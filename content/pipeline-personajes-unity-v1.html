@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipeline Completo para Creación de Personajes en Unity 3D</title>
+
+  <!-- Essential CDN Libraries -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: 'hsl(210, 75%, 95%)',
+              100: 'hsl(210, 75%, 85%)',
+              200: 'hsl(210, 75%, 75%)',
+              300: 'hsl(210, 75%, 65%)',
+              400: 'hsl(210, 75%, 55%)',
+              500: 'hsl(210, 75%, 40%)',
+              600: 'hsl(210, 75%, 35%)',
+              700: 'hsl(210, 75%, 25%)',
+              800: 'hsl(210, 75%, 15%)',
+              900: 'hsl(210, 75%, 10%)'
+            },
+            accent: {
+              50: 'hsl(240, 65%, 95%)',
+              100: 'hsl(240, 65%, 85%)',
+              200: 'hsl(240, 65%, 75%)',
+              300: 'hsl(240, 65%, 65%)',
+              400: 'hsl(240, 65%, 60%)',
+              500: 'hsl(240, 65%, 55%)',
+              600: 'hsl(240, 65%, 50%)',
+              700: 'hsl(240, 65%, 40%)',
+              800: 'hsl(240, 65%, 30%)',
+              900: 'hsl(240, 65%, 20%)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+
+  <!-- Preline UI Components -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.js"></script>
+
+  <!-- Micro-interactions & Custom Styles -->
+  <style>
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+    .btn-interactive {
+      transition: all 0.2s ease-out;
+    }
+    
+    .btn-interactive:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn-interactive:active {
+      transform: scale(0.95);
+    }
+
+    .card-interactive {
+      transition: all 0.3s ease-out;
+      border: 1px solid transparent;
+      --border-lightness: 40%;
+    }
+
+    .dark .card-interactive {
+      --border-lightness: 60%;
+    }
+
+    .card-interactive:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      filter: brightness(0.98);
+    }
+    
+    /* Primary colored cards */
+    .card-interactive[class*="primary"]:hover,
+    .card-interactive[class*="white"]:hover,
+    .card-interactive[class*="gray-"]:hover {
+      border-color: hsl(210, 75%, var(--border-lightness));
+    }
+    
+    /* Accent colored cards */
+    .card-interactive[class*="accent"]:hover {
+      border-color: hsl(240, 65%, var(--border-lightness));
+    }
+
+    .dark .card-interactive:hover {
+      filter: brightness(1.05);
+    }
+  </style>
+
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      document.getElementById('sunIcon').style.display = isDark ? 'block' : 'none';
+      document.getElementById('moonIcon').style.display = isDark ? 'none' : 'block';
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+  <!-- Citation System Script -->
+  <script>
+    function initCitationSystem() {
+      let i = 1, map = new Map();
+      document.querySelectorAll('[data-ref]').forEach(el => {
+        if (el.dataset.citationProcessed) return;
+        const raw = (el.getAttribute('data-ref')||'').trim();
+        if (!raw) return;
+
+        const parts = raw.split('|');
+        const url = parts[0].trim();
+        const idx = (parts[1]||'').trim() || map.get(raw) || (map.set(raw, String(i)), String(i++));
+
+        if (!el.textContent || !el.textContent.trim()) { el.dataset.citationProcessed = 'true'; return; }
+
+        const btn = document.createElement('sup'); btn.textContent = String(idx);
+        Object.assign(btn.style, { fontSize:'8px', color:'#fff', cursor:'pointer', top: '1px', fontWeight:'bold', backgroundColor:'#0284c7', borderRadius:'50%', transition:'all .15s', userSelect:'none', minWidth:'19px', height:'19px', marginLeft:'6px', display:'inline-flex', alignItems:'center', justifyContent:'center', boxShadow:'0 1px 3px rgba(0,0,0,.2)', lineHeight:'1'});
+        btn.addEventListener('mouseenter', ()=> Object.assign(btn.style, { backgroundColor:'#0369a1', transform:'scale(1.12)' }));
+        btn.addEventListener('mouseleave', ()=> Object.assign(btn.style, { backgroundColor:'#0284c7', transform:'scale(1)' }));
+        btn.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); window.open(url, '_blank'); });
+
+        el.appendChild(btn); el.dataset.citationProcessed = 'true';
+      });
+    }
+  </script>
+
+  <!-- Progress bar -->
+  <div class="fixed top-0 left-0 h-1 bg-primary-500 dark:bg-primary-400 z-[60] transition-all duration-300 ease-out" id="progressBar" style="width: 0%;"></div>
+
+  <!-- Floating Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur bg-gray-50/90 dark:bg-gray-900/90 border-b border-primary-500/20 dark:border-primary-600/20" data-aos="fade-down">
+    <nav class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold text-primary-700 dark:text-primary-300">Pipeline de Personajes Unity</h1>
+        
+        <div class="flex items-center space-x-6">
+          <a href="#inicio" class="btn-interactive text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Inicio</a>
+          <a href="#conceptual" class="btn-interactive text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Conceptual</a>
+          <a href="#modelado" class="btn-interactive text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Modelado</a>
+          <a href="#texturizado" class="btn-interactive text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Texturizado</a>
+          <a href="#rigging" class="btn-interactive text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Rigging</a>
+          <a href="#optimizacion" class="btn-interactive text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Optimización</a>
+          <a href="#integracion" class="btn-interactive text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Integración</a>
+          <a href="#conclusion" class="btn-interactive text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Conclusión</a>
+          
+          <button onclick="toggleDarkMode()" class="btn-interactive p-2 rounded-lg bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 transition-all">
+            <i data-lucide="sun" id="sunIcon" class="w-5 h-5" style="display: none;"></i>
+            <i data-lucide="moon" id="moonIcon" class="w-5 h-5" style="display: block;"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="min-h-screen">
+    <!-- Hero Section -->
+    <section id="inicio" class="py-40 bg-primary-50/50 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-4xl font-bold mb-6 text-primary-700 dark:text-primary-300">
+          Pipeline Completo para Diseño y Creación de Personajes en Unity 3D
+        </h2>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-8 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+          Este documento proporciona una guía exhaustiva para crear personajes de alta calidad para videojuegos en Unity 3D, cubriendo desde el diseño conceptual hasta la integración final, con especial énfasis en personajes jugables y no jugables.
+        </p>
+        
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+          <div class="space-y-4">
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+              El diseño de personajes es una parte fundamental del desarrollo de videojuegos, ya que los personajes bien diseñados pueden aumentar significativamente la inmersión del jugador y el éxito general del juego. El proceso implica múltiples etapas, desde el diseño conceptual hasta la integración final en el motor de juego.
+            </p>
+            
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Objetivo: Proporcionar una guía exhaustiva que cubra cada etapa del proceso de creación de personajes para videojuegos, asegurando resultados óptimos tanto para personajes jugables como no jugables.
+              </p>
+            </div>
+          </div>
+          
+          <img
+            src="img/pipeline-personajes-unity-v1/01.png"
+            alt="Ilustración técnica de un pipeline de desarrollo de personajes en Unity 3D mostrando cinco etapas principales dispuestas horizontalmente de izquierda a derecha sobre un fondo gris claro (#E5E7EB). Etapa 1: Diseño conceptual con un boceto de lápiz en papel blanco sobre mesa de dibujo marrón claro, representado con un icono de lápiz azul (#1E90FF). Etapa 2: Modelado 3D con un modelo poligonal humanoide en tono gris metálico (#808080) sobre plataforma negra, acompañado de icono de cubo azul (#1E90FF). Etapa 3: Texturizado con una superficie de piel humana texturizada en tono beige claro (#D2B48C) con mapeo UV visible como líneas blancas, junto a icono de pincel azul (#1E90FF). Etapa 4: Rigging con un esqueleto articulado en tono naranja brillante (#FF8C00) rodeando el modelo humanoide, representado con icono de hueso azul (#1E90FF). Etapa 5: Integración con el logotipo de Unity en azul (#1E90FF) sobre fondo negro, acompañado de icono de engranaje azul (#1E90FF). Flechas azules (#1E90FF) conectan secuencialmente cada etapa. Cada icono mide aproximadamente 32x32 píxeles. Todo el diseño utiliza tipografía sans-serif clara en color gris oscuro (#374151)."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Diseño Conceptual Section -->
+    <section id="conceptual" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Diseño Conceptual y Preproducción
+        </h2>
+
+        <div class="space-y-6">
+          <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+            La fase de diseño conceptual es donde todo comienza. Esta etapa establece las bases para todo el proceso de creación de personajes, definiendo la apariencia, personalidad y rol del personaje en el mundo del juego.
+          </p>
+
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="palette" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h3 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">Concept Art</h3>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Los artistas crean bocetos y diseños conceptuales para establecer la apariencia visual del personaje, incluyendo estilo, proporciones y características distintivas.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="users" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <h3 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">Personajes Jugables</h3>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Se enfocan en permitir la identificación y la agencia del jugador, con diseños que facilitan el control y la interacción intuitiva.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="message-square" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h3 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">Personajes No Jugables</h3>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Necesitan facilitar el reconocimiento, interpretación e interacción, con diseños que comunican claramente su rol y comportamiento al jugador.
+              </p>
+            </div>
+          </div>
+
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+              <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Importancia: El diseño conceptual es fundamental porque establece la dirección artística y funcional del personaje antes de que comience cualquier trabajo técnico.
+            </p>
+          </div>
+
+          <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+            Durante esta fase, los equipos de desarrollo colaboran estrechamente entre artistas conceptuales, diseñadores de juego y programadores para asegurar que el diseño del personaje sea tanto visualmente atractivo como técnicamente viable para implementación en el motor de juego.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modelado 3D Section -->
+    <section id="modelado" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Modelado 3D y Topología
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 items-start mb-8">
+          <div class="space-y-4">
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+              El modelado 3D es el proceso de crear una representación tridimensional del personaje basada en los diseños conceptuales. Esta etapa es crítica para establecer la estructura básica sobre la cual se aplicarán texturas y animaciones.
+            </p>
+
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+              Los artistas utilizan software profesional como Blender, Maya o 3ds Max para construir el modelo poligonal del personaje, asegurándose de mantener una topología limpia que soporte bien las animaciones futuras.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Consideración clave: La topología debe estar optimizada para animación, con bucles de aristas que siguen las líneas naturales de movimiento del cuerpo humano.
+              </p>
+            </div>
+          </div>
+
+          <div class="card-interactive p-6 rounded-xl shadow-md bg-white/90 backdrop-blur-sm dark:bg-gray-900 h-80">
+            <canvas id="polycountChart"></canvas>
+          </div>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-polycount-heading">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="triangle" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Consideraciones de Polígono</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-polycount-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-polycount-heading">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Unity3D/comments/1kz5v4q/what_is_the_ideal_poly_count_for_a_unity_character/|15">
+                  Para personajes principales en juegos de PC o consola, un recuento típico de polígonos oscila entre
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">100,000 a 150,000</span>
+                  polígonos. Esto permite suficiente detalle para personajes importantes sin sacrificar demasiado rendimiento.
+                </p>
+
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Unity3D/comments/1kz5v4q/what_is_the_ideal_poly_count_for_a_unity_character/|15">
+                  Los personajes secundarios o de fondo suelen tener un recuento más bajo de polígonos, típicamente entre
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">30,000 a 60,000</span>
+                  polígonos, ya que no necesitan el mismo nivel de detalle que los personajes protagonistas.
+                </p>
+
+                <div class="pl-4 pr-3 py-3 border-l-4 border-amber-500 bg-amber-50/40 dark:bg-amber-900/30 rounded-r-lg">
+                  <p class="text-sm font-medium text-amber-900 dark:text-amber-100 leading-relaxed" data-ref="https://www.reddit.com/r/Unity3D/comments/1kz5v4q/what_is_the_ideal_poly_count_for_a_unity_character/|15">
+                    <i data-lucide="alert-triangle" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                    Advertencia: En plataformas móviles, el recuento de polígonos debe reducirse significativamente, generalmente a un rango de
+                    <span class="mx-1 px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-semibold text-sm">10,000 a 30,000</span>
+                    polígonos por personaje, debido a las limitaciones de hardware.
+                  </p>
+                </div>
+
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Unity3D/comments/1kz5v4q/what_is_the_ideal_poly_count_for_a_unity_character/|15">
+                  En VRChat, existe una clasificación de rendimiento basada en el recuento de polígonos. Cualquier cosa por encima de
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">70,000</span>
+                  polígonos se consideraría muy pobre, mientras que
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">32,000</span>
+                  polígonos es el máximo para una calificación excelente.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-topology-heading">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="git-branch" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Topología para Animación</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-topology-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-topology-heading">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/topology-guidelines-for-game-character-modeling-must-read-johnson/|2">
+                  La topología es crucial para el modelado de personajes de videojuegos, ya que determina cómo se deformará el modelo durante la animación. Una buena topología asegura que el personaje se mueva naturalmente sin artefactos de deformación.
+                </p>
+
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/topology-guidelines-for-game-character-modeling-must-read-johnson/|2">
+                  Los bucles de aristas deben seguir las líneas naturales del cuerpo humano, especialmente en áreas de articulación como rodillas, codos y hombros. Esto ayuda a mantener la integridad de la forma durante la animación.
+                </p>
+
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/topology-guidelines-for-game-character-modeling-must-read-johnson/|2">
+                  Las caras triangulares deben distribuirse uniformemente por todo el modelo, evitando triángulos extremadamente largos o delgados que puedan causar problemas de sombreado o deformación.
+                </p>
+
+                <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
+                  <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/topology-guidelines-for-game-character-modeling-must-read-johnson/|2">
+                    <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                    Práctica recomendada: Utilizar cuatro lados de polígonos siempre que sea posible, ya que se subdividen más limpiamente y producen mejores resultados durante la animación.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Texturizado Section -->
+    <section id="texturizado" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Texturizado y Materiales
+        </h2>
+
+        <div class="space-y-6">
+          <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+            El texturizado es el proceso de aplicar colores, materiales y detalles superficiales al modelo 3D. Esta etapa da vida al personaje, definiendo su apariencia final en el juego.
+          </p>
+
+          <div class="grid md:grid-cols-2 gap-8 items-center mb-8">
+            <img
+              src="img/pipeline-personajes-unity-v1/02.png"
+              alt="Representación visual de un proceso de texturizado de personajes en Unity 3D mostrando tres etapas principales organizadas verticalmente sobre fondo gris claro (#F3F4F6). Etapa superior: Modelado 3D con un modelo humanoide poligonal en tono gris metálico (#808080) sobre plataforma negra, con icono de cubo azul (#1E90FF) en la esquina superior derecha. Etapa central: Texturizado con la misma figura humana pero ahora con textura de piel humana en tono beige claro (#D2B48C) aplicada, mapeo UV visible como líneas blancas sobre la superficie, junto a icono de pincel azul (#1E90FF) en la esquina superior derecha. Etapa inferior: Resultado final con el personaje completamente texturizado y coloreado en tonos realistas (piel, cabello castaño oscuro #654321, ropa azul marino #191970), con icono de engranaje azul (#1E90FF) en la esquina superior derecha. Cada etapa está separada por una flecha azul (#1E90FF) apuntando hacia abajo. Todos los elementos utilizan tipografía sans-serif clara en color gris oscuro (#374151)."
+              class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+            />
+
+            <div class="space-y-4">
+              <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                Los artistas utilizan software especializado como Substance Painter, Mari o Photoshop para pintar texturas detalladas, incluyendo mapas de difusión, normales, metalicidad y rugosidad.
+              </p>
+
+              <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+                <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                  <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                  Flujo PBR: El texturizado moderno sigue el flujo de renderizado basado en físicas (PBR), que simula cómo la luz interactúa con diferentes materiales de manera realista.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+            Las texturas deben optimizarse para el rendimiento, utilizando técnicas como compresión de texturas, niveles de detalle (LOD) y agrupación eficiente de materiales para minimizar el impacto en el rendimiento del juego.
+          </p>
+
+          <div class="hs-accordion-group space-y-4">
+            <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-materials-heading">
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="layers" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                  </div>
+                  <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Optimización de Materiales</span>
+                </div>
+                <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+              </button>
+              <div id="hs-materials-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-materials-heading">
+                <div class="p-6 pt-0 space-y-4">
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Unity3D/comments/1l3k54u/what_is_the_optimal_number_of_materials_per_model_in/|13">
+                    Para modelos de personajes en Unity, generalmente se recomienda usar
+                    <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">entre 1 y 4 materiales</span>
+                    por modelo. Esto ayuda a mantener un buen rendimiento, especialmente en escenas con múltiples personajes.
+                  </p>
+
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Unity3D/comments/1l3k54u/what_is_the_optimal_number_of_materials_per_model_in/|13">
+                    Usar un solo material por personaje puede mejorar significativamente el rendimiento al reducir los cambios de estado de dibujo, pero esto puede limitar la flexibilidad de texturizado si se necesita variar significativamente las propiedades de la superficie.
+                  </p>
+
+                  <div class="pl-4 pr-3 py-3 border-l-4 border-amber-500 bg-amber-50/40 dark:bg-amber-900/30 rounded-r-lg">
+                    <p class="text-sm font-medium text-amber-900 dark:text-amber-100 leading-relaxed" data-ref="https://www.reddit.com/r/Unity3D/comments/1l3k54u/what_is_the_optimal_number_of_materials_per_model_in/|13">
+                      <i data-lucide="alert-triangle" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                      Compromiso: Más materiales permiten mayor variación visual pero pueden afectar el rendimiento, especialmente en dispositivos móviles o cuando hay muchos personajes en pantalla simultáneamente.
+                    </p>
+                  </div>
+
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Unity3D/comments/1l3k54u/what_is_the_optimal_number_of_materials_per_model_in/|13">
+                    La optimización de materiales debe equilibrar la calidad visual con el rendimiento, teniendo en cuenta el número esperado de personajes en escena y las capacidades de destino de la plataforma.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-atlas-heading">
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="package" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                  </div>
+                  <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Agrupación de Texturas (Atlas)</span>
+                </div>
+                <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+              </button>
+              <div id="hs-atlas-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-atlas-heading">
+                <div class="p-6 pt-0 space-y-4">
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Unity3D/comments/1l3k54u/what_is_the_optimal_number_of_materials_per_model_in/|13">
+                    La agrupación de texturas (texture atlasing) es una técnica poderosa para reducir el número de materiales y mejorar el rendimiento al combinar múltiples texturas en una sola hoja de textura grande.
+                  </p>
+
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Unity3D/comments/1l3k54u/what_is_the_optimal_number_of_materials_per_model_in/|13">
+                    Para personajes, la agrupación de texturas funciona mejor cuando se combinan partes del cuerpo que usan el mismo tipo de material, como diferentes secciones de ropa o accesorios.
+                  </p>
+
+                  <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
+                    <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed" data-ref="https://www.reddit.com/r/Unity3D/comments/1l3k54u/what_is_the_optimal_number_of_materials_per_model_in/|13">
+                      <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                      Ventaja: La agrupación de texturas reduce los cambios de estado de dibujo y puede mejorar significativamente el rendimiento, especialmente en dispositivos móviles.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rigging Section -->
+    <section id="rigging" class="py-20 bg-accent-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-accent-700 dark:text-accent-300">
+          Rigging y Control de Esqueleto
+        </h2>
+
+        <div class="space-y-6">
+          <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+            El rigging es el proceso de crear un esqueleto articulado para el modelo 3D, permitiendo que se anime de manera realista. Esta etapa es fundamental para dar vida al personaje y permitir expresiones faciales, movimientos corporales y gestos.
+          </p>
+
+          <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <h3 class="font-semibold text-lg text-accent-700 dark:text-accent-300 mb-4" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">Tipos de Rigging</h3>
+              <div class="space-y-3">
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-accent-600 dark:text-accent-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>Rigging de Esqueleto:</strong> Implica crear un esqueleto articulado con huesos y articulaciones que se vinculan al modelo 3D, permitiendo animación de cuerpo completo.
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-accent-600 dark:text-accent-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>Rigging de Formas de Mezcla (Blend Shapes):</strong> Se utiliza para animaciones faciales y expresiones sutiles mediante deformaciones de malla predefinidas.
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-accent-600 dark:text-accent-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>Rigging Inverso (IK):</strong> Permite controlar las posiciones finales de los huesos, útil para tareas como hacer que los pies del personaje toquen el suelo correctamente.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <h3 class="font-semibold text-lg text-accent-700 dark:text-accent-300 mb-4" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">Proceso de Rigging</h3>
+              <div class="space-y-3">
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="arrow-right" class="w-5 h-5 text-accent-600 dark:text-accent-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>Creación de Esqueleto:</strong> Se colocan huesos en el modelo para replicar la estructura anatómica del personaje.
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="arrow-right" class="w-5 h-5 text-accent-600 dark:text-accent-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>Vinculación de Peso:</strong> Se asignan pesos a los vértices del modelo para determinar cómo responden a los movimientos de los huesos.
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="arrow-right" class="w-5 h-5 text-accent-600 dark:text-accent-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>Configuración de Controles:</strong> Se agregan controles para permitir a los animadores manipular fácilmente el esqueleto.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+              <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Consideración importante: El rigging debe ser lo suficientemente robusto para soportar una amplia gama de animaciones mientras permanece eficiente para el rendimiento en tiempo real.
+            </p>
+          </div>
+
+          <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+            Los rigger profesionales utilizan software especializado como Maya, Blender o 3ds Max para crear sistemas de rigging complejos que permiten animación realista y expresiones faciales detalladas.
+          </p>
+
+          <div class="hs-accordion-group space-y-4">
+            <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-accent-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-blendshapes-heading">
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="smile" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                  </div>
+                  <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Formas de Mezcla (Blend Shapes)</span>
+                </div>
+                <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+              </button>
+              <div id="hs-blendshapes-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-blendshapes-heading">
+                <div class="p-6 pt-0 space-y-4">
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    Las formas de mezcla son una técnica de animación que permite deformaciones sutiles de la malla, comúnmente utilizada para expresiones faciales y emociones.
+                  </p>
+
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    Los artistas crean múltiples versiones del modelo con diferentes expresiones faciales, y luego el sistema de animación interpola entre estas formas para crear transiciones suaves.
+                  </p>
+
+                  <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
+                    <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                      <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                      Aplicación: Las formas de mezcla son particularmente efectivas para animaciones faciales detalladas donde el rigging de esqueleto por sí solo no puede capturar expresiones sutiles.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-accent-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-retargeting-heading">
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="repeat" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                  </div>
+                  <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Reutilización de Animaciones</span>
+                </div>
+                <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+              </button>
+              <div id="hs-retargeting-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-retargeting-heading">
+                <div class="p-6 pt-0 space-y-4">
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Unity3D/comments/1l3k54u/what_is_the_optimal_number_of_materials_per_model_in/|13">
+                    La reutilización de animaciones es crucial para mantener la consistencia visual y reducir los requisitos de memoria en proyectos de Unity con múltiples personajes.
+                  </p>
+
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Unity3D/comments/1l3k54u/what_is_the_optimal_number_of_materials_per_model_in/|13">
+                    Para personajes humanoides, Unity admite el sistema Avatar, que permite reutilizar animaciones entre personajes con diferentes rigs siempre que compartan la misma estructura de huesos base.
+                  </p>
+
+                  <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+                    <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.reddit.com/r/Unity3D/comments/1l3k54u/what_is_the_optimal_number_of_materials_per_model_in/|13">
+                      <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                      Estrategia: Utilizar el sistema Avatar de Unity permite compartir animaciones entre personajes humanoides, reduciendo significativamente los requisitos de memoria y simplificando el flujo de trabajo de animación.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Optimización Section -->
+    <section id="optimizacion" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Optimización y Niveles de Detalle (LOD)
+        </h2>
+
+        <div class="space-y-6">
+          <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+            La optimización es una parte crítica del pipeline de desarrollo de personajes, especialmente para plataformas con recursos limitados como dispositivos móviles o VR. El objetivo es mantener la calidad visual mientras se maximiza el rendimiento.
+          </p>
+
+          <div class="grid md:grid-cols-2 gap-8 items-center mb-8">
+            <div class="space-y-4">
+              <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">Niveles de Detalle (LOD)</h3>
+              
+              <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                Los LOD son versiones simplificadas del modelo de personaje que se utilizan cuando el personaje está lejos de la cámara. Esto reduce la carga en la CPU y GPU al renderizar menos polígonos y materiales.
+              </p>
+
+              <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+                <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                  <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                  Beneficio: El uso de LOD puede reducir significativamente el uso de polígonos en escenas complejas, mejorando el rendimiento sin sacrificar la calidad visual para objetos cercanos.
+                </p>
+              </div>
+            </div>
+
+            <div class="card-interactive p-6 rounded-xl shadow-md bg-white/90 backdrop-blur-sm dark:bg-gray-900 h-80">
+              <canvas id="lodChart"></canvas>
+            </div>
+          </div>
+
+          <div class="hs-accordion-group space-y-4">
+            <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-compression-heading">
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="file-down" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                  </div>
+                  <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Compresión de Texturas</span>
+                </div>
+                <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+              </button>
+              <div id="hs-compression-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-compression-heading">
+                <div class="p-6 pt-0 space-y-4">
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    La compresión de texturas es esencial para reducir el tamaño de archivo y mejorar los tiempos de carga. Unity admite varios formatos de compresión de texturas que equilibran calidad y tamaño de archivo.
+                  </p>
+
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    Los formatos de compresión populares incluyen ASTC para dispositivos móviles, BC7 para Windows y PVRTC para iOS, cada uno optimizado para diferentes plataformas y requisitos de calidad.
+                  </p>
+
+                  <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+                    <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                      <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                      Práctica recomendada: Utilizar diferentes formatos de compresión según la plataforma objetivo para maximizar la calidad visual mientras se minimiza el uso de memoria.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-culling-heading">
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="eye-off" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                  </div>
+                  <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Culling y Ocultamiento</span>
+                </div>
+                <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+              </button>
+              <div id="hs-culling-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-culling-heading">
+                <div class="p-6 pt-0 space-y-4">
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    El culling es el proceso de no renderizar objetos que están fuera del campo de visión de la cámara o bloqueados por otros objetos. Esto reduce significativamente la carga en la GPU.
+                  </p>
+
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    Unity admite múltiples técnicas de culling, incluyendo culling de vista, culling de distancia y culling de ocultamiento, cada una diseñada para optimizar diferentes aspectos del rendimiento de renderizado.
+                  </p>
+
+                  <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
+                    <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                      <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                      Impacto: Una implementación efectiva de culling puede reducir el número de objetos renderizados en hasta un 80%, mejorando drásticamente el rendimiento en escenas complejas.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-batching-heading">
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="package" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                  </div>
+                  <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Instanciado y Agrupación</span>
+                </div>
+                <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+              </button>
+              <div id="hs-batching-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-batching-heading">
+                <div class="p-6 pt-0 space-y-4">
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    El instanciado de GPU permite renderizar múltiples copias del mismo objeto con un solo comando de dibujo, reduciendo significativamente la sobrecarga de CPU en escenas con muchos objetos similares.
+                  </p>
+
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    La agrupación por lotes combina múltiples objetos con materiales idénticos en un solo comando de dibujo, reduciendo los cambios de estado de dibujo y mejorando el rendimiento.
+                  </p>
+
+                  <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+                    <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                      <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                      Aplicación: Para personajes idénticos o similares, el instanciado de GPU puede reducir los comandos de dibujo en hasta un 90%, mejorando significativamente el rendimiento en multijugador o escenas con multitudes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Integración en Unity Section -->
+    <section id="integracion" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Integración y Animación en Unity
+        </h2>
+
+        <div class="space-y-6">
+          <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+            La integración de personajes en Unity implica importar el modelo, configurar el sistema de animación y asegurar que el personaje funcione correctamente dentro del entorno del juego. Esta etapa une todos los componentes técnicos y artísticos.
+          </p>
+
+          <div class="grid md:grid-cols-2 gap-8 items-start mb-8">
+            <div class="space-y-4">
+              <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">Importación y Configuración</h3>
+              
+              <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                El primer paso en Unity es importar el modelo 3D, preferiblemente en formato FBX. Unity proporciona opciones de importación para configurar automáticamente el tipo de animación, escala y otras propiedades.
+              </p>
+
+              <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                Para personajes humanoides, Unity puede generar automáticamente un Avatar basado en el esqueleto del modelo, permitiendo la reutilización de animaciones entre diferentes personajes.
+              </p>
+
+              <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+                <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                  <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                  Consideración clave: Verificar la configuración del Avatar es crucial para asegurar que las animaciones se transfieran correctamente entre diferentes modelos de personajes.
+                </p>
+              </div>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <h3 class="font-semibold text-lg text-primary-700 dark:text-primary-300 mb-4" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">Sistema de Animación</h3>
+              <div class="space-y-3">
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="layers" class="w-5 h-5 text-primary-600 dark:text-primary-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>Controlador de Animator:</strong> Gestiona las transiciones entre diferentes estados de animación basadas en parámetros de animación.
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="git-merge" class="w-5 h-5 text-primary-600 dark:text-primary-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>Árboles de Mezcla:</strong> Permiten mezclar suavemente entre diferentes animaciones basadas en valores de parámetro como velocidad o dirección.
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="cpu" class="w-5 h-5 text-primary-600 dark:text-primary-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>Máquinas de Estado:</strong> Organizan las animaciones en un gráfico de estados con transiciones controladas por lógica de juego.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion-group space-y-4">
+            <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-animation-heading">
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="play" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                  </div>
+                  <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Animación y Parámetros</span>
+                </div>
+                <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+              </button>
+              <div id="hs-animation-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-animation-heading">
+                <div class="p-6 pt-0 space-y-4">
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    Los parámetros de animación son variables definidas dentro de un Controlador de Animator que pueden accederse y asignarse valores desde scripts. Estos parámetros controlan las transiciones entre estados de animación.
+                  </p>
+
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    Los tipos comunes de parámetros incluyen flotantes, enteros, booleanos y desencadenadores, cada uno utilizado para diferentes aspectos del control de animación como velocidad, estado de salto o interacciones.
+                  </p>
+
+                  <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+                    <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                      <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                      Práctica recomendada: Utilizar parámetros flotantes para controlar transiciones suaves entre animaciones, como mezclar entre caminar y correr basado en la velocidad del personaje.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-runtime-heading">
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="settings" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                  </div>
+                  <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Modificaciones en Tiempo de Ejecución</span>
+                </div>
+                <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+              </button>
+              <div id="hs-runtime-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-runtime-heading">
+                <div class="p-6 pt-0 space-y-4">
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    Unity permite modificar propiedades de materiales en tiempo de ejecución, lo que habilita características como cambio de color dinámico, transparencia o efectos visuales basados en eventos de juego.
+                  </p>
+
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    Los bloques de propiedad de material (MaterialPropertyBlock) permiten cambiar propiedades de material para objetos individuales sin afectar el recurso de material original, manteniendo la eficiencia de agrupación.
+                  </p>
+
+                  <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
+                    <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                      <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                      Aplicación: Cambiar dinámicamente el color de los materiales permite personalización de personajes, indicadores de estado o efectos visuales interactivos sin sacrificar el rendimiento.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-ai-heading">
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="brain" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                  </div>
+                  <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">IA y Comportamiento de NPC</span>
+                </div>
+                <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+              </button>
+              <div id="hs-ai-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-ai-heading">
+                <div class="p-6 pt-0 space-y-4">
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    Los personajes no jugables (NPC) requieren sistemas de IA para comportamiento autónomo, incluyendo navegación, toma de decisiones y respuestas a eventos del jugador.
+                  </p>
+
+                  <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                    Unity admite múltiples enfoques de IA, desde máquinas de estado simples hasta sistemas de aprendizaje automático complejos, permitiendo una amplia gama de comportamientos de NPC.
+                  </p>
+
+                  <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+                    <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+                      <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                      Implementación: Combinar sistemas de IA con animación procedimental permite NPCs que responden dinámicamente al entorno y al jugador, mejorando la inmersión del juego.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conclusión Section -->
+    <section id="conclusion" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Conclusión y Mejores Prácticas
+        </h2>
+
+        <div class="space-y-6">
+          <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+            El desarrollo exitoso de personajes para videojuegos en Unity requiere una comprensión integral de múltiples disciplinas, desde diseño conceptual hasta optimización técnica. Cada etapa del pipeline contribuye a la calidad final del personaje y su rendimiento en el juego.
+          </p>
+
+          <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <h3 class="font-semibold text-lg text-primary-700 dark:text-primary-300 mb-4" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">Mejores Prácticas Clave</h3>
+              <div class="space-y-3">
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-primary-600 dark:text-primary-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    Mantener topología limpia y optimizada para animación desde el inicio del modelado
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-primary-600 dark:text-primary-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    Implementar niveles de detalle (LOD) para mantener el rendimiento en escenas complejas
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-primary-600 dark:text-primary-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    Utilizar el sistema Avatar de Unity para reutilización eficiente de animaciones
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-primary-600 dark:text-primary-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    Optimizar materiales y texturas para el rendimiento de la plataforma objetivo
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <h3 class="font-semibold text-lg text-accent-700 dark:text-accent-300 mb-4" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">Consideraciones Finales</h3>
+              <div class="space-y-3">
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="target" class="w-5 h-5 text-accent-600 dark:text-accent-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    Equilibrar calidad visual con rendimiento según las capacidades de la plataforma
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="users" class="w-5 h-5 text-accent-600 dark:text-accent-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    Considerar las necesidades del jugador tanto para personajes jugables como no jugables
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="refresh-cw" class="w-5 h-5 text-accent-600 dark:text-accent-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    Iterar constantemente basándose en pruebas y comentarios de jugadores
+                  </p>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <i data-lucide="zap" class="w-5 h-5 text-accent-600 dark:text-accent-400 mt-0.5 flex-shrink-0"></i>
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    Utilizar herramientas automatizadas para optimización y generación de contenido
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+              <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Éxito garantizado: Un pipeline bien estructurado que combine excelencia artística con optimización técnica produce personajes que no solo lucen impresionantes sino que también funcionan sin problemas en el entorno del juego.
+            </p>
+          </div>
+
+          <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/pulse/complete-guide-character-design-process-game-development-ajay-dhamija|1">
+            El desarrollo de personajes es un proceso iterativo que requiere colaboración entre artistas, animadores y desarrolladores. Al seguir este pipeline completo y adaptarlo a las necesidades específicas del proyecto, los equipos pueden crear personajes memorables que enriquecen la experiencia del jugador y contribuyen al éxito general del juego.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-primary-900 dark:bg-gray-950 text-primary-100 dark:text-gray-300 py-12">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="text-center">
+        <h3 class="text-2xl font-bold mb-4 text-primary-100 dark:text-primary-300">Pipeline de Personajes Unity 3D</h3>
+        <p class="text-primary-200 dark:text-gray-400 mb-6">
+          Guía exhaustiva para el diseño, modelado, texturizado, rigging e integración de personajes en Unity 3D
+        </p>
+        <div class="flex justify-center space-x-6 mb-6">
+          <a href="#inicio" class="btn-interactive text-sm hover:text-primary-300">Inicio</a>
+          <a href="#conceptual" class="btn-interactive text-sm hover:text-primary-300">Conceptual</a>
+          <a href="#modelado" class="btn-interactive text-sm hover:text-primary-300">Modelado</a>
+          <a href="#texturizado" class="btn-interactive text-sm hover:text-primary-300">Texturizado</a>
+          <a href="#rigging" class="btn-interactive text-sm hover:text-primary-300">Rigging</a>
+          <a href="#optimizacion" class="btn-interactive text-sm hover:text-primary-300">Optimización</a>
+          <a href="#integracion" class="btn-interactive text-sm hover:text-primary-300">Integración</a>
+          <a href="#conclusion" class="btn-interactive text-sm hover:text-primary-300">Conclusión</a>
+        </div>
+        <p class="text-sm text-primary-300 dark:text-gray-500">
+          Documento educativo basado en prácticas industriales y mejores prácticas de desarrollo de videojuegos
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Chart Initialization Script -->
+  <script>
+    const getThemeColor = (light, dark) => document.body.classList.contains('dark') ? dark : light;
+    let charts = {};
+    
+    const getColors = () => ({
+      primary: getThemeColor('#1E3A8A', '#60A5FA'),
+      accent: getThemeColor('#7C3AED', '#A78BFA'),
+      text: getThemeColor('#1F2937', '#E5E7EB'),
+      grid: getThemeColor('#E5E7EB', '#4B5563')
+    });
+    
+    const updateCharts = () => {
+      const { text, grid } = getColors();
+      
+      Object.values(charts).forEach(chart => {
+        if (chart?.options) {
+          if (chart.options.plugins?.legend?.labels) chart.options.plugins.legend.labels.color = text;
+          if (chart.options.plugins?.title) chart.options.plugins.title.color = text;
+          if (chart.options.scales) {
+            Object.values(chart.options.scales).forEach(scale => {
+              if (scale.ticks) scale.ticks.color = text;
+              if (scale.grid) scale.grid.color = grid;
+              if (scale.pointLabels) scale.pointLabels.color = text;
+              if (scale.title) scale.title.color = text;
+            });
+          }
+          chart.update('none');
+        }
+      });
+    };
+
+    // Data from https://www.reddit.com/r/Unity3D/comments/1kz5v4q/what_is_the_ideal_poly_count_for_a_unity_character/|15
+    const polycountData = {
+      labels: ['PC/Consola\nPrincipal', 'PC/Consola\nSecundario', 'Móvil\nPrincipal', 'Móvil\nSecundario'],
+      datasets: [{
+        label: 'Polígonos (millones)',
+        data: [0.15, 0.06, 0.03, 0.01], // 150k, 60k, 30k, 10k converted to millions
+        backgroundColor: ['#1E3A8A', '#3B82F6', '#7C3AED', '#A78BFA']
+      }]
+    };
+
+    // Data from https://www.reddit.com/r/Unity3D/comments/1kz5v4q/what_is_the_ideal_poly_count_for_a_unity_character/|15
+    const lodData = {
+      labels: ['Máximo Recomendado', 'Calificación\nExcelente', 'Calificación\nBuena', 'Calificación\nPobre'],
+      datasets: [{
+        label: 'Polígonos (miles)',
+        data: [70, 32, 15, 5], // 70k, 32k, 15k, 5k converted to thousands
+        borderColor: '#1E3A8A',
+        backgroundColor: 'rgba(30, 58, 138, 0.1)',
+        tension: 0.4
+      }]
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      lucide.createIcons();
+      AOS.init({ duration: 800, once: true });
+      initCitationSystem();
+      
+      const { primary, accent, text, grid } = getColors();
+      
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: text } } },
+        scales: {
+          x: { ticks: { color: text }, grid: { color: grid } },
+          y: { beginAtZero: true, ticks: { color: text }, grid: { color: grid } }
+        }
+      };
+
+      if (document.getElementById('polycountChart')) {
+        charts.polycount = new Chart(document.getElementById('polycountChart'), {
+          type: 'bar',
+          data: polycountData,
+          options: { ...commonOptions, plugins: { legend: { display: false } } }
+        });
+      }
+
+      if (document.getElementById('lodChart')) {
+        charts.lod = new Chart(document.getElementById('lodChart'), {
+          type: 'line',
+          data: lodData,
+          options: { ...commonOptions, plugins: { legend: { labels: { color: text } } } }
+        });
+      }
+      
+      new MutationObserver(() => updateCharts()).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    });
+
+    // Progress bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progressBar').style.width = scrolled + '%';
+    });
+  </script>
+</body>
+</html>

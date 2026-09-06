@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creación de Personajes para Videojuegos: Diseño, Modelado y Rigging</title>
+
+  <!-- Essential CDN Libraries -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: 'hsl(20, 90%, 95%)',
+              100: 'hsl(20, 90%, 85%)',
+              200: 'hsl(20, 90%, 75%)',
+              300: 'hsl(20, 90%, 65%)',
+              400: 'hsl(20, 90%, 55%)',
+              500: 'hsl(20, 90%, 50%)',
+              600: 'hsl(20, 90%, 45%)',
+              700: 'hsl(20, 90%, 35%)',
+              800: 'hsl(20, 90%, 25%)',
+              900: 'hsl(20, 90%, 15%)'
+            },
+            accent: {
+              50: 'hsl(50, 95%, 95%)',
+              100: 'hsl(50, 95%, 85%)',
+              200: 'hsl(50, 95%, 75%)',
+              300: 'hsl(50, 95%, 65%)',
+              400: 'hsl(50, 95%, 60%)',
+              500: 'hsl(50, 95%, 55%)',
+              600: 'hsl(50, 95%, 50%)',
+              700: 'hsl(50, 95%, 40%)',
+              800: 'hsl(50, 95%, 30%)',
+              900: 'hsl(50, 95%, 20%)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+
+  <!-- Preline UI Components -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.js"></script>
+
+  <!-- Micro-interactions & Custom Styles -->
+  <style>
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+    .btn-interactive {
+      transition: all 0.2s ease-out;
+    }
+    
+    .btn-interactive:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn-interactive:active {
+      transform: scale(0.95);
+    }
+
+    .card-interactive {
+      transition: all 0.3s ease-out;
+      border: 1px solid transparent;
+      --border-lightness: 40%;
+    }
+
+    .dark .card-interactive {
+      --border-lightness: 60%;
+    }
+
+    .card-interactive:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      filter: brightness(0.98);
+    }
+    
+    /* Primary colored cards */
+    .card-interactive[class*="primary"]:hover,
+    .card-interactive[class*="white"]:hover,
+    .card-interactive[class*="gray-"]:hover {
+      border-color: hsl(20, 90%, var(--border-lightness));
+    }
+    
+    /* Accent colored cards */
+    .card-interactive[class*="accent"]:hover {
+      border-color: hsl(50, 95%, var(--border-lightness));
+    }
+
+    .dark .card-interactive:hover {
+      filter: brightness(1.05);
+    }
+  </style>
+
+  <!-- Dark Mode Toggle Function -->
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      document.getElementById('sunIcon').style.display = isDark ? 'block' : 'none';
+      document.getElementById('moonIcon').style.display = isDark ? 'none' : 'block';
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+  <!-- Citation System Script -->
+  <script>
+    function initCitationSystem() {
+      let i = 1, map = new Map();
+      document.querySelectorAll('[data-ref]').forEach(el => {
+        if (el.dataset.citationProcessed) return;
+        const raw = (el.getAttribute('data-ref')||'').trim();
+        if (!raw) return;
+
+        const parts = raw.split('|');
+        const url = parts[0].trim();
+        const idx = (parts[1]||'').trim() || map.get(raw) || (map.set(raw, String(i)), String(i++));
+
+        if (!el.textContent || !el.textContent.trim()) { el.dataset.citationProcessed = 'true'; return; }
+
+        const btn = document.createElement('sup'); btn.textContent = String(idx);
+        Object.assign(btn.style, { fontSize:'8px', color:'#fff', cursor:'pointer', top: '1px', fontWeight:'bold', backgroundColor:'#ea580c', borderRadius:'50%', transition:'all .15s', userSelect:'none', minWidth:'19px', height:'19px', marginLeft:'6px', display:'inline-flex', alignItems:'center', justifyContent:'center', boxShadow:'0 1px 3px rgba(0,0,0,.2)', lineHeight:'1'});
+        btn.addEventListener('mouseenter', ()=> Object.assign(btn.style, { backgroundColor:'#c2410c', transform:'scale(1.12)' }));
+        btn.addEventListener('mouseleave', ()=> Object.assign(btn.style, { backgroundColor:'#ea580c', transform:'scale(1)' }));
+        btn.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); window.open(url, '_blank'); });
+
+        el.appendChild(btn); el.dataset.citationProcessed = 'true';
+      });
+    }
+  </script>
+
+  <!-- Progress bar -->
+  <div class="fixed top-0 left-0 h-1 bg-primary-500 dark:bg-primary-400 z-[60] transition-all duration-300 ease-out" id="progressBar"></div>
+
+  <!-- Floating Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur bg-gray-50/90 dark:bg-gray-900/90 border-b border-primary-500/20 dark:border-primary-600/20">
+    <nav class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold text-primary-700 dark:text-primary-300">Personajes para Videojuegos</h1>
+        
+        <div class="flex items-center gap-6">
+          <a href="#inicio" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Inicio</a>
+          <a href="#concepto" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Concepto</a>
+          <a href="#modelado" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Modelado</a>
+          <a href="#texturizado" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Texturizado</a>
+          <a href="#rigging" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Rigging</a>
+          <a href="#pipeline" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Pipeline</a>
+          <a href="#ejemplo" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Ejemplo</a>
+          <a href="#conclusion" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Conclusión</a>
+          
+          <button onclick="toggleDarkMode()" class="btn-interactive p-2 rounded-lg bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 transition-all">
+            <i data-lucide="sun" id="sunIcon" class="w-5 h-5" style="display:none;"></i>
+            <i data-lucide="moon" id="moonIcon" class="w-5 h-5" style="display:block;"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="min-h-screen">
+    <!-- Hero Section -->
+    <section id="inicio" class="py-40 bg-primary-50/50 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl md:text-5xl font-bold mb-6 text-primary-700 dark:text-primary-300">
+            Creación de Personajes para Videojuegos
+          </h2>
+          <p class="text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
+            Guía integral sobre diseño, modelado, texturizado y rigging de personajes 3D para juegos digitales
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 items-center mt-16">
+          <div class="space-y-6">
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://medium.com/@homicidalnacho/3d-modelling-pipeline-bd9be7dba136|41">
+              El proceso de creación de personajes 3D para videojuegos abarca múltiples etapas técnicas interconectadas que van desde la conceptualización hasta la implementación final en el motor de juego.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.facebook.com/AIEedu/posts/how-3d-artists-optimise-characters-for-better-game-performanceever-wondered-how-/1479534184214897/|43">
+                <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Cada etapa del pipeline desempeña un papel vital en garantizar que los personajes sean visualmente atractivos y funcionalmente eficientes dentro del entorno del juego.
+              </p>
+            </div>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.juegostudio.com/blog/video-game-character-design|46">
+              Los estudios profesionales utilizan flujos de trabajo estructurados que integran arte conceptual, modelado, texturizado, rigging y optimización para motores de juego.
+            </p>
+          </div>
+          
+          <img
+            src="https://cdn.qwenlm.ai/8a09e309-5904-448e-80a9-e34fccdf6992/8edbccbb-ca47-4d3c-a8d7-92d122096897/6bb67845-d4a2-4b71-a155-8ff6f7b2af96.png?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZV91c2VyX2lkIjoiOGEwOWUzMDktNTkwNC00NDhlLTgwYTktZTM0ZmNjZGY2OTkyIiwicmVzb3VyY2VfaWQiOiI4ZWRiY2NiYi1jYTQ3LTRkM2MtYThkNy05MmQxMjIwOTY4OTciLCJyZXNvdXJjZV9jaGF0X2lkIjpudWxsfQ.htbxxQWCVG-8nZd-fGvlB9OjsVmixCHlyVsHw-mA1hc"
+            alt="Ilustración de un artista digital trabajando en la creación de un personaje 3D para videojuegos. En primer plano, una figura humana estilizada de color naranja brillante (hex #ea580c) en una pose dinámica de acción, con líneas de contorno claras y definidas. Detrás de la figura, cuatro paneles flotantes rectangulares dispuestos en forma de cuadrícula 2x2 mostrando cada fase del proceso: panel superior izquierdo con un boceto a lápiz en tonos grises sobre papel blanco; panel superior derecho con un modelo 3D en verde brillante (hex #10b981) girando suavemente; panel inferior izquierdo con una textura detallada de piel en tonos café y beige; panel inferior derecho con una estructura de huesos articulados en azul claro (hex #60a5fa). El fondo es un gradiente suave de gris claro a blanco (hex #f9fafb a #ffffff) con elementos sutiles de interfaz de software 3D en bordes blancos limpios. Todos los colores siguen la paleta de naranjas y amarillos mencionada, con iluminación ambiental suave y sin sombras duras."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Conceptualización y Diseño de Personajes -->
+    <section id="concepto" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Conceptualización y Diseño de Personajes
+        </h2>
+
+        <div class="space-y-6 mb-12">
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.youtube.com/watch?v=zPcbx_XeN7E&vl=en-US|42">
+            El primer paso fundamental en la creación de un personaje para videojuegos es encontrar el concepto adecuado. Esta fase inicial determina la dirección visual y narrativa del personaje.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.youtube.com/watch?v=4iw8XLusQ7s|11">
+            El diseño de personajes implica comprender profundamente los principios de dirección artística, lenguaje de formas y teoría del color para crear diseños visualmente coherentes y memorables.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://vsquad.art/blog/articles/exploring-unique-character-art-styles-fresh-inspiration-for-artists/|20">
+            Las diferentes estilos artísticos de personajes afectan significativamente la percepción del jugador y deben elegirse cuidadosamente para no comprometer el rendimiento visual del juego.
+          </p>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <!-- Formas y Siluetas -->
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-concepto-1">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="shapes" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Formas y Siluetas</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-concepto-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-concepto-1">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.youtube.com/watch?v=tHj4GDi0LbM|12">
+                  El lenguaje de formas en el diseño de personajes oscuros permite crear personajes icónicos que transmiten emociones y características a través de la geometría básica del diseño.
+                </p>
+                
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.youtube.com/watch?v=4iw8XLusQ7s|11">
+                  Las siluetas claras y reconocibles son fundamentales para que los personajes sean identificables incluso en vistas distantes o en condiciones de poca visibilidad.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Teoría del Color -->
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-concepto-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="palette" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Teoría del Color</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-concepto-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-concepto-2">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.youtube.com/watch?v=4iw8XLusQ7s|11">
+                  La teoría del color juega un papel crucial en el diseño de personajes, ya que los colores pueden transmitir emociones, identificar facciones y diferenciar jerarquías visuales dentro del juego.
+                </p>
+                
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://vsquad.art/blog/articles/exploring-unique-character-art-styles-fresh-inspiration-for-artists/|20">
+                  Las combinaciones de colores deben ser coherentes con la narrativa del juego y la identidad visual general del título.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estilo Visual -->
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-concepto-3">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="sparkles" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Estilo Visual</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-concepto-3" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-concepto-3">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://vsquad.art/blog/articles/exploring-unique-character-art-styles-fresh-inspiration-for-artists/|20">
+                  Los estilos artísticos únicos ayudan a diferenciar los personajes y contribuyen a la estética general del juego, influyendo en cómo los jugadores perciben y se conectan con las figuras.
+                </p>
+                
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.tiktok.com/@lazy_.angels/video/7651444752449162527|13">
+                  Explorar nuevos estilos artísticos, como el estilo manga, puede ofrecer oportunidades creativas para desarrollar diseños originales y atractivos.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modelado 3D -->
+    <section id="modelado" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Modelado 3D de Personajes
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 items-start mb-12">
+          <div class="space-y-6">
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.youtube.com/watch?v=zPcbx_XeN7E&vl=en-US|42">
+              Después de establecer el concepto, el siguiente paso es bloquear la forma básica del personaje. Este proceso crea la estructura fundamental sobre la cual se construirá el modelo final.
+            </p>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://medium.com/@homicidalnacho/3d-modelling-pipeline-bd9be7dba136|41">
+              El modelado 3D es la segunda etapa típica en un pipeline de producción 3D, donde se crea la geometría tridimensional del personaje basándose en los diseños conceptuales.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed" data-ref="https://www.reddit.com/r/ZBrush/comments/p3dxjv/beginner_question_about_3d_character_pipeline_for/|73">
+                <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Para un personaje de juego, nunca se debe exceder los
+                <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-sm">140,000 vértices</span>,
+                y realísticamente se debería mantener entre
+                <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-sm">40,000 - 80,000 vértices</span>.
+              </p>
+            </div>
+          </div>
+
+          <img
+            src="https://cdn.qwenlm.ai/8a09e309-5904-448e-80a9-e34fccdf6992/8edbccbb-ca47-4d3c-a8d7-92d122096897/699eb456-8aaf-42fb-aaec-750cae85f814.png?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZV91c2VyX2lkIjoiOGEwOWUzMDktNTkwNC00NDhlLTgwYTktZTM0ZmNjZGY2OTkyIiwicmVzb3VyY2VfaWQiOiI4ZWRiY2NiYi1jYTQ3LTRkM2MtYThkNy05MmQxMjIwOTY4OTciLCJyZXNvdXJjZV9jaGF0X2lkIjpudWxsfQ.htbxxQWCVG-8nZd-fGvlB9OjsVmixCHlyVsHw-mA1hc"
+            alt="Ilustración de una cabeza humana 3D en proceso de modelado digital. La figura muestra una malla poligonal detallada en color naranja brillante (hex #ea580c) con líneas de borde claras y definidas. En la parte superior de la cabeza, una silueta de escultor en color gris oscuro (hex #374151) con una herramienta digital en mano sugiriendo el proceso de modelado. En el centro de la cara, una rejilla de polígonos en color verde brillante (hex #10b981) mostrando la topología del modelo. Alrededor de la cabeza, tres iconos flotantes en círculos: un cubo blanco (hex #ffffff) representando poligonización tradicional, un cilindro amarillo dorado (hex #fbbf24) representando subdivisión, y una herramienta de pulido en plata (hex #9ca3af) representando el método de remallado y pulido. El fondo es un gradiente suave de gris claro (hex #f3f4f6) a blanco (hex #ffffff) con elementos sutiles de interfaz de software 3D en bordes blancos limpios. Iluminación ambiental suave con resaltos naranjas y amarillos en los bordes de la malla para enfatizar la calidad visual."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+
+        <div class="space-y-6">
+          <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300">
+            Métodos de Creación de Alta Poligonización
+          </h3>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://polycount.com/discussion/237029/breakdown-of-the-aaa-pipeline-for-game-ready-realistic-hero-props|185">
+            Existen diferentes métodos para crear modelos de alta poligonización, siendo los más comunes: modelado poligonal tradicional, modelado por subdivisión, método de remallado y pulido, y técnicas avanzadas de superficie subdividida.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.facebook.com/groups/IndieGameDevs/posts/10152134492331573/|40">
+            El pipeline general de activos 3D sigue la secuencia: Arte Conceptual → Escultura → Retopológico → UV → Hornear → Texturizado. Esta metodología asegura que los detalles de alta resolución se transfieran correctamente al modelo de baja poligonización listo para el juego.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Texturizado y Mapeado UV -->
+    <section id="texturizado" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Texturizado y Mapeado UV
+        </h2>
+
+        <div class="space-y-6 mb-12">
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://medium.com/@homicidalnacho/3d-modelling-pipeline-bd9be7dba136|41">
+            El mapeado UV y el texturizado son etapas críticas en la pipeline de producción 3D que permiten aplicar materiales y colores realistas a los modelos 3D.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.animationmentor.com/workshops/3d-character-modeling-02-for-games/|45">
+            Durante esta fase, se crean UVs efectivas optimizadas para juegos y se utiliza Substance Painter para crear texturas de alta calidad que mejoren la apariencia visual del personaje.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.facebook.com/thinktanktrainingcentre/posts/in-this-advanced-texturing-course-for-think-tank-online-character-artist-and-thi/3856205791146266/|47">
+            El proceso completo de texturizado incluye desde la escultura → retopológico → UVs → hornear → pintar → posar → renderizar, todo en tiempo real con metodología paso a paso.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 bg-primary-500 dark:bg-primary-600 rounded-lg flex items-center justify-center">
+                <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-primary-700 dark:text-primary-300" data-ref="https://medium.com/@homicidalnacho/3d-modelling-pipeline-bd9be7dba136|41">Mapeado UV</h3>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Proceso de proyectar coordenadas 2D sobre una malla 3D para aplicar texturas de manera precisa y evitar distorsiones.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 bg-accent-500 dark:bg-accent-600 rounded-lg flex items-center justify-center">
+                <i data-lucide="droplet" class="w-5 h-5 text-white"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.facebook.com/thinktanktrainingcentre/posts/in-this-advanced-texturing-course-for-think-tank-online-character-artist-and-thi/3856205791146266/|47">Pintado de Texturas</h3>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Aplicación de colores, patrones y detalles visuales al modelo mediante herramientas especializadas como Substance Painter.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 bg-primary-500 dark:bg-primary-600 rounded-lg flex items-center justify-center">
+                <i data-lucide="eye" class="w-5 h-5 text-white"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.facebook.com/thinktanktrainingcentre/posts/in-this-advanced-texturing-course-for-think-tank-online-character-artist-and-thi/3856205791146266/|47">Renderizado</h3>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Visualización final del personaje con iluminación, sombras y efectos para verificar la calidad del texturizado.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-12 pl-4 pr-3 py-3 border-l-4 border-amber-500 bg-amber-50/40 dark:bg-amber-900/30 rounded-r-lg">
+          <p class="text-sm font-medium text-amber-900 dark:text-amber-100 leading-relaxed" data-ref="https://www.artstation.com/blogs/thundercloudstudio/y1Nyv/topology-for-low-poly-game-characters-essential-tips-and-tricks-part-1|187">
+            <i data-lucide="alert-triangle" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+            Una topología bien diseñada crea mapas UV más precisos y menos propensos a distorsiones al aplicar texturas al modelo.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rigging y Animación -->
+    <section id="rigging" class="py-20 bg-accent-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-accent-700 dark:text-accent-300">
+          Rigging y Animación de Personajes
+        </h2>
+
+        <div class="space-y-6 mb-12">
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://medium.com/@homicidalnacho/3d-modelling-pipeline-bd9be7dba136|41">
+            El rigging es la quinta etapa típica en una pipeline de producción 3D, donde se crea el sistema esquelético que permite animar el modelo 3D de manera realista.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://game-ace.com/blog/game-character-skinning/|49">
+            El skinning de personajes es el paso técnico que une una malla 3D a un rig esquelético y asigna a cada vértice una influencia ponderada de uno o más huesos, permitiendo movimientos naturales.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://80.lv/articles/video-game-characters-sculpting-texturing-rigging|50">
+            Herramientas especializadas como el Toolkit de Rigging de Unreal de Jeremy Ernst facilitan el proceso de rigging, permitiendo crear rigs complejos de manera eficiente.
+          </p>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <!-- Métodos de Rigging -->
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-accent-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-rigging-1">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="bone" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Métodos de Rigging</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-rigging-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-rigging-1">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://forums.unrealengine.com/t/shared-character-rigging-workflow-in-maya-body-and-facial-rig/133020|121">
+                  Es posible crear un flujo de trabajo compartido en Maya para rigging tanto corporal como facial rápidamente, con diferentes topologías pero compartiendo el mismo esqueleto esquelético.
+                </p>
+                
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.cgchannel.com/2021/04/master-character-rigging-in-maya-for-game-development/|128">
+                  Se exploran formas de aplicar principios básicos de rigging para crear rigs de personajes complejos de manera creativa, construyendo desde establecer una pipeline de personajes.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blend Shapes y Morph Targets -->
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-accent-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-rigging-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="smile" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Blend Shapes y Morph Targets</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-rigging-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-rigging-2">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://mocaponline.com/blogs/mocap-news/blend-shapes-morph-targets-guide?srsltid=AfmBOooEp8_2kvxwfg7x7HKqQR4wmha2JVTYUVZk4N0SiGQBgESIAMag|81">
+                  El flujo de trabajo típico para crear blend shapes implica duplicar la malla base, esculpir la duplicada en la forma deseada del target, y luego integrarla en el sistema de animación.
+                </p>
+                
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.reddit.com/r/Unity3D/comments/1khg1xd/how_i_used_blend_shapes_to_add_personality_to_my/|80">
+                  Los blend shapes permiten agregar personalidad a los personajes a través de expresiones faciales detalladas, permitiendo que miren objetos cercanos y expresen emociones complejas.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Optimización para Motores -->
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-accent-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-rigging-3">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="zap" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Optimización para Motores</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-rigging-3" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-rigging-3">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://sol-g-brennan.medium.com/rigging-tips-methods-for-extra-character-deformation-in-game-dev-e4c0e89e7b00|78">
+                  Los blend shapes no son gratuitos en un motor de juego y consumen memoria para almacenarlos. Utilizar articulaciones en lugar de blend shapes puede reducir el costo computacional de personajes con muchos vértices.
+                </p>
+                
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://threedium.io/3d-model/game-ready|233">
+                  Un modelo anunciado como "listo para juegos" debe incluir conteo de polígonos optimizado, topología limpia, mapeado UV completo y mapas de textura formateados para renderizado en tiempo real.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pipeline Completo de Producción -->
+    <section id="pipeline" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Pipeline Completo de Producción de Personajes
+        </h2>
+
+        <div class="space-y-6 mb-12">
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.therookies.co/blog/breakdowns/3d-character-creation-pipeline-for-games|74">
+            La creación de personajes 3D para juegos requiere un flujo de trabajo estructurado que coordine múltiples disciplinas artísticas y técnicas para lograr resultados profesionales.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.vcad.ca/about/spotlights/the-game-development-pipeline-a-beginner-s-guide-to-how-games-are-made/|103">
+            El desarrollo de juegos se divide en tres etapas principales: Preproducción, Producción y Posproducción, cada una con objetivos y entregables específicos.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.reddit.com/r/gamedev/comments/1urrb6b/art_pipeline_3d_character_production_pipeline_1/|180">
+            El pipeline básico para personajes 3D incluye: Diseño Conceptual → Creación de Hoja de Personaje → Modelado → Desenvolver UVs → Texturizado → Rigging → Animación.
+          </p>
+        </div>
+
+        <div class="relative">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-primary-100 dark:bg-primary-900/30">
+                  <th class="px-6 py-4 font-semibold text-primary-800 dark:text-primary-200" data-ref="https://www.therookies.co/blog/breakdowns/3d-character-creation-pipeline-for-games|74">Etapa</th>
+                  <th class="px-6 py-4 font-semibold text-primary-800 dark:text-primary-200" data-ref="https://www.therookies.co/blog/breakdowns/3d-character-creation-pipeline-for-games|74">Responsable</th>
+                  <th class="px-6 py-4 font-semibold text-primary-800 dark:text-primary-200" data-ref="https://www.therookies.co/blog/breakdowns/3d-character-creation-pipeline-for-games|74">Entregable</th>
+                  <th class="px-6 py-4 font-semibold text-primary-800 dark:text-primary-200" data-ref="https://www.therookies.co/blog/breakdowns/3d-character-creation-pipeline-for-games|74">Duración</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tr class="bg-white/90 dark:bg-gray-800">
+                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">Diseño Conceptual</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Artista Conceptual</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Hoja de Personaje</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">1-2 semanas</td>
+                </tr>
+                <tr class="bg-white/90 dark:bg-gray-800">
+                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">Escultura</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Modelador 3D</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Modelo Alta Poligonización</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">2-3 semanas</td>
+                </tr>
+                <tr class="bg-white/90 dark:bg-gray-800">
+                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">Retopológico</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Modelador 3D</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Modelo Baja Poligonización</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">1 semana</td>
+                </tr>
+                <tr class="bg-white/90 dark:bg-gray-800">
+                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">Texturizado</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Artista de Texturas</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Mapas de Textura</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">2 semanas</td>
+                </tr>
+                <tr class="bg-white/90 dark:bg-gray-800">
+                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">Rigging</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Rigger</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Esqueleto Funcional</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">1 semana</td>
+                </tr>
+                <tr class="bg-white/90 dark:bg-gray-800">
+                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">Animación</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Animador</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">Secuencias Animadas</td>
+                  <td class="px-6 py-4 text-gray-700 dark:text-gray-300">2-4 semanas</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-8 pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.therookies.co/blog/breakdowns/3d-character-creation-pipeline-for-games|74">
+              <i data-lucide="clock" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              La duración total estimada para crear un personaje AAA es de aproximadamente
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">9-13 semanas</span>
+              dependiendo de la complejidad y requisitos del proyecto.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Caso de Estudio: Total Darkness -->
+    <section id="ejemplo" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Caso de Estudio: Total Darkness
+        </h2>
+
+        <div class="space-y-6 mb-12">
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://totaldarkness.sciencemuseum.org.uk/|85">
+            Total Darkness es un juego de aventura nocturna que invita a los jugadores a usar sus habilidades científicas para resolver el misterio de Total Darkness.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.sciencemuseumgroup.org.uk/learning/resources/total-darkness|147">
+            El juego permite explorar diferentes ubicaciones, conocer nuevos personajes y crear tu propia aventura única mientras juegas, incorporando elementos de ciencia en la narrativa.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://bentempleton.co.uk/project/total-darkness/|262">
+            Total Darkness es un juego de aventura en línea gratuito desarrollado en HTML5 que ayuda a jóvenes a reflexionar sobre sus habilidades científicas y construir confianza.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 bg-primary-500 dark:bg-primary-600 rounded-lg flex items-center justify-center">
+                <i data-lucide="moon" class="w-5 h-5 text-white"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.facebook.com/groups/isaacarthur/posts/2688134034823122/|1">Contexto Narrativo</h3>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              El plan se centraba en un equipo de salvamento... Total Darkness, aunque de alguna manera la Tierra emerge como si nada hubiera pasado al principio, de repente parece que hay un planeta visible en el cielo.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 bg-accent-500 dark:bg-accent-600 rounded-lg flex items-center justify-center">
+                <i data-lucide="shield" class="w-5 h-5 text-white"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-accent-700 dark:text-accent-300" data-ref="https://spark-in-the-dark.fandom.com/wiki/Game_mechanics|86">Mecánica de Oscuridad</h3>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Cuando un personaje permanece demasiado tiempo (dependiendo de la Voluntad) en la oscuridad, recibirá un debuff que lentamente causará pérdida de salud.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 bg-primary-500 dark:bg-primary-600 rounded-lg flex items-center justify-center">
+                <i data-lucide="eye-off" class="w-5 h-5 text-white"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-primary-700 dark:text-primary-300" data-ref="https://dokumen.pub/gurps-horror-4th-edition-1556348037-9781556348037.html|4">Visión en la Oscuridad</h3>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Aún no puedes ver en total oscuridad. Ejemplo: Los Morlocks tienen Visión Nocturna 6 como característica. En la oscuridad eso le daría a los humanos ordinarios -6 (aproximadamente luz de luna).
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 bg-accent-500 dark:bg-accent-600 rounded-lg flex items-center justify-center">
+                <i data-lucide="search" class="w-5 h-5 text-white"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-accent-700 dark:text-accent-300" data-ref="https://static1.squarespace.com/static/55ec7221e4b02963949a705f/t/69e3a3ee1b43cb3c0f3640ca/1776526318467/CASTILLA+-+26.pdf|10">Seguimiento en Oscuridad</h3>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Los cazadores primitivos rastrearían a su presa hasta estas fuentes salinas. Rastrear al enemigo en la oscuridad total (track the enemy in total darkness).
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-12 pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+          <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://spark-in-the-dark.fandom.com/wiki/Game_mechanics|86">
+            <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+            La mecánica de oscuridad añade una capa estratégica al juego, requiriendo que los jugadores gestionen su exposición a entornos oscuros para evitar penalizaciones de salud.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conclusión -->
+    <section id="conclusion" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Conclusión
+        </h2>
+
+        <div class="space-y-6">
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.facebook.com/AIEedu/posts/how-3d-artists-optimise-characters-for-better-game-performanceever-wondered-how-/1479534184214897/|43">
+            La creación de personajes 3D para videojuegos es un proceso complejo que requiere la coordinación de múltiples disciplinas artísticas y técnicas, desde la conceptualización hasta la implementación final.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.juegostudio.com/blog/video-game-character-design|46">
+            Los flujos de trabajo estructurados que integran concepto, modelado, texturizado, rigging y optimización para motores de juego son esenciales para lograr resultados profesionales y eficientes.
+          </p>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.therookies.co/blog/breakdowns/3d-character-creation-pipeline-for-games|74">
+            La duración total estimada para crear un personaje AAA puede variar entre 9 y 13 semanas, dependiendo de la complejidad del proyecto y los requisitos específicos del estudio de desarrollo.
+          </p>
+
+          <div class="mt-8 grid md:grid-cols-2 gap-6">
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 bg-primary-500 dark:bg-primary-600 rounded-lg flex items-center justify-center">
+                  <i data-lucide="target" class="w-5 h-5 text-white"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-primary-700 dark:text-primary-300">Claves del Éxito</h3>
+              </div>
+              <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 mr-2 mt-0.5 text-primary-600 dark:text-primary-400"></i>
+                  <span>Planificación detallada de cada etapa del pipeline</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 mr-2 mt-0.5 text-primary-600 dark:text-primary-400"></i>
+                  <span>Comunicación efectiva entre equipos multidisciplinarios</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 mr-2 mt-0.5 text-primary-600 dark:text-primary-400"></i>
+                  <span>Optimización constante para rendimiento en tiempo real</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 mr-2 mt-0.5 text-primary-600 dark:text-primary-400"></i>
+                  <span>Iteración continua basada en pruebas y feedback</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 bg-accent-500 dark:bg-accent-600 rounded-lg flex items-center justify-center">
+                  <i data-lucide="lightbulb" class="w-5 h-5 text-white"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-accent-700 dark:text-accent-300">Consideraciones Futuras</h3>
+              </div>
+              <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                <li class="flex items-start">
+                  <i data-lucide="arrow-right" class="w-4 h-4 mr-2 mt-0.5 text-accent-600 dark:text-accent-400"></i>
+                  <span>Integración de IA en procesos de texturizado y modelado</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="arrow-right" class="w-4 h-4 mr-2 mt-0.5 text-accent-600 dark:text-accent-400"></i>
+                  <span>Herramientas automatizadas para rigging facial</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="arrow-right" class="w-4 h-4 mr-2 mt-0.5 text-accent-600 dark:text-accent-400"></i>
+                  <span>Mejoras en renderizado en tiempo real para personajes</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="arrow-right" class="w-4 h-4 mr-2 mt-0.5 text-accent-600 dark:text-accent-400"></i>
+                  <span>Adopción de tecnologías de captura de movimiento avanzadas</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mt-12 pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.facebook.com/AIEedu/posts/how-3d-artists-optimise-characters-for-better-game-performanceever-wondered-how-/1479534184214897/|43">
+              <i data-lucide="award" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              La inversión en pipelines de producción sólidos y bien coordinados es fundamental para garantizar que los personajes sean visualmente atractivos, funcionalmente eficientes y consistentes con la visión artística del proyecto.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-primary-900 dark:bg-gray-950 text-gray-300 py-12 border-t border-primary-700 dark:border-gray-800">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="grid md:grid-cols-3 gap-8 mb-8">
+        <div>
+          <h3 class="text-lg font-semibold text-primary-300 dark:text-primary-400 mb-4">Sobre este Recurso</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Documento integral sobre la creación de personajes 3D para videojuegos, cubriendo todas las etapas del pipeline profesional desde el diseño conceptual hasta la implementación final.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-primary-300 dark:text-primary-400 mb-4">Temas Principales</h3>
+          <ul class="space-y-2 text-sm text-gray-400">
+            <li>• Diseño Conceptual de Personajes</li>
+            <li>• Modelado 3D y Topología</li>
+            <li>• Texturizado y Mapeado UV</li>
+            <li>• Rigging y Animación</li>
+            <li>• Pipeline de Producción Completa</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-primary-300 dark:text-primary-400 mb-4">Casos de Estudio</h3>
+          <ul class="space-y-2 text-sm text-gray-400">
+            <li>• Total Darkness</li>
+            <li>• Flujos de Trabajo AAA</li>
+            <li>• Optimización para Juegos</li>
+            <li>• Mecánicas de Juego</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="border-t border-primary-800 dark:border-gray-800 pt-8 text-center">
+        <p class="text-sm text-gray-500">
+          © 2024 Guía de Creación de Personajes para Videojuegos. Contenido educativo para desarrolladores y artistas digitales.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts de Inicialización -->
+  <script>
+    // Inicializar bibliotecas
+    document.addEventListener('DOMContentLoaded', function() {
+      // Inicializar Lucide Icons
+      lucide.createIcons();
+
+      // Inicializar AOS
+      AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+      });
+
+      // Inicializar Preline componentes
+      setTimeout(() => {
+        window.HSStaticMethods.autoInit();
+      }, 100);
+
+      // Inicializar sistema de citas
+      initCitationSystem();
+
+      // Control de barra de progreso
+      const progressBar = document.getElementById('progressBar');
+      
+      window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrollPercent = (scrollTop / docHeight) * 100;
+        progressBar.style.width = scrollPercent + '%';
+      });
+    });
+  </script>
+</body>
+</html>

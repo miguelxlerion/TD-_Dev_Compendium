@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipeline Completo de Creación de Personajes para Unity 3D</title>
+
+  <!-- Essential CDN Libraries -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: 'hsl(210, 75%, 95%)',
+              100: 'hsl(210, 75%, 85%)',
+              200: 'hsl(210, 75%, 75%)',
+              300: 'hsl(210, 75%, 65%)',
+              400: 'hsl(210, 75%, 55%)',
+              500: 'hsl(210, 75%, 40%)',
+              600: 'hsl(210, 75%, 35%)',
+              700: 'hsl(210, 75%, 25%)',
+              800: 'hsl(210, 75%, 15%)',
+              900: 'hsl(210, 75%, 10%)'
+            },
+            accent: {
+              50: 'hsl(270, 70%, 95%)',
+              100: 'hsl(270, 70%, 85%)',
+              200: 'hsl(270, 70%, 75%)',
+              300: 'hsl(270, 70%, 65%)',
+              400: 'hsl(270, 70%, 60%)',
+              500: 'hsl(270, 70%, 55%)',
+              600: 'hsl(270, 70%, 50%)',
+              700: 'hsl(270, 70%, 40%)',
+              800: 'hsl(270, 70%, 30%)',
+              900: 'hsl(270, 70%, 20%)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+
+  <!-- Preline UI Components -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.js"></script>
+
+  <!-- Micro-interactions & Custom Styles -->
+  <style>
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+    .btn-interactive {
+      transition: all 0.2s ease-out;
+    }
+    
+    .btn-interactive:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn-interactive:active {
+      transform: scale(0.95);
+    }
+
+    .card-interactive {
+      transition: all 0.3s ease-out;
+      border: 1px solid transparent;
+      --border-lightness: 40%;
+    }
+
+    .dark .card-interactive {
+      --border-lightness: 60%;
+    }
+
+    .card-interactive:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      filter: brightness(0.98);
+    }
+    
+    /* Primary colored cards */
+    .card-interactive[class*="primary"]:hover,
+    .card-interactive[class*="white"]:hover,
+    .card-interactive[class*="gray-"]:hover {
+      border-color: hsl(210, 75%, var(--border-lightness));
+    }
+    
+    /* Accent colored cards */
+    .card-interactive[class*="accent"]:hover {
+      border-color: hsl(270, 70%, var(--border-lightness));
+    }
+
+    .dark .card-interactive:hover {
+      filter: brightness(1.05);
+    }
+  </style>
+
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      document.getElementById('sunIcon').style.display = isDark ? 'block' : 'none';
+      document.getElementById('moonIcon').style.display = isDark ? 'none' : 'block';
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+  <!-- Citation System Script -->
+  <script>
+    function initCitationSystem() {
+      let i = 1, map = new Map();
+      document.querySelectorAll('[data-ref]').forEach(el => {
+        if (el.dataset.citationProcessed) return;
+        const raw = (el.getAttribute('data-ref')||'').trim();
+        if (!raw) return;
+
+        const parts = raw.split('|');
+        const url = parts[0].trim();
+        const idx = (parts[1]||'').trim() || map.get(raw) || (map.set(raw, String(i)), String(i++));
+
+        if (!el.textContent || !el.textContent.trim()) { el.dataset.citationProcessed = 'true'; return; }
+
+        const btn = document.createElement('sup'); btn.textContent = String(idx);
+        Object.assign(btn.style, { fontSize:'8px', color:'#fff', cursor:'pointer', top: '1px', fontWeight:'bold', backgroundColor:'#0284c7', borderRadius:'50%', transition:'all .15s', userSelect:'none', minWidth:'19px', height:'19px', marginLeft:'6px', display:'inline-flex', alignItems:'center', justifyContent:'center', boxShadow:'0 1px 3px rgba(0,0,0,.2)', lineHeight:'1'});
+        btn.addEventListener('mouseenter', ()=> Object.assign(btn.style, { backgroundColor:'#0369a1', transform:'scale(1.12)' }));
+        btn.addEventListener('mouseleave', ()=> Object.assign(btn.style, { backgroundColor:'#0284c7', transform:'scale(1)' }));
+        btn.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); window.open(url, '_blank'); });
+
+        el.appendChild(btn); el.dataset.citationProcessed = 'true';
+      });
+    }
+  </script>
+
+  <!-- Progress Bar -->
+  <div class="fixed top-0 left-0 h-1 bg-primary-500 dark:bg-primary-400 z-[60] transition-all duration-300 ease-out" id="progressBar" style="width: 0%;"></div>
+
+  <!-- Floating Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur bg-gray-50/90 dark:bg-gray-900/90 border-b border-primary-500/20 dark:border-primary-600/20">
+    <nav class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold text-primary-700 dark:text-primary-300">Pipeline de Personajes Unity 3D</h1>
+        
+        <div class="flex items-center space-x-6">
+          <a href="#inicio" class="btn-interactive text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">Inicio</a>
+          <a href="#conceptual" class="btn-interactive text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">Conceptual</a>
+          <a href="#modelado" class="btn-interactive text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">Modelado</a>
+          <a href="#texturizado" class="btn-interactive text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">Texturizado</a>
+          <a href="#rigging" class="btn-interactive text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">Rigging</a>
+          <a href="#optimizacion" class="btn-interactive text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">Optimización</a>
+          <a href="#integracion" class="btn-interactive text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">Integración</a>
+          <a href="#conclusion" class="btn-interactive text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">Conclusión</a>
+          
+          <button onclick="toggleDarkMode()" class="btn-interactive p-2 rounded-lg bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 transition-all">
+            <i data-lucide="sun" id="sunIcon" class="w-5 h-5" style="display: none;"></i>
+            <i data-lucide="moon" id="moonIcon" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="min-h-screen">
+    <!-- Hero Section -->
+    <section id="inicio" class="py-40 bg-primary-50/50 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="text-center mb-12">
+          <h2 class="text-5xl font-bold mb-6 text-primary-700 dark:text-primary-300">
+            Pipeline Completo de Creación de Personajes para Unity 3D
+          </h2>
+          <p class="text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
+            Guía exhaustiva para diseñar, modelar, texturizar y hacer rigging de personajes jugables y no jugables destinados a videojuegos, con enfoque en su preparación para interacción y animación dentro del motor Unity.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 items-center mt-16">
+          <div class="space-y-6">
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.facebook.com/groups/nomadsculpt/posts/1390666508780551/|3">
+              El diseño de personajes debe seguir el principio de que la forma debe seguir la función y complementar el diseño general del juego, asegurando que cada elemento visual tenga un propósito claro en la experiencia del jugador.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.intechopen.com/chapters/1221056|2">
+                <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Hallazgo clave: Los avatares deben permitir identificación y agencia, mientras que los PNJ deben facilitar reconocimiento, interpretación e interacción efectiva con el jugador.
+              </p>
+            </div>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.juegostudio.com/blog/video-game-character-design|9">
+              El diseño de personajes determina la claridad del gameplay, la eficiencia de animación, la flexibilidad de monetización y el reconocimiento de franquicia a largo plazo, convirtiéndose en un componente estratégico fundamental en el desarrollo de videojuegos.
+            </p>
+          </div>
+          
+          <img
+            src="img/pipeline-personajes-unity-v2/01.png"
+            alt="Ilustración conceptual de un pipeline de creación de personajes en Unity 3D mostrando cinco etapas principales dispuestas horizontalmente: Diseño Conceptual representado por un boceto de lápiz en papel blanco sobre fondo gris claro (#F5F5F5); Modelado 3D mostrado como un modelo poligonal humanoide en color azul primario (#1A73B3) sobre fondo blanco; Texturizado representado por una paleta de colores con gradientes de piel, cabello y ropa; Rigging ilustrado con un esqueleto articulado en tono púrpura (#8B5CF6) rodeando el modelo; Integración final mostrada como un personaje completo en escena de juego. Flechas de transición en color secundario púrpura conectan cada etapa. Elementos visuales: sombras sutiles debajo de cada etapa, iconos de herramientas 3D (cubos, esferas, cilindros) dispersos en segundo plano, tipografía profesional en español sobre fondo limpio y minimalista."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Diseño Conceptual Section -->
+    <section id="conceptual" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Diseño Conceptual y Planificación
+        </h2>
+
+        <div class="grid md:grid-cols-3 gap-6 mb-12">
+          <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="palette" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.ixiegaming.com/blog/navigating-the-game-art-production-pipeline/|95">Preproducción</h3>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              La preproducción establece la base para la dirección artística, actuando el concept art como el plano visual para todo el desarrollo del personaje.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="heart" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-accent-700 dark:text-accent-300" data-ref="https://journals.sagepub.com/doi/10.1177/15554120251380423|7">Empatía Jugador</h3>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              La narrativa centrada en personajes fomenta inmersión y conexión al crear empatía, aumentando el compromiso emocional del jugador con la historia.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="target" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-primary-700 dark:text-primary-300" data-ref="https://ecampusontario.pressbooks.pub/gamedesigndevelopmenttextbook/chapter/goals-of-character-design/|8">Objetivos Emocionales</h3>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Los diseñadores de juegos crean personajes emocionales, únicos, poderosos y empáticos, más allá de héroes bidimensionales tradicionales.
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://brinkhelsinki.com/logs/character-design-for-animation/|158">
+            El diseño de personajes es fundamental en la preproducción de animación, donde las hojas de expresión típicamente incluyen emociones como feliz, triste, enfadado, sorprendido, neutral y extremo, proporcionando una base completa para la animación facial.
+          </p>
+
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://petrilankoski.com/2008/11/12/character-driven-game-design-characters-conflict-and-gameplay/|10">
+              <i data-lucide="lightbulb" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Método innovador: El diseño de juegos centrado en personajes utiliza ideas del diseño dramático de personajes para incluir gameplay en el proceso de diseño, integrando narrativa y mecánicas.
+            </p>
+          </div>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.linkedin.com/posts/ranko-trifkovic-42b9503_were-entering-a-dark-age-of-game-development-activity-7450462840353820672-l_qx|150">
+            El diseño narrativo es la única herramienta que transforma presionar un botón en tomar una decisión, convirtiendo acciones mecánicas en experiencias significativas para el jugador.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modelado 3D Section -->
+    <section id="modelado" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Modelado 3D y Optimización de Topología
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 items-start mb-12">
+          <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.facebook.com/groups/290530545401744/posts/778008253320635/|55">
+              Recuentos de Polígonos por Plataforma
+            </h3>
+            
+            <div class="space-y-4">
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                Los personajes principales típicamente oscilan entre
+                <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">100,000-150,000</span>
+                polígonos, mientras que los personajes secundarios están entre
+                <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">30,000-60,000</span>
+                polígonos.
+              </p>
+
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://discussions.unity.com/t/polycount-for-characters-in-mobile-fighting-game-doubt/690499|56">
+                Para juegos móviles de combate, mantenerse en el rango de
+                <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">10,000-15,000</span>
+                polígonos por personaje es seguro para múltiples personajes en pantalla, aunque depende del contexto específico.
+              </p>
+
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://discussions.unity.com/t/recommendation-of-count-of-polygons-tris-for-mobile-game/691518|58">
+                En dispositivos móviles, entre
+                <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">20,000-30,000</span>
+                polígonos puede ser adecuado si no hay muchas otras actividades en la escena, como efectos limitados, animaciones reducidas y vegetación mínima.
+              </p>
+            </div>
+          </div>
+
+          <div class="card-interactive p-6 rounded-xl shadow-md bg-white/90 backdrop-blur-sm dark:bg-gray-900 h-80">
+            <canvas id="polyCountChart"></canvas>
+          </div>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-topologia-heading">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="git-branch" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Topología para Animación</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-topologia-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-topologia-heading">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.thegnomonworkshop.com/workshops/topology-for-animated-characters|23">
+                  El enfoque fundamental de João sobre el flujo de bordes crea una estructura de malla robusta que funciona bien durante las fases de rigging y animación.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://thundercloud-studio.com/article/topology-for-low-poly-game-characters/|24">
+                  Una topología bien construida facilita el rigging y el skinning de modelos, conduciendo a animaciones más suaves y movimientos más naturales.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/groups/mayariggingandanimation/posts/738644010108712/|27">
+                  Una buena topología incluye una distribución adecuada de bucles de bordes en bordes afilados, y el flujo de bordes debe coincidir con la anatomía natural de la forma para lograr mejores resultados.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-poligonos-heading">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="layers" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Guías de Polígonos por Plataforma</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-poligonos-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-poligonos-heading">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/550/Documentation/Manual/ModelingOptimizedCharacters.html|59">
+                  Para dispositivos móviles, entre
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-sm">300-1,500</span>
+                  polígonos por malla dará buenos resultados, mientras que para plataformas de escritorio el rango ideal es aproximadamente
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-sm">1,500-4,000</span>
+                  polígonos.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://cgcookie.com/community/19163-what-is-a-good-amount-of-polycount-for-a-videogame-assset|60">
+                  En una PC de bajo rendimiento, se recomienda mantener el total máximo de polígonos renderizados en un frame por debajo de
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-sm">2 millones</span>
+                  polígonos (según Unity), incluyendo props simples y complejos.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://cgaxis.com/polygon-count-guide-how-many-polys-do-you-really-need-in-2026/|61">
+                  Un personaje de juego móvil podría usar
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-sm">1,500</span>
+                  polígonos en total, mientras que props ambientales como barriles o cajas permanecen por debajo de
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-sm">500</span>
+                  polígonos.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-mobile-heading">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="smartphone" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Consideraciones Móviles</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-mobile-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-mobile-heading">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://discussions.unity.com/t/3d-model-polygon-count-how-much-is-optimal/418488|62">
+                  Si se está apuntando a un dispositivo móvil, definitivamente limitar el recuento de polígonos en el rango de
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">3,000-7,000</span>
+                  como máximo, dependiendo aún de cuántos objetos se planea tener.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/groups/2260502854/posts/10160202386792855/|164">
+                  En móviles, el rango va desde
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">3,000-50,000</span>
+                  triángulos. Para nuestro juego móvil, cada personaje tiene aproximadamente
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">8,000-12,000</span>
+                  triángulos porque la cámara no está muy cerca y necesitamos hasta 12 personajes en pantalla.
+                </p>
+                
+                <div class="pl-4 pr-3 py-3 border-l-4 border-amber-500 bg-amber-50/40 dark:bg-amber-900/30 rounded-r-lg">
+                  <p class="text-sm font-medium text-amber-900 dark:text-amber-100 leading-relaxed" data-ref="https://creators.vrchat.com/platforms/android/quest-content-optimization|99">
+                    <i data-lucide="triangle-alert" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                    Advertencia crítica: Mantener el conteo de triángulos bajo es muy importante en plataformas móviles. Incluso el Quest, que es bastante potente para un casco móvil, tiene límites de hardware.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Texturizado Section -->
+    <section id="texturizado" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Texturizado y Gestión de Materiales
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 items-center mb-12">
+          <img
+            src="img/pipeline-personajes-unity-v2/02.png"
+            alt="Escena de texturizado en Unity 3D mostrando un personaje humanoide completo sobre fondo blanco (#FFFFFF). El personaje tiene tres capas visibles de materiales: piel en tono beige claro (#D4A574) con textura de porosidad sutil; cabello en marrón oscuro (#3E2723) con brillo realista; y ropa en azul primario (#1A73B3) con textura de tejido tejido. A la izquierda del personaje, cuatro iconos de materiales flotantes: textura difusa en rojo (#EF4444), mapa de normales en verde (#10B981), mapa de rugosidad en gris (#6B7280), y mapa de metalicidad en dorado (#F59E0B). En la parte superior derecha, un panel de inspector de Unity muestra propiedades del material con deslizadores de brillo, color y transparencia. A la derecha del personaje, un sistema de gestión de materiales organizado en filas: materiales compartidos en azul primario (#1A73B3) etiquetados como 'Reutilizables', materiales únicos en púrpura secundario (#8B5CF6) etiquetados como 'Personaje Específico'. Tipografía clara en español sobre fondo limpio y profesional."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+
+          <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.youtube.com/watch?v=f2E3KhSZgss|65">
+              Fundamentos de Texturizado en Unity
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Este tutorial de 10 minutos examina cómo texturar objetos con materiales en Unity, incluyendo la importación de un controlador de personaje en primera persona para demostrar la aplicación práctica.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.facebook.com/groups/IndieGameDevs/posts/10155404360561573/|66">
+                <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Estrategia eficiente: Para dibujar un personaje con texturas corporales y de expresión facial en un solo batch, la solución es pegar todas las texturas en un atlas, optimizando el rendimiento.
+              </p>
+            </div>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.youtube.com/watch?v=jbRcWRMTR4Q|67">
+              En este video, se exportan las texturas finales desde Substance Painter para la canalización URP de Unity y se configuran en la ventana gráfica de Maya para validar la calidad antes de la integración.
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <h3 class="text-xl font-semibold text-accent-700 dark:text-accent-300">
+            Estrategias de Optimización de Texturas
+          </h3>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <i data-lucide="package" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300" data-ref="https://blender.stackexchange.com/questions/204740/workflow-for-texturing-in-games-in-unity|69">Agrupación por Materiales</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Agrupar objetos por material y usar una textura sin fisuras para todos ellos parece ahorrar rendimiento porque todo se dibuja en una sola llamada de dibujo.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <i data-lucide="zap" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.quora.com/How-do-I-get-a-great-texture-quality-in-Unity-3D-as-in-AAA-games|70">Calidad Gráfica AAA</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Se puede obtener buena calidad gráfica usando texturas de alta resolución, buenos shaders y iluminación relevante. Solo se necesita preocuparse por la optimización del rendimiento.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <i data-lucide="layers" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300" data-ref="https://docs.lunalabs.io/docs/playable/optimise-your-builds/optimising-assets/optimising-textures|71">Optimización de Texturas</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Consejos sobre cómo reducir el tamaño de texturas, tanto desde dentro de la ventana del plugin Playable como externamente, para mejorar el rendimiento sin sacrificar calidad visual.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <i data-lucide="circle-help" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300" data-ref="https://sunstrikestudios.com/en/blog/texturing_3d_models_for_games/|142">Flujo PBR</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Esta guía exhaustiva destila principios probados en producción para texturizado 3D listo para juegos en PC, consola y móvil, con pasos concretos, listas de verificación y trampas de QA.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-12 space-y-6">
+          <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300">
+            Modificación de Materiales en Tiempo de Ejecución
+          </h3>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300 mb-4" data-ref="https://discussions.unity.com/t/solved-how-to-change-material-properties-at-runtime/589377|38">Transparencia Dinámica</h4>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Cambiar propiedades de materiales en tiempo de ejecución permite efectos como hacer que un personaje sea transparente cuando la cámara se acerca, mejorando la interactividad.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300 mb-4" data-ref="https://discussions.unity.com/t/proper-way-to-modify-materials-at-runtime/687739|39">Bloques de Propiedad</h4>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Se pueden modificar configuraciones de materiales en una base por componente de renderer, y luego deshacer esos cambios configurando un bloque de propiedad nulo.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300 mb-4" data-ref="https://www.reddit.com/r/Unity3D/comments/1v06v2n/character_customization/|43">Personalización de Personajes</h4>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Separar las partes que se quieren cambiar de color (piel, cabello, ojos) como diferentes materiales permite cambiar el color del material en tiempo de ejecución para personalización.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300 mb-4" data-ref="https://discussions.unity.com/t/optimal-material-runtime-workflow-resident-drawer-srp-mpb/1710189|107">Workflow Óptimo</h4>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Cuando se necesita cambiar el valor de propiedad para un personaje, se obtiene el material en tiempo de ejecución desde SkinnedMeshRenderer y se usa MaterialPropertyBlock para sobreescribir el valor de propiedad.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rigging Section -->
+    <section id="rigging" class="py-20 bg-accent-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-accent-700 dark:text-accent-300">
+          Rigging y Sistema de Animación
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-accent-700 dark:text-accent-300" data-ref="https://discussions.unity.com/t/generic-and-humanoid/632789|33">
+              Tipos de Rig: Humanoid vs Genérico
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Humanoid se basa en información de MuscleClip para manipular el rig, mientras que un rig genérico utiliza información de transformación para manipulación. Ambos tipos tienen usos específicos dependiendo del tipo de personaje.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed" data-ref="https://www.facebook.com/groups/vrchat/posts/7279941755455679/|32">
+                <i data-lucide="settings" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Proceso de conversión: Para cambiar el tipo de rig, hacer clic en rig, luego en el menú desplegable de tipo de animación seleccionar humanoid, aplicar y configurar. Esto convierte un modelo no humanoide en un avatar humanoide.
+              </p>
+            </div>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://docs.unity3d.com/6000.2/Documentation/Manual/ConfiguringtheAvatar.html|37">
+              Desde la pestaña Rig de la ventana Inspector, configurar el tipo de animación en Humanoid. Por defecto, la propiedad Definición de Avatar está configurada en Crear Desde Este Modelo, lo que genera automáticamente el avatar.
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://ktcg.art/2019/07/25/character-setup-for-unity-rigging-animation-and-importing-considerations/|89">
+              Requisitos de Huesos para Humanoid
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Si se planea usar el Avatar, se necesita tener al menos los siguientes huesos: Cadera, Columna, Cabeza, Brazo Superior.
+            </p>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300 mb-4" data-ref="https://docs.unity3d.com/2022.1/Documentation/Manual/UsingHumanoidChars.html|221">Requisitos Específicos</h4>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Para un modelo Humanoid, hay requisitos específicos para el esqueleto para que Unity pueda emparejarlo con un Avatar Humanoid: un mínimo de
+                <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">15 huesos</span>.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300 mb-4" data-ref="https://discussions.unity.com/t/humanoid-rigs-and-extra-bones/601395|223">Huesos Extra</h4>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Sí se pueden animar huesos extra con un rig Humanoid, por defecto las animaciones de huesos extra no se importan. Se necesita abrir explícitamente la máscara para incluirlos.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-accent-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-rigging-heading">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="bone" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Rigging Facial y Formas de Mezcla</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-rigging-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-rigging-heading">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://adamspring.co.uk/2020/05/25/facs-rigging-texture-blending-digital-humans/|25">
+                  La primera etapa del rigging de formas de mezcla es modelar todas las formas faciales. La primera y forma más importante es la expresión 'neutral', que sirve como base para todas las demás animaciones faciales.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://polycount.com/discussion/199253/face-rigging-vs-using-morph-targets-for-animating-face-expressions|26">
+                  Los personajes del cortometraje Blacksmith de Unity son buenos ejemplos de usar rig de articulación para el cuerpo y formas de mezcla para animaciones faciales, combinando ambos métodos para resultados óptimos.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.youtube.com/watch?v=BXm6jcrE0uQ|104">
+                  Las formas de mezcla se aplican en el componente Skinned Mesh Renderer, permitiendo animaciones faciales precisas y controladas a nivel de vértices.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Unity3D/comments/afj0s7/is_there_really_no_way_to_add_blendshapes_at/|73">
+                  Las formas de mezcla son animaciones de vértices. Se puede cambiar el peso de la forma de mezcla en tiempo de ejecución a través de scripting para animar expresiones faciales dinámicamente.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-accent-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-animation-heading">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="motion" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Paquete de Rigging de Animación</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-animation-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-animation-heading">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://mocaponline.com/blogs/mocap-news/unity-animation-rigging-guide?srsltid=AfmBOoqdc50H9E2hBl1P46FHA84E2nDqara8uSnsR3Gu_41_tXtARaBk|166">
+                  El paquete de Rigging de Animación de Unity es un sistema de animación procedural en tiempo de ejecución que permite superponer manipulación de huesos basada en restricciones encima de animaciones existentes.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://unitycodemonkey.com/video.php?v=LEwYmFT3xDk|30">
+                  Se puede aprender a usar el paquete de Rigging de Animación de Unity que permite añadir lógica dinámica encima de las animaciones. O usar IK de Dos Huesos para lograr resultados más realistas.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.youtube.com/watch?v=Htl7ysv10Qs|29">
+                  Se pueden crear animaciones procedurales usando Rigging de Animación, lo que permite animaciones más naturales y reactivas basadas en interacciones del entorno.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://mocaponline.com/blogs/mocap-news/unity-animation-rigging-guide?srsltid=AfmBOorcKCN6nPFyuvWRcOiRh0oAWDCLpiy78mhoAW8xB_2Ci0cXEO4v|106">
+                  Esta guía cubre cada tipo mayor de restricción, camina paso a paso a través de los escenarios de configuración más importantes, explica cómo combinar restricciones para lograr resultados complejos.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-accent-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-root-heading">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="move" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Movimiento Raíz</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-root-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-root-heading">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/6000.1/Documentation/Manual/RootMotion.html|157">
+                  El movimiento raíz es un método donde la animación incluye datos de posición y rotación para el transform de la raíz, permitiendo que los personajes se muevan a través del mundo con precisión.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://support.soxware.com/communities/1/topics/202-root-motion-isnt-working-when-i-export-as-fbx-only-anim|243">
+                  Se necesita decirle a Unity a través de la configuración de importación de FBX (mostrada en el Inspector cuando se selecciona el FBX) cómo debería extraer y generar movimiento raíz para lograr sincronización precisa.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Optimización Section -->
+    <section id="optimizacion" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Optimización de Rendimiento y Niveles de Detalle
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 items-center mb-12">
+          <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.youtube.com/watch?v=A0b2MfHCCfU|11">
+              Sistema Automático de LOD
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              El nuevo sistema de LOD de malla de Unity crea y gestiona automáticamente niveles de detalle para mallas en la importación, reduciendo el conteo de polígonos y mejorando el rendimiento sin intervención manual.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://docs.unity3d.com/6000.2/Documentation/Manual/lod/mesh-lod-introduction.html|12">
+                <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Selección automática: En tiempo de ejecución, la característica LOD de malla selecciona automáticamente el LOD apropiado dependiendo del tamaño de la malla en la pantalla, gestionando la optimización de manera inteligente.
+              </p>
+            </div>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://discussions.unity.com/t/how-to-implement-megacity-lods-and-culling-system/893982?page=2|13">
+              El sistema LOD de Unity puede hacer ajustes sofisticados como deshabilitar sombras y sondas de luz por LOD, permitiendo configuraciones avanzadas para optimización de rendimiento.
+            </p>
+          </div>
+
+          <img
+            src="img/pipeline-personajes-unity-v2/03.png"
+            alt="Diagrama de niveles de detalle (LOD) en Unity 3D mostrando un personaje humanoide en tres estados de detalle decreciente. En la parte superior izquierda, el modelo de alto detalle con 150,000 polígonos en color azul primario (#1A73B3) con malla visible detallada; en el centro, el modelo de medio detalle con 75,000 polígonos en tono púrpura secundario (#8B5CF6) con malla simplificada; en la parte inferior derecha, el modelo de bajo detalle con 30,000 polígonos en gris oscuro (#374151) con malla muy simplificada. Flechas descendentes en color azul primario indican la transición entre niveles. A la derecha del diagrama, un panel de inspector de Unity mostrando configuración de LOD con deslizadores de distancia de transición (0m, 20m, 50m) y estadísticas de polígonos. Tipografía clara en español sobre fondo blanco (#FFFFFF) con elementos visuales limpios y profesionales."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+
+        <div class="space-y-6">
+          <h3 class="text-xl font-semibold text-accent-700 dark:text-accent-300">
+            Herramientas y Estrategias de LOD
+          </h3>
+
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <i data-lucide="layers" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.reddit.com/r/Unity3D/comments/3hphg2/automatic_lod_for_unity_generates_lod_meshes_for/|14">Generación Automática</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Genera mallas LOD para objetos y permite hacer cada paso desde Unity, incluida la generación de malla, con control completo del proceso de optimización.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <i data-lucide="wrench" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.youtube.com/watch?v=EqVig88ZC_M|15">Edición en Tiempo Real</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Aprender a tomar cualquier modelo 3D y reducir el conteo de polígonos EN-EDITOR para generar LODs, trabajando directamente en el flujo de trabajo de Unity sin salir del editor.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <i data-lucide="tool-case" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300" data-ref="https://github.com/Whinarn/UnityMeshSimplifier/wiki/LOD-Generator-Helper-component|17">Componente de Ayuda</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                El componente de Ayuda de Generador de LOD está diseñado para facilitar la generación de LODs para objetos de juego en Unity sin escribir código, automatizando el proceso.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-12 space-y-6">
+          <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300">
+            Consideraciones de Rendimiento
+          </h3>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300 mb-4" data-ref="https://docs.unity3d.com/2020.1/Documentation/Manual/ModelingOptimizedCharacters.html|68">Mejores Prácticas</h4>
+              <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 text-primary-600 dark:text-primary-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>Usar un solo Renderizador de Malla con Skin</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 text-primary-600 dark:text-primary-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>Usar tantos Materiales como sea posible</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 text-primary-600 dark:text-primary-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>Usar tantos huesos como sea posible</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 text-primary-600 dark:text-primary-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>Minimizar el número de vértices afectados por cada hueso</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300 mb-4" data-ref="https://www.youtube.com/watch?v=WwkfH0mG7Hc|72">Animación de Cientos de Personajes</h4>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Uno de los desafíos más complicados de rendimiento en Unity es renderizar cientos o miles de personajes animados sin sobrecalentar el sistema, requiriendo técnicas avanzadas de optimización.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300 mb-4" data-ref="https://www.youtube.com/watch?v=cK7VCr5sb2g|74">Combinación de Mallas con Skin</h4>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Usando Mesh Baker Pro, se puede combinar múltiples renderizadores de malla con skin para que usen un solo rig/esqueleto y malla combinada, reduciendo la sobrecarga de dibujo.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300 mb-4" data-ref="https://discussions.unity.com/t/mobile-blend-shape-performance/825346|86">Rendimiento en Móviles</h4>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Actualmente desarrollando un juego móvil en el cual se planea usar una variedad de formas de mezcla para controlar las expresiones faciales del personaje, requiriendo optimización cuidadosa.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Integración y Animación Section -->
+    <section id="integracion" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Integración y Control de Animación
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.facebook.com/groups/IndieGameDevs/posts/10157773113466573/|81">
+              Máquinas de Estado Completas
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Usar capas, subestados de animación y animaciones procedurales ayuda a organizar el control complejo de personajes en el Animator de Unity, manteniendo el sistema manejable y escalable.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.youtube.com/watch?v=YNKzROgB1Hg|82">
+                <i data-lucide="lightbulb" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Solución avanzada: Los desarrolladores suelen complicar demasiado la animación de personajes — usar Máquinas de Subestado en su lugar para estructuras de animación más limpias y mantenibles.
+              </p>
+            </div>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://docs.unity3d.com/2017.1/Documentation/Manual/NestedStateMachines.html|80">
+              Se puede crear una máquina de subestado haciendo clic derecho en un espacio vacío dentro de la ventana del Controlador de Animator y seleccionando Crear Máquina de Subestado desde el menú contextual que aparece.
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-accent-700 dark:text-accent-300" data-ref="https://docs.unity3d.com/2023.1/Documentation/Manual/Quickstart3DCreate.html|132">
+              Parámetros y Transiciones de Animación
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Crear Transiciones de Animator que especifiquen condiciones (basadas en parámetros) para cuándo un Estado debería cambiar y cuánto tiempo debería tomar la transición entre estados.
+            </p>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300 mb-4" data-ref="https://docs.unity3d.com/6000.5/Documentation/Manual/AnimationParameters.html|229">Parámetros de Animación</h4>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Los Parámetros de Animación son variables definidas dentro de un Controlador de Animator que se pueden acceder y asignar valores desde scripts, permitiendo control dinámico de animaciones.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300 mb-4" data-ref="https://docs.unity3d.com/2022.2/Documentation/Manual/class-BlendTree.html|129">Árboles de Mezcla</h4>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Usar Árboles de Mezcla para mezclar continuamente animaciones entre sus hijos. Se pueden crear árboles de mezcla 1D o 2D para control preciso de transiciones.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-blend-heading">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="shuffle" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Tipos de Árboles de Mezcla</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-blend-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-blend-heading">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/6000.5/Documentation/Manual/class-BlendTree.html|228">
+                  Para empezar a trabajar con un nuevo Árbol de Mezcla, hacer clic derecho en un espacio vacío en la vista del Controlador de Animator y seleccionar Crear Estado &gt; Desde Nuevo Árbol de Mezcla.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/6000.4/Documentation/Manual/BlendTree-DirectBlending.html|231">
+                  Usar un Árbol de Mezcla Directa para mapear parámetros de animator al peso de un hijo de Árbol de Mezcla. Esto es útil cuando se quiere control exacto sobre mezclar animaciones.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/6000.5/Documentation/Manual/BlendTree-2DBlending.html|232">
+                  Este tipo de árbol de mezcla permite controlar el peso. Después de configurar el Tipo de Mezcla, lo primero que se necesita es seleccionar los dos Parámetros de Animación usados para controlar la transición.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-cinemachine-heading">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="video" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Cinemachine y Cámara Controlada por Estados</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-cinemachine-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-cinemachine-heading">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://medium.com/@foster_sawyer2/unity-cinemachine-state-driven-camera-b0e9ee5c744b|226">
+                  Una Cámara Controlada por Estados es una cámara virtual que cambia la cámara que está usando o estado dependiendo del estado de animación del personaje, sincronizando la cámara con la acción.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/Packages/com.unity.cinemachine@2.2/manual/CinemachineStateDrivenCamera.html|227">
+                  El componente Cinemachine State-Driven Camera activa una Cámara Virtual hija cuando un objetivo de animación cambia de estados, proporcionando control dinámico de la cámara basado en animaciones.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-audio-heading">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="volume-2" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Sistema de Audio y Mezcladores</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-audio-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-audio-heading">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/6000.6/Documentation/Manual/AudioMixerOverview.html|130">
+                  Las Instantáneas capturan el estado de cada configuración de parámetro en un Mezclador de Audio, y se pueden transicionar entre ellas en tiempo de ejecución para controlar dinámicamente el audio.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/560/Documentation/Manual/AudioMixerOverview.html|131">
+                  Las Instantáneas capturan el estado de todas las configuraciones de parámetro dentro de un AudioMixer, y se pueden transicionar entre ellas en tiempo de ejecución para controlar el estado del audio.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conclusión Section -->
+    <section id="conclusion" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-center text-primary-700 dark:text-primary-300">
+          Conclusión y Consideraciones Finales
+        </h2>
+
+        <div class="space-y-8">
+          <div class="card-interactive p-8 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+            <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300 mb-4">
+              Resumen del Pipeline Completo
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4" data-ref="https://www.reddit.com/r/gamedev/comments/1urrb6b/art_pipeline_3d_character_production_pipeline_1/|96">
+              El proceso básico para producción de personajes 3D incluye: Diseño Conceptual, Creación de Hoja de Personaje, Modelado, Desenvolver UVs, Texturizado, Rigging y Animación, proporcionando una estructura clara para el desarrollo.
+            </p>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://fgfactory.com/optimize-game-development-pipeline-with-ai|5">
+              Aprender a diseñar un personaje de juego 3D desde el concepto hasta el modelo final, incluyendo arte conceptual, modelado, mapeo UV, texturizado y optimización, asegurando que cada paso esté alineado con los objetivos del proyecto.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <i data-lucide="shield-check" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300" data-ref="https://80.lv/articles/unveiling-the-pipeline-behind-aaa-quality-indie-game-characters|4">Casos de Estudio AAA</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Casos de estudio del mundo real que muestran pipelines de personajes optimizados para Unreal Engine y Unity, desde creadores solos hasta pequeños estudios, demostrando enfoques prácticos para lograr calidad AAA.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <i data-lucide="brain" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.linkedin.com/pulse/neural-npcs-ai-personalities-unity-complete-game-developers-2vipf|6">PNJ Neuronales</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Los PNJ neuronales son personajes no jugables impulsados por redes neuronales — sistemas computacionales inspirados en la estructura del cerebro humano, proporcionando comportamientos más realistas y adaptables.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <i data-lucide="users" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                <h4 class="text-lg font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.snippets3d.com/blog/scripted-characters-vs-autonomous-npcs-unity|1">Arquitectura de Personajes</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Un marco práctico para elegir entre actuaciones controladas, PNJ autónomos o una arquitectura híbrida para experiencias guiadas por personajes en Unity, adaptándose a las necesidades específicas del proyecto.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <i data-lucide="sparkles" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300" data-ref="https://dl.acm.org/doi/full/10.1145/3662003|91">Integración de IA</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Presentación integral del proceso de integración del modelo de lenguaje grande GPT-3.5 de OpenAI en Unity 3D para mejorar personajes no jugables, demostrando capacidades avanzadas de IA en juegos.
+              </p>
+            </div>
+          </div>
+
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.reallusion.com/auto-setup/unity/default.html|159">
+              <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Flujo de Trabajo Integrado: El pipeline de Unity de Reallusion conecta tres herramientas de producción — Character Creator para personajes 3D, iClone para animación y captura de movimiento, y ActorCore para personajes de baja poligonalidad, proporcionando una solución completa.
+            </p>
+          </div>
+
+          <div class="card-interactive p-8 bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 rounded-xl shadow-md border border-primary-200 dark:border-primary-700">
+            <h3 class="text-2xl font-bold text-primary-700 dark:text-primary-300 mb-4">
+              Consideraciones Estratégicas
+            </h3>
+            <div class="space-y-4">
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.gamedeveloper.com/game-platforms/better-ways-to-design-fat-characters-in-games|152">
+                Los desarrolladores de todos los orígenes discuten sus procesos para incluir personajes gordos y expandir la diversidad corporal en sus juegos, destacando la importancia de la representación inclusiva en el diseño de personajes.
+              </p>
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.reddit.com/r/gamingsuggestions/comments/1asmuw0/story_driven_games_where_the_choices_throughout/|148">
+                Los juegos guiados por historias donde las elecciones a lo largo del juego influyen en el resultado final ofrecen alta rejugabilidad, con nuevas opciones que se abren después de cada partida, demostrando el poder del diseño narrativo.
+              </p>
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.quora.com/What-makes-a-good-RPG-game|154">
+                Un RPG es un juego de rol, significando todo lo que rodea a los personajes que se interpretan. Un RPG exitoso incluye una historia convincente, sistema de batalla y sistemas de desarrollo que involucran al jugador.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-primary-900 dark:bg-gray-950 text-gray-300 py-12">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center">
+        <h3 class="text-2xl font-bold text-primary-300 dark:text-primary-400 mb-4">
+          Pipeline de Personajes Unity 3D
+        </h3>
+        <p class="text-gray-400 dark:text-gray-500 mb-6">
+          Documentación exhaustiva del flujo completo de creación de personajes para videojuegos
+        </p>
+        <div class="flex justify-center space-x-6 mb-6">
+          <div class="text-center">
+            <p class="text-sm text-gray-500 dark:text-gray-600">Etapa Conceptual</p>
+            <p class="text-lg font-semibold text-primary-300 dark:text-primary-400">✓</p>
+          </div>
+          <div class="text-center">
+            <p class="text-sm text-gray-500 dark:text-gray-600">Modelado</p>
+            <p class="text-lg font-semibold text-primary-300 dark:text-primary-400">✓</p>
+          </div>
+          <div class="text-center">
+            <p class="text-sm text-gray-500 dark:text-gray-600">Texturizado</p>
+            <p class="text-lg font-semibold text-primary-300 dark:text-primary-400">✓</p>
+          </div>
+          <div class="text-center">
+            <p class="text-sm text-gray-500 dark:text-gray-600">Rigging</p>
+            <p class="text-lg font-semibold text-primary-300 dark:text-primary-400">✓</p>
+          </div>
+          <div class="text-center">
+            <p class="text-sm text-gray-500 dark:text-gray-600">Integración</p>
+            <p class="text-lg font-semibold text-primary-300 dark:text-primary-400">✓</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-600">
+          © 2024 Documentación de Pipeline de Personajes Unity 3D. Todos los derechos reservados.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Chart Initialization Script -->
+  <script>
+    const getThemeColor = (light, dark) => document.body.classList.contains('dark') ? dark : light;
+    let charts = {};
+    
+    const getColors = () => ({
+      primary: getThemeColor('#1a73b3', '#60a5fa'),
+      accent: getThemeColor('#8b5cf6', '#a78bfa'),
+      text: getThemeColor('#374151', '#e5e7eb'),
+      grid: getThemeColor('#e5e7eb', '#374151')
+    });
+    
+    const updateCharts = () => {
+      const { text, grid } = getColors();
+      
+      Object.values(charts).forEach(chart => {
+        if (chart?.options) {
+          if (chart.options.plugins?.legend?.labels) chart.options.plugins.legend.labels.color = text;
+          if (chart.options.plugins?.title) chart.options.plugins.title.color = text;
+          if (chart.options.scales) {
+            Object.values(chart.options.scales).forEach(scale => {
+              if (scale.ticks) scale.ticks.color = text;
+              if (scale.grid) scale.grid.color = grid;
+              if (scale.pointLabels) scale.pointLabels.color = text;
+              if (scale.title) scale.title.color = text;
+            });
+          }
+          chart.update('none');
+        }
+      });
+    };
+
+    // Data from https://www.facebook.com/groups/290530545401744/posts/778008253320635/|55, https://discussions.unity.com/t/polycount-for-characters-in-mobile-fighting-game-doubt/690499|56, https://discussions.unity.com/t/recommendation-of-count-of-polygons-tris-for-mobile-game/691518|58
+    const polyCountData = {
+      labels: ['Principal', 'Secundario', 'Móvil', 'Móvil Bajo'],
+      datasets: [{
+        label: 'Polígonos (millones)',
+        data: [0.15, 0.06, 0.015, 0.007], // Converted from raw numbers for better visualization
+        backgroundColor: ['#1a73b3', '#60a5fa', '#8b5cf6', '#a78bfa']
+      }]
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      requestAnimationFrame(() => {
+        const { primary, accent, text, grid } = getColors();
+
+        if (document.getElementById('polyCountChart')) {
+          charts.polyCount = new Chart(document.getElementById('polyCountChart'), {
+            type: 'bar',
+            data: polyCountData,
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                title: {
+                  display: true,
+                  text: 'Recuentos de Polígonos Recomendados',
+                  color: text,
+                  font: { size: 14, weight: 'bold' }
+                }
+              },
+              scales: {
+                x: { ticks: { color: text }, grid: { color: grid } },
+                y: { 
+                  beginAtZero: true, 
+                  ticks: { 
+                    color: text,
+                    callback: function(value) {
+                      return value + 'M';
+                    }
+                  }, 
+                  grid: { color: grid },
+                  title: {
+                    display: true,
+                    text: 'Polígonos',
+                    color: text
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        updateCharts();
+        initCitationSystem();
+        lucide.createIcons();
+        
+        AOS.init({
+          duration: 800,
+          once: true,
+          offset: 100
+        });
+
+        // Smooth scrolling with offset for fixed header
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+          anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+              const headerOffset = 80;
+              const elementPosition = target.getBoundingClientRect().top;
+              const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+              
+              window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+              });
+            }
+          });
+        });
+
+        // Progress bar
+        const progressBar = document.getElementById('progressBar');
+        const updateProgressBar = () => {
+          const scrollTop = window.scrollY;
+          const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const scrollPercent = (scrollTop / docHeight) * 100;
+          progressBar.style.width = scrollPercent + '%';
+        };
+        
+        window.addEventListener('scroll', updateProgressBar);
+        updateProgressBar();
+
+        // Theme change listener for charts
+        const observer = new MutationObserver(updateCharts);
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      });
+    });
+  </script>
+</body>
+</html>

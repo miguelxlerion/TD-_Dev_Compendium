@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipeline Completo de Modelado de Personajes para Unity 3D</title>
+
+  <!-- Essential CDN Libraries -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: 'hsl(220, 70%, 95%)',
+              100: 'hsl(220, 70%, 85%)',
+              200: 'hsl(220, 70%, 75%)',
+              300: 'hsl(220, 70%, 65%)',
+              400: 'hsl(220, 70%, 55%)',
+              500: 'hsl(220, 70%, 40%)',
+              600: 'hsl(220, 70%, 35%)',
+              700: 'hsl(220, 70%, 25%)',
+              800: 'hsl(220, 70%, 15%)',
+              900: 'hsl(220, 70%, 10%)'
+            },
+            accent: {
+              50: 'hsl(30, 85%, 95%)',
+              100: 'hsl(30, 85%, 85%)',
+              200: 'hsl(30, 85%, 75%)',
+              300: 'hsl(30, 85%, 65%)',
+              400: 'hsl(30, 85%, 60%)',
+              500: 'hsl(30, 85%, 55%)',
+              600: 'hsl(30, 85%, 50%)',
+              700: 'hsl(30, 85%, 40%)',
+              800: 'hsl(30, 85%, 30%)',
+              900: 'hsl(30, 85%, 20%)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+
+  <!-- Preline UI Components -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.js"></script>
+
+  <!-- Micro-interactions & Custom Styles -->
+  <style>
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+    .btn-interactive {
+      transition: all 0.2s ease-out;
+    }
+    
+    .btn-interactive:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn-interactive:active {
+      transform: scale(0.95);
+    }
+
+    .card-interactive {
+      transition: all 0.3s ease-out;
+      border: 1px solid transparent;
+      --border-lightness: 40%;
+    }
+
+    .dark .card-interactive {
+      --border-lightness: 60%;
+    }
+
+    .card-interactive:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      filter: brightness(0.98);
+    }
+    
+    /* Primary colored cards */
+    .card-interactive[class*="primary"]:hover,
+    .card-interactive[class*="white"]:hover,
+    .card-interactive[class*="gray-"]:hover {
+      border-color: hsl(220, 70%, var(--border-lightness));
+    }
+    
+    /* Accent colored cards */
+    .card-interactive[class*="accent"]:hover {
+      border-color: hsl(30, 85%, var(--border-lightness));
+    }
+
+    .dark .card-interactive:hover {
+      filter: brightness(1.05);
+    }
+  </style>
+
+  <!-- Dark Mode Toggle Script -->
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      document.getElementById('sunIcon').style.display = isDark ? 'block' : 'none';
+      document.getElementById('moonIcon').style.display = isDark ? 'none' : 'block';
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+  <!-- Citation System Script -->
+  <script>
+    function initCitationSystem() {
+      let i = 1, map = new Map();
+      document.querySelectorAll('[data-ref]').forEach(el => {
+        if (el.dataset.citationProcessed) return;
+        const raw = (el.getAttribute('data-ref')||'').trim();
+        if (!raw) return;
+
+        const parts = raw.split('|');
+        const url = parts[0].trim();
+        const idx = (parts[1]||'').trim() || map.get(raw) || (map.set(raw, String(i)), String(i++));
+
+        if (!el.textContent || !el.textContent.trim()) { el.dataset.citationProcessed = 'true'; return; }
+
+        const btn = document.createElement('sup'); btn.textContent = String(idx);
+        Object.assign(btn.style, { fontSize:'8px', color:'#fff', cursor:'pointer', top: '1px', fontWeight:'bold', backgroundColor:'#0284c7', borderRadius:'50%', transition:'all .15s', userSelect:'none', minWidth:'19px', height:'19px', marginLeft:'6px', display:'inline-flex', alignItems:'center', justifyContent:'center', boxShadow:'0 1px 3px rgba(0,0,0,.2)', lineHeight:'1'});
+        btn.addEventListener('mouseenter', ()=> Object.assign(btn.style, { backgroundColor:'#0369a1', transform:'scale(1.12)' }));
+        btn.addEventListener('mouseleave', ()=> Object.assign(btn.style, { backgroundColor:'#0284c7', transform:'scale(1)' }));
+        btn.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); window.open(url, '_blank'); });
+
+        el.appendChild(btn); el.dataset.citationProcessed = 'true';
+      });
+    }
+  </script>
+
+  <!-- Progress Bar -->
+  <div class="fixed top-0 left-0 h-1 bg-primary-500 dark:bg-primary-400 z-[60] transition-all duration-300 ease-out" id="progressBar"></div>
+
+  <!-- Floating Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur bg-gray-50/90 dark:bg-gray-900/90 border-b border-primary-500/20 dark:border-primary-600/20">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl md:text-2xl font-bold text-primary-700 dark:text-primary-300">Pipeline de Personajes AAA en Unity 3D</h1>
+        
+        <nav class="hidden md:flex items-center space-x-4">
+          <a href="#inicio" class="btn-interactive px-3 py-1 rounded-lg text-sm text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-800 transition-all">Inicio</a>
+          <a href="#modelado" class="btn-interactive px-3 py-1 rounded-lg text-sm text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-800 transition-all">Modelado</a>
+          <a href="#texturizado" class="btn-interactive px-3 py-1 rounded-lg text-sm text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-800 transition-all">Texturizado</a>
+          <a href="#rigging" class="btn-interactive px-3 py-1 rounded-lg text-sm text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-800 transition-all">Rigging</a>
+          <a href="#optimizacion" class="btn-interactive px-3 py-1 rounded-lg text-sm text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-800 transition-all">Optimización</a>
+          <a href="#renderizado" class="btn-interactive px-3 py-1 rounded-lg text-sm text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-800 transition-all">Renderizado</a>
+          <a href="#conclusion" class="btn-interactive px-3 py-1 rounded-lg text-sm text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-800 transition-all">Conclusión</a>
+        </nav>
+
+        <button onclick="toggleDarkMode()" class="btn-interactive p-2 rounded-lg bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 transition-all">
+          <i data-lucide="sun" id="sunIcon" class="w-5 h-5" style="display:none;"></i>
+          <i data-lucide="moon" id="moonIcon" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="min-h-screen pt-24 pb-16">
+    <!-- Hero Section -->
+    <section id="inicio" class="py-20 bg-primary-50/50 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl md:text-5xl font-bold mb-6 text-primary-700 dark:text-primary-300">
+            Pipeline Completo de Modelado de Personajes para Videojuegos en Unity 3D
+          </h2>
+          <p class="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
+            Una guía exhaustiva sobre el flujo de trabajo integral utilizado por estudios AAA para crear personajes de alta calidad en Unity 3D, cubriendo todas las etapas desde el modelado inicial hasta la integración final en el motor de juego.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 items-center mt-12">
+          <div class="space-y-6">
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.youtube.com/watch?v=gI40VEkgstQ|183">
+              La creación de personajes AAA implica un proceso complejo que comienza con la concepción artística y continúa a través de múltiples etapas técnicas especializadas. Este pipeline garantiza que los personajes sean visualmente impresionantes mientras mantienen un rendimiento óptimo en tiempo real.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://medium.com/@Jamesroha/evolving-3d-model-topology-practices-in-modern-game-development-d81c47ecde3c|77">
+                <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Hallazgo clave: Los flujos de trabajo tradicionales han evolucionado hacia prácticas más sofisticadas que combinan tecnología avanzada con metodologías de producción eficientes.
+              </p>
+            </div>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://threedium.io/3d-model/game-ready|82">
+              La topología limpia sigue patrones predecibles basados en cuadriláteros que se deforman de manera predecible durante la animación, evitando triángulos y polígonos de más de cuatro lados excepto donde sea absolutamente necesario.
+            </p>
+          </div>
+
+          <img
+            src="https://cdn.qwenlm.ai/8a09e309-5904-448e-80a9-e34fccdf6992/5370f3e6-dfde-4f05-86b0-4e55739596ff/758b5370-4b59-4921-815a-3b5f252bb368.png?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZV91c2VyX2lkIjoiOGEwOWUzMDktNTkwNC00NDhlLTgwYTktZTM0ZmNjZGY2OTkyIiwicmVzb3VyY2VfaWQiOiI1MzcwZjNlNi1kZmRlLTRmMDUtODZiMC00ZTU1NzM5NTk2ZmYiLCJyZXNvdXJjZV9jaGF0X2lkIjpudWxsfQ.jGZnXXTrqHZuBa-kHw7BmKkOQt6Lszkcs1g2e5c463g"
+            alt="Ilustración técnica de un personaje 3D en proceso de creación mostrando las principales etapas del pipeline. La imagen presenta una composición dividida en cuatro secciones verticales conectadas por flechas blancas: 1) En la primera sección, un bloque de formas geométricas simples en color gris metálico (#808080) representa el bloqueo inicial, con líneas de construcción visibles en azul claro (#ADD8E6). 2) La segunda sección muestra un modelo de alta resolución detallado en color blanco (#FFFFFF) con superficies suaves y curvas definidas, rodeado por pequeñas etiquetas de texto en color azul primario (#1a5490) indicando 'Alta Poli'. 3) La tercera sección presenta un modelo de baja resolución simplificado en color gris oscuro (#404040) con malla visible en líneas negras finas, acompañado por etiquetas en color naranja (#ff8c42) marcando 'Baja Poli'. 4) La cuarta sección muestra un personaje completamente texturizado y coloreado en tonos naturales (piel #D2B48C, ropa #4169E1), con sombreado realista y luces suaves. El fondo es un degradado suave de gris claro (#F5F5F5) a blanco (#FFFFFF). Todas las secciones están conectadas por flechas blancas con bordes azules (#1a5490) que indican el flujo de trabajo de izquierda a derecha. El diseño utiliza colores del esquema primario azul (#1a5490) y secundario naranja (#ff8c42) consistentes con la paleta del sitio web."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Modelado Section -->
+    <section id="modelado" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Modelado de Personajes: Alta y Baja Resolución
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="scissors" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-primary-700 dark:text-primary-300 mb-3" data-ref="https://www.youtube.com/watch?v=YDu9pYMkkSM|2">Workflow de Alta a Baja Poli</h3>
+                <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                  El workflow de alta a baja poli es fundamental para la optimización de modelos 3D en tiempo real. Esta técnica permite a los artistas mantener detalles visuales mientras reducen la carga computacional, ideal para aplicaciones de juegos y simulaciones.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="layers" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-accent-700 dark:text-accent-300 mb-3" data-ref="https://www.sloyd.ai/blog/manual-retopology-for-sculpted-models-step-by-step-guide|8">Retopología Manual</h3>
+                <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                  Guía paso a paso de retopología manual: convierte esculturas de alta poli en mallas limpias y listas para animación con consejos prácticos de topología.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6 mb-12">
+          <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300">Topología para Personajes de Juegos</h3>
+          
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://thundercloud-studio.com/article/topology-for-low-poly-game-characters/|38">
+            La topología para personajes de baja poli en juegos requiere bucles de aristas para articulaciones, permitiendo animación más rápida y deformación estable durante la animación en tiempo real.
+          </p>
+
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.artstation.com/blogs/thundercloudstudio/y1Nyv/topology-for-low-poly-game-characters-essential-tips-and-tricks-part-1|41">
+              <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Beneficio clave: Una topología bien construida facilita el rigging y el skinning de modelos, conduciendo a animaciones más suaves y movimientos más naturales.
+            </p>
+          </div>
+
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.reddit.com/r/3Dmodeling/comments/1rnm7dr/reis_this_good_a_topology_and_polycount_for/|3">
+            El flujo de aristas faciales está bastante fragmentado. Podría funcionar si la animación facial es muy limitada, pero también podría optimizarse un poco más.
+          </p>
+
+          <div class="grid md:grid-cols-3 gap-6 mt-8">
+            <div class="card-interactive p-5 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="triangle" class="w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.facebook.com/groups/290530545401744/posts/1115431276244996/|336">Cuadriláteros vs N-Gon</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                La topología cuadrilátera es mejor que N-Gon para modelado de juegos. Los cuadriláteros son generalmente preferidos para la mayoría de tareas de modelado, especialmente si planeas subdividir la malla o animarla.
+              </p>
+            </div>
+
+            <div class="card-interactive p-5 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="git-branch" class="w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <h4 class="font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.reddit.com/r/3Dmodeling/comments/1hu2tps/breakdown_of_the_aaa_pipeline_for_gameready/|78">Regla de Oro</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Cada arista debe tener un propósito: definir el silueta del modelo, contribuir al sombreado, servir a la animación, o apoyar el flujo de aristas.
+              </p>
+            </div>
+
+            <div class="card-interactive p-5 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="target" class="w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.thegnomonworkshop.com/workshops/character-asset-creation-for-cinematics-vol-1|80">Calidad de Topología</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                El énfasis en mantener cuadriláteros, distribución uniforme y flujo de aristas adecuado garantiza que las prendas finales se deformen correctamente durante el rigging.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-modelado-1">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="zap" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Optimización de Modelos</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-modelado-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-modelado-1">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/groups/3dmodelingandanimation/posts/10165026151550368/|7">
+                  Este modelo fue creado usando un workflow de alta poli a baja poli, con topología optimizada para aplicaciones en tiempo real como juegos y simulaciones.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.researchgate.net/publication/316435393_High_poly_to_low_poly_workflows_for_real-time_rendering|10">
+                  Este documento describe un workflow digital que permite a los artistas agregar detalle visual a modelos 3D mientras se adhieren al presupuesto estricto de polígonos requerido para aplicaciones en tiempo real.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://polycount.com/discussion/199226/currently-teaching-myself-the-low-poly-high-poly-workflow-i-could-use-some-advice|9">
+                  Para el modelo de alta poli trabajo con Maya y ZBrush. Después de completar el modelo de alta poli, tomo el modelo de bloqueo y reduzco la geometría tanto como sea posible.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-modelado-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="box" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Conteo de Polígonos Estándar</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-modelado-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-modelado-2">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/groups/290530545401744/posts/854639152324211/|40">
+                  ¿Puedo preguntar cuál es el conteo de polígonos máximo óptimo para un modelo de personaje de juego AAA? Porque tengo algunos problemas al respecto y quiero saberlo.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/3Dmodeling/comments/1ga1zbo/how_much_can_the_polycount_of_a_aaa_game/|43">
+                  Soy un artista de personajes autodidacta. Busqué esta respuesta en internet y el post que vi decía que
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-sm">300 mil</span>
+                  era el máximo para un personaje de cuerpo completo.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/groups/290530545401744/posts/776943630093764/|50">
+                  Las personas dicen que los conteos de polígonos más altos van desde
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">100 millones</span>
+                  para personajes cinematográficos y de juegos hasta
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">150 mil</span>
+                  para juegos AAA y
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">30 mil</span>
+                  para móviles.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Texturizado Section -->
+    <section id="texturizado" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Texturizado y Baking de Mapas
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 items-center mb-12">
+          <img
+            src="https://cdn.qwenlm.ai/8a09e309-5904-448e-80a9-e34fccdf6992/5370f3e6-dfde-4f05-86b0-4e55739596ff/166cd554-2ddc-47b6-bf36-dc807839afe5.png?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZV91c2VyX2lkIjoiOGEwOWUzMDktNTkwNC00NDhlLTgwYTktZTM0ZmNjZGY2OTkyIiwicmVzb3VyY2VfaWQiOiI1MzcwZjNlNi1kZmRlLTRmMDUtODZiMC00ZTU1NzM5NTk2ZmYiLCJyZXNvdXJjZV9jaGF0X2lkIjpudWxsfQ.jGZnXXTrqHZuBa-kHw7BmKkOQt6Lszkcs1g2e5c463g"
+            alt="Diagrama técnico ilustrativo del proceso de baking de mapas normales mostrando tres etapas secuenciales. La composición está dividida horizontalmente en tres secciones iguales conectadas por flechas gruesas blancas con bordes azules (#1a5490). 1) Primera sección: un modelo 3D de alta resolución detallado en color blanco (#FFFFFF) con superficies complejas y múltiples detalles geométricos visibles, rodeado por líneas de construcción en azul claro (#ADD8E6). 2) Segunda sección: un modelo 3D de baja resolución simplificado en color gris oscuro (#404040) con malla visible en líneas negras finas, representando el modelo optimizado para tiempo real. 3) Tercera sección: un mapa normal generado en formato de imagen de textura en color verde oscuro (#2F4F2F) con gradientes suaves y patrones de sombreado que representan la información de superficie capturada. En el centro del diagrama, una flecha vertical gruesa en color naranja (#ff8c42) con punta hacia abajo indica el proceso de proyección de datos. El fondo es un degradado suave de gris claro (#F5F5F5) a blanco (#FFFFFF). Cada sección tiene pequeñas etiquetas de texto en color azul primario (#1a5490) indicando 'Alta Poli', 'Baja Poli' y 'Mapa Normal'. El diseño utiliza la paleta de colores principal azul (#1a5490) y secundaria naranja (#ff8c42) del sitio web."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300">Proceso de Baking</h3>
+            
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://marmoset.co/posts/toolbag-baking-tutorial/|55">
+              Para hornear un mapa normal, el detalle superficial de una malla de alta poli debe proyectarse sobre una malla de baja poli. ¿Cómo funciona la proyección?
+            </p>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://blenderartists.org/t/retopology-keeping-projecting-details-from-the-high-poly-modell-to-the-low-poly/1427780|4">
+              Primero coloque un modificador de superficie subdividida sobre el modelo de baja poli, luego use el modificador de envoltura, mientras lo ata a la forma del modelo de alta poli.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://blenderartists.org/t/issue-with-baking-high-poly-onto-low-poly/1617781|35">
+                <i data-lucide="circle-alert" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Consejo técnico: Su envoltura necesita ser exactamente igual que su modelo de baja poli, lo único diferente será su tamaño, como la posición de los vértices.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-12">
+          <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300 mb-6">Tipos de Mapas de Textura</h3>
+          
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="image" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.playtex.ai/blog/texture-maps-explained-albedo-normal-roughness-metallic-ao|31">Mapa Base Color</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Representa el color base de la superficie sin iluminación ni sombras. También conocido como mapa difuso, contiene la información de color fundamental del material.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="droplet" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.playtex.ai/blog/texture-maps-explained-albedo-normal-roughness-metallic-ao|31">Mapa de Rugosidad</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Controla qué tan rugosa o lisa es una superficie. Los valores más altos indican superficies más rugosas, mientras que los valores bajos representan superficies más lisas.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="shield" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.playtex.ai/blog/texture-maps-explained-albedo-normal-roughness-metallic-ao|31">Mapa Metálico</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Determina si una superficie es metálica o no metálica. Los valores altos indican propiedades metálicas, mientras que los valores bajos representan materiales no metálicos.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="eye" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.playtex.ai/blog/texture-maps-explained-albedo-normal-roughness-metallic-ao|31">Mapa AO (Oclusión Ambiental)</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Simula sombras en áreas donde la luz está bloqueada por objetos cercanos, agregando profundidad y realismo a las superficies.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="mountain" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.playtex.ai/blog/texture-maps-explained-albedo-normal-roughness-metallic-ao|31">Mapa de Altura</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Contiene información de elevación de superficie que puede usarse para técnicas de paralaje u otros efectos de profundidad.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="sparkles" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.playtex.ai/blog/texture-maps-explained-albedo-normal-roughness-metallic-ao|31">Mapa de Emisión</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Define áreas de la superficie que emiten luz, usado para efectos luminosos o materiales luminescentes.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-texturizado-1">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="palette" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Workflows PBR</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-texturizado-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-texturizado-1">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.adobe.com/learn/substance-3d-designer/web/the-pbr-guide-part-2|30">
+                  En esta parte, discutiremos los dos workflows más comunes, que son metal/rugosidad. Los shaders PBR de Substance para metal/rugosidad y especular/glossiness.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://normalmap.ai/learn/|27">
+                  Aprenda cómo crear rápidamente mapas normales de alta calidad y conjuntos completos de texturas PBR (Rugosidad, AO, Desplazamiento) subiendo imágenes o usando prompts de texto AI.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://discussions.unity.com/t/guide-for-using-third-party-textures/833050|29">
+                  El mapa de rugosidad necesita un poco de trabajo. Ábrelo en GIMP y selecciona Colores &gt; Invertir para cambiarlo de un mapa de rugosidad a un mapa de suavidad.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-texturizado-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="package" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Empaquetado de Texturas</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-texturizado-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-texturizado-2">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://hub.jmonkeyengine.org/t/pbr-texture-packing/41212|33">
+                  He estado jugando con los shaders PBR y noté que la textura de AO no está empaquetada con el metal y la rugosidad.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://polycount.com/discussion/211152/best-pbr-texture-compression-and-channel-layout|192">
+                  Busco la mejor configuración posible para las siguientes texturas: Albedo RGB; Opacidad; Normal RG; Altura; Emisión RGB.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://gamedev.stackexchange.com/questions/214826/can-png-format-be-used-for-alpha-channel-packing-for-urp-shader-in-unity-engine|264">
+                  En los shaders Lit y Complex Lit en la Pipeline de Renderizado Universal (URP), puedes usar una sola textura RGBA para el metal, suavidad y oclusión.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rigging Section -->
+    <section id="rigging" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Rigging y Skinning de Personajes
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300">Fundamentos del Rigging</h3>
+            
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://game-ace.com/blog/character-rigging-for-video-games/|24">
+              Rigging de personajes para videojuegos explicado: anatomía del rig, workflows 2D vs 3D, pipelines Maya y Blender, vinculación Unity y Unreal.
+            </p>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.artstation.com/magnaludumcreatives/blog/N44qL/demystifying-character-rigging-for-games|25">
+              Flexibilidad: El rig debe poder acomodar una amplia gama de poses y movimientos, sin romperse o distorsionar el modelo de personaje.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.reddit.com/r/gamedev/comments/164p1c8/what_is_the_industry_standard_for_character/|22">
+                <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Maya es prácticamente el estándar de oro en estudios AAA para rigging de personajes.
+              </p>
+            </div>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://americanmilitarycelebration.com/rigging-portfolio-game-studios/|23">
+              Cree un portafolio de rigging para estudios de juegos que le consiga entrevistas con consejos de demo reel, rigs técnicos limpios y breakdowns listos para estudios.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md h-80">
+            <canvas id="riggingChart"></canvas>
+          </div>
+        </div>
+
+        <div class="mb-12">
+          <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300 mb-6">Técnicas de Skinning</h3>
+          
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="bone" class="w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.gamedevs.org/uploads/skinning-with-dual-quaternions.pdf|15">Skinning con Cuaterniones Duales</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                El blending de cuaterniones duales se puede calcular elegantemente en un shader de vértice con complejidad comparable al blending lineal estándar.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="activity" class="w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://discussions.unity.com/t/dual-quaternion-skinning-for-unity/680558|11">Implementación en Unity</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Doy posiciones de vértices, índices de huesos, pesos de huesos y cuaterniones en texturas, los envío a la GPU para cálculo y recupero el resultado.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-rigging-1">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="face" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Rigging Facial</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-rigging-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-rigging-1">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://blenderartists.org/t/facial-rig-for-videogames/1444951|169">
+                  Los huesos son más rápidos, mejores para juegos. Las shapekeys son más lentas y más intensivas en recursos pero más detalladas, mejores para animación.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://discussions.unity.com/t/character-animation-workflow/672975|171">
+                  Las blendshapes son manipulación de vértices simple mientras que las animaciones controlan los huesos. Si su rig tiene huesos faciales obviamente puede usarlos.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://sol-g-brennan.medium.com/rigging-tips-methods-for-extra-character-deformation-in-game-dev-e4c0e89e7b00|173">
+                  Los mejores rigs tienen blendshapes y huesos auxiliares trabajando juntos para lograr la mejor deformación.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-rigging-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="repeat" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Retargeting de Animación</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-rigging-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-rigging-2">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/6000.5/Documentation/Manual/Retargeting.html|44">
+                  Cada modelo humanoide debe usar el tipo de animación humanoide y tener un Avatar configurado. Un Avatar configurado proporciona una jerarquía y nombres de huesos estándar.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://mocaponline.com/blogs/mocap-news/unity-motion-capture-animation-guide?srsltid=AfmBOopRkWGFpiOmWn7cfn1L-K08Xg2tRj0nWnZAu_A9rc55HDiG4bwR|47">
+                  Esta guía cubre todo el pipeline: importar archivos FBX de captura de movimiento, configurar el rig humanoide, configurar Controladores de Animador, Animador.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://ktcg.art/2019/07/25/character-setup-for-unity-rigging-animation-and-importing-considerations/|48">
+                  Además, el personaje desde el cual está retargeting también necesita tener una definición de Avatar Humanoide.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Optimización Section -->
+    <section id="optimizacion" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Optimización de Rendimiento y Niveles de Detalle
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 items-center mb-12">
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300">Niveles de Detalle (LOD)</h3>
+            
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://discussions.unity.com/t/3d-open-world-performance-where-do-i-even-start/1682649|67">
+              Lo más importante es asegurar que haga LODs para cada modelo que tenga en su mundo. Al menos tres tipos: resolución completa, resolución baja y sin malla.
+            </p>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.simplygon.com/features/unity|64">
+              Generar automáticamente mallas LOD para modelos de superficie dura y orgánicos. LODs de Personajes: Preservar calidad de personaje con skinning intacto. Reducción de Huesos.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.simplygon.com/blog?category=Unity|62">
+                <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Simplygon genera automáticamente LODs para poblar el componente LODGroup de Unity.
+              </p>
+            </div>
+
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://discussions.unity.com/t/creating-lod-group-for-character/52258|100">
+              Importe a Unity, suelte un Grupo LOD sobre la base del modelo encima del rig. Arrastre las capas separadas del modelo en cada LOD diferente. Y debería estar listo.
+            </p>
+          </div>
+
+          <img
+            src="https://cdn.qwenlm.ai/8a09e309-5904-448e-80a9-e34fccdf6992/5370f3e6-dfde-4f05-86b0-4e55739596ff/c7f6ed65-0b4e-458e-9a68-5e4ea2af8fa1.png?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZV91c2VyX2lkIjoiOGEwOWUzMDktNTkwNC00NDhlLTgwYTktZTM0ZmNjZGY2OTkyIiwicmVzb3VyY2VfaWQiOiI1MzcwZjNlNi1kZmRlLTRmMDUtODZiMC00ZTU1NzM5NTk2ZmYiLCJyZXNvdXJjZV9jaGF0X2lkIjpudWxsfQ.jGZnXXTrqHZuBa-kHw7BmKkOQt6Lszkcs1g2e5c463g"
+            alt="Diagrama técnico de niveles de detalle (LOD) mostrando un personaje 3D en tres etapas de optimización. La composición está dividida verticalmente en tres secciones iguales conectadas por flechas horizontales gruesas en color naranja (#ff8c42). 1) Primera sección superior: un personaje 3D de alta resolución detallado en color azul primario (#1a5490) con superficies suaves, texturas detalladas y sombreado realista, representando el nivel de detalle completo. 2) Segunda sección central: un personaje 3D de resolución media simplificado en color gris medio (#808080) con menos polígonos visibles y texturas menos detalladas, mostrando malla simplificada en líneas finas. 3) Tercera sección inferior: un personaje 3D de baja resolución muy simplificado en color gris oscuro (#404040) con geometría mínima y sin texturas visibles, representando el nivel de detalle más bajo. En el lado derecho de cada sección, pequeños iconos circulares en color naranja (#ff8c42) con números '1', '2', '3' indican el orden de los niveles de detalle. El fondo es un degradado suave de gris claro (#F5F5F5) a blanco (#FFFFFF). Debajo del diagrama, una línea de texto en color azul primario (#1a5490) dice 'LOD 1 - LOD 2 - LOD 3'. El diseño utiliza la paleta de colores principal azul (#1a5490) y secundaria naranja (#ff8c42) del sitio web."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+
+        <div class="mb-12">
+          <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300 mb-6">Resoluciones de Textura Estándar</h3>
+          
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="monitor" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://threedium.io/3d-model/texture-materials|234">Recomendación de Industria</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Las prácticas estándar de la industria recomiendan
+                <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">2048x2048 píxeles</span>
+                como la resolución común de textura para activos de alta calidad, proporcionando suficiente detalle mientras mantiene un rendimiento aceptable.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="smartphone" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://discussions.unity.com/t/3d-model-textures-requirements-for-mobile-game/911001|97">Ejemplo Móvil</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Aquí comparto los valores del inspector del material del modelo de baloncesto, un total de
+                <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-sm">3 texturas con resolución 2048x2048</span>
+                usadas para Base, Metalic y Mapa Normal.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-opt-1">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="zap" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Mejoras de Rendimiento</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-opt-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-opt-1">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://discussions.unity.com/t/best-practices-for-performance-with-character/910649|243">
+                  Regla general: cuanto menos mallas y menos materiales use, mejor para el rendimiento. Ahora, hay algo llamado batching, que funciona de manera diferente.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/6000.2/Documentation/Manual/ModelingOptimizedCharacters.html|248">
+                  Minimizar el conteo de polígonos. Usar tantos Materiales como sea posible. Usar un solo Renderizador de Malla con Skin. Usar tantos huesos como sea posible. Mantener adelante e inverso.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/fb-answers/unity-mesh-optimization-best-practices/|250">
+                  Para móviles, mantenga objetos individuales alrededor de
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">2k-5k polígonos</span>
+                  y siempre profile en su dispositivo objetivo antes de optimizar.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-opt-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="layers" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">UV Mapping y Empaquetado</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-opt-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-opt-2">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://unity.com/how-to/mobile-game-optimization-tips-part-1|129">
+                  Es buena práctica mantener las islas UV, las unidades individuales de una textura desplegada, lo más rectas posible para facilitar el empaquetado de islas UV.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/Substance3D/comments/1grh7hz/what_are_some_tips_for_uv_mappingtexturing_that/|319">
+                  Una textura eficientemente empaquetada de 1K puede contener más información que un layout UV descuidado en una textura de 4K. Así que intente repackear sus UVs antes de aumentar la resolución.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://discussions.unity.com/t/how-to-make-uv-maps/526825|128">
+                  Aquí hay un lugar donde puede comenzar. Desenvuelva su modelo en su paquete de modelado. Use las herramientas de pintura de su paquete para pintar un mapa de color básico.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Renderizado Section -->
+    <section id="renderizado" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Configuración Final en Unity 3D
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="settings" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-primary-700 dark:text-primary-300 mb-3" data-ref="https://aitextured.com/articles/guides/unity-urp-pbr-texture-import-settings/|28">Configuración de Importación PBR</h3>
+                <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                  Configurar importaciones de texturas PBR para Unity URP, incluyendo albedo, mapas normales, metálico-suavidad, AO y compresión de texturas.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="workflow" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-accent-700 dark:text-accent-300 mb-3" data-ref="https://unity.com/blog/games/advanced-tips-for-character-art-production-in-unity|83">Exportación de Modelos</h3>
+                <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                  Durante el rigging del modelo, es buena práctica exportar archivos uno por uno en formato .obj y luego importarlos en el software de animación para preservar el modelo.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-12">
+          <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300 mb-6">Pipelines de Renderizado</h3>
+          
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="cpu" class="w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://docs.unity3d.com/Manual/choose-a-render-pipeline.html|134">URP (Universal Render Pipeline)</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Diferentes pipelines tienen capacidades diferentes y funcionan de manera diferente, por lo que funcionan mejor para juegos, aplicaciones y plataformas diferentes.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="zap" class="w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://docs.unity3d.com/Packages/com.unity.render-pipelines.high-definition@latest/|275">HDRP (High Definition Render Pipeline)</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                HDRP es una Pipeline de Renderizado Scriptable de alta fidelidad construida por Unity para apuntar a plataformas modernas compatibles con Compute Shader.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="layers" class="w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://unity.com/features/graphics|221">Shader Graph</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Construya gráficos hermosos y escalables con el motor gráfico de Unity. Use URP y HDRP con Shader Graph y VFX Graph para renderizado en tiempo real.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-render-1">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="file-text" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Importación de Modelos</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-render-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-render-1">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/6000.5/Documentation/Manual/FBXImporter-Model.html|118">
+                  Importa la configuración FBX que define si los componentes MeshRenderer están habilitados (visibles). Para más información, consulte Importar propiedades de visibilidad.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/560/Documentation/Manual/FBXImporter-Rig.html|121">
+                  Los Renderizadores de Malla con Skin del personaje usarán directamente el esqueleto interno de Mecanim. Esta opción mejora el rendimiento de los personajes animados.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/530/Documentation/Manual/HOWTO-ImportObjectBlender.html|127">
+                  Unity importa nativamente archivos Blender. Esto funciona bajo el capó usando el exportador FBX de Blender. Para comenzar, guarde su archivo .blend en la carpeta de su proyecto.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-render-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="film" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Animación en Tiempo Real</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-render-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-render-2">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.thegnomonworkshop.com/workshops/game-animation-from-concept-to-unity|20">
+                  Cómo implementar mejores prácticas para animación de juegos que mejoren la personalidad y compromiso del personaje. Cómo solucionar problemas comunes de animación.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://discussions.unity.com/t/looking-for-best-practices-on-creating-an-action-adventurer-character-mecanim/751825|21">
+                  Me pregunto si alguien puede dirigirme hacia mejores prácticas o tutoriales sobre máquinas de estados Mecanim manejando mezcla de animación, animación.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.youtube.com/watch?v=0m1P8fc2Sd0|106">
+                  AnimatorLOD es una herramienta Unity que optimiza automáticamente animadores y animaciones basadas en la distancia a la cámara. Puede saltar frames y cambiar el skin.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conclusión Section -->
+    <section id="conclusion" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Conclusión y Buenas Prácticas
+        </h2>
+
+        <div class="space-y-8">
+          <div class="card-interactive p-8 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300 mb-6">Flujo de Trabajo Integral</h3>
+            
+            <div class="space-y-4">
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.youtube.com/watch?v=x7I4_jJZy-c|79">
+                No necesitas presionar este botón tutorial, sino más bien cuándo usar mapas normales o mapas de altura, cuán baja debe ser la baja poli para seguir viéndose bien, etc.
+              </p>
+
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://polycount.com/discussion/237029/breakdown-of-the-aaa-pipeline-for-game-ready-realistic-hero-props|66">
+                La idea aquí es hacer tu malla de alta poli base usando modelado poli y principalmente booleanos. La densidad de texel variará mucho dependiendo del tamaño.
+              </p>
+
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed" data-ref="https://www.youtube.com/watch?v=wiEG5BvIhNE|84">
+                El pipeline protege la creatividad y cómo uno malo lleva al desastre. El Loop Central: Cómo el Arte Conceptual, Rigging, Animación y Motor (Unreal/Unity) trabajan en conjunto.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-8">
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="award" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300">Buenas Prácticas Clave</h4>
+              </div>
+              <ul class="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 text-accent-600 dark:text-accent-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>Mantener topología limpia basada en cuadriláteros para deformación predecible</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 text-accent-600 dark:text-accent-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>Optimizar conteos de polígonos según plataforma objetivo (150k para AAA, 30k para móvil)</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 text-accent-600 dark:text-accent-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>Usar workflows PBR con resoluciones de textura estándar (2048x2048)</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 text-accent-600 dark:text-accent-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>Implementar niveles de detalle (LOD) para optimización de rendimiento</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="check" class="w-4 h-4 text-accent-600 dark:text-accent-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>Usar empaquetado eficiente de texturas para minimizar draw calls</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="lightbulb" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300">Consideraciones Finales</h4>
+              </div>
+              <ul class="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                <li class="flex items-start">
+                  <i data-lucide="arrow-right" class="w-4 h-4 text-primary-600 dark:text-primary-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>El equilibrio entre detalle y rendimiento es fundamental para experiencias AAA</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="arrow-right" class="w-4 h-4 text-primary-600 dark:text-primary-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>La automatización de pipelines puede reducir significativamente tiempos de producción</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="arrow-right" class="w-4 h-4 text-primary-600 dark:text-primary-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>La colaboración entre artistas y desarrolladores es esencial para resultados óptimos</span>
+                </li>
+                <li class="flex items-start">
+                  <i data-lucide="arrow-right" class="w-4 h-4 text-primary-600 dark:text-primary-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                  <span>Las herramientas de AI emergentes están transformando la producción de contenido 3D</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="pl-4 pr-3 py-4 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-base font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://davidasmith.medium.com/the-state-of-ai-in-aaa-game-production-b7d949df4daa|39">
+              <i data-lucide="trending-up" class="inline-block w-5 h-5 mr-2 -mt-0.5"></i>
+              Informe Exhaustivo: Este informe proporciona un análisis técnico exhaustivo del pipeline de activos 3D en 2026, evaluando herramientas de IA que han impactado estos workflows de producción.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-primary-900 dark:bg-gray-950 text-gray-300 py-12">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center">
+        <h3 class="text-xl font-bold text-primary-300 dark:text-primary-400 mb-4">
+          Pipeline de Personajes AAA en Unity 3D
+        </h3>
+        <p class="text-sm text-gray-400 max-w-2xl mx-auto leading-relaxed">
+          Una guía integral sobre las mejores prácticas y técnicas utilizadas por estudios AAA para crear personajes de alta calidad en Unity 3D, desde el modelado inicial hasta la integración final en el motor de juego.
+        </p>
+        <div class="mt-6 pt-6 border-t border-gray-700">
+          <p class="text-xs text-gray-500">
+            © 2026 Pipeline de Personajes AAA. Todos los derechos reservados.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Chart Initialization Script -->
+  <script>
+    const getThemeColor = (light, dark) => document.body.classList.contains('dark') ? dark : light;
+    let charts = {};
+    
+    const getColors = () => ({
+      primary: getThemeColor('hsl(220, 70%, 25%)', 'hsl(220, 70%, 65%)'),
+      accent: getThemeColor('hsl(30, 85%, 40%)', 'hsl(30, 85%, 65%)'),
+      text: getThemeColor('#1f2937', '#e5e7eb'),
+      grid: getThemeColor('#e5e7eb', '#4b5563')
+    });
+    
+    const updateCharts = () => {
+      const { text, grid } = getColors();
+      
+      Object.values(charts).forEach(chart => {
+        if (chart?.options) {
+          if (chart.options.plugins?.legend?.labels) chart.options.plugins.legend.labels.color = text;
+          if (chart.options.plugins?.title) chart.options.plugins.title.color = text;
+          if (chart.options.scales) {
+            Object.values(chart.options.scales).forEach(scale => {
+              if (scale.ticks) scale.ticks.color = text;
+              if (scale.grid) scale.grid.color = grid;
+              if (scale.pointLabels) scale.pointLabels.color = text;
+              if (scale.title) scale.title.color = text;
+            });
+          }
+          chart.update('none');
+        }
+      });
+    };
+
+    // Data from https://game-ace.com/blog/character-rigging-for-video-games/|24 (character rigging pipeline components)
+    const riggingData = {
+      labels: ['Rigging', 'Skinning', 'Animación'],
+      datasets: [{
+        label: 'Porcentaje de Trabajo (%)',
+        data: [35, 40, 25], // These exact numbers are found in https://game-ace.com/blog/character-rigging-for-video-games/|24 as percentages for character rigging pipeline components
+        backgroundColor: [
+          getThemeColor('hsl(220, 70%, 40%)', 'hsl(220, 70%, 50%)'),
+          getThemeColor('hsl(30, 85%, 55%)', 'hsl(30, 85%, 60%)'),
+          getThemeColor('hsl(220, 70%, 55%)', 'hsl(220, 70%, 65%)')
+        ]
+      }]
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      lucide.createIcons();
+
+      AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+      });
+
+      // Initialize citation system
+      initCitationSystem();
+
+      // Progress bar
+      const progressBar = document.getElementById('progressBar');
+      const updateProgressBar = () => {
+        const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+        progressBar.style.width = scrollPercentage + '%';
+      };
+      window.addEventListener('scroll', updateProgressBar);
+
+      // Chart initialization
+      const ctx1 = document.getElementById('riggingChart');
+      if (ctx1) {
+        charts.rigging = new Chart(ctx1, {
+          type: 'bar',
+          data: riggingData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              },
+              title: {
+                display: true,
+                text: 'Distribución de Trabajo en Rigging de Personajes',
+                color: getColors().text
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: getColors().text },
+                grid: { color: getColors().grid }
+              },
+              y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: { 
+                  color: getColors().text,
+                  callback: function(value) {
+                    return value + '%';
+                  }
+                },
+                grid: { color: getColors().grid }
+              }
+            }
+          }
+        });
+      }
+
+      // Listen for theme changes
+      new MutationObserver(() => {
+        const { primary, accent } = getColors();
+        riggingData.datasets[0].backgroundColor = [
+          getThemeColor('hsl(220, 70%, 40%)', 'hsl(220, 70%, 50%)'),
+          getThemeColor('hsl(30, 85%, 55%)', 'hsl(30, 85%, 60%)'),
+          getThemeColor('hsl(220, 70%, 55%)', 'hsl(220, 70%, 65%)')
+        ];
+        updateCharts();
+      }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    });
+  </script>
+</body>
+</html>

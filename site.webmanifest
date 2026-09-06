@@ -1,0 +1,13 @@
+{
+  "name": "TD Dev Compendium · Documentación de Total Darkness",
+  "short_name": "TD Compendium",
+  "description": "Guías HTML y PDFs del proyecto Total Darkness organizados por contexto.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0a12",
+  "theme_color": "#0a0a12",
+  "icons": [
+    { "src": "assets/img/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/img/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

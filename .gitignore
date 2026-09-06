@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Windows / macOS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs del lanzador
+*.log
+
+# Accesos directos de Windows (rutas absolutas locales, no portables)
+*.lnk

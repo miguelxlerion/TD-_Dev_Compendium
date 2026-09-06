@@ -1,0 +1,17 @@
+{
+  "name": "td-dev-compendium",
+  "version": "1.0.0",
+  "description": "TD Dev Compendium — plataforma unificada de documentación de Total Darkness (HTML + PDF con auto-integración)",
+  "type": "module",
+  "scripts": {
+    "up": "python tools/launcher.py",
+    "server": "python tools/server.py",
+    "manifest": "python tools/build-manifest.py --update-index",
+    "imagenes": "python tools/localizar-imagenes.py",
+    "dev": "npx serve . -l 8080",
+    "dev:py": "python -m http.server 8080"
+  },
+  "devDependencies": {
+    "serve": "^14.2.1"
+  }
+}

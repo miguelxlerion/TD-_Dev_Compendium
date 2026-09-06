@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Total Darkness - Lógica de Programación: Sistemas Core</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: 'hsl(45, 80%, 95%)',
+              100: 'hsl(45, 80%, 85%)',
+              200: 'hsl(45, 80%, 70%)',
+              300: 'hsl(45, 80%, 55%)',
+              400: 'hsl(45, 85%, 45%)',
+              500: 'hsl(45, 90%, 35%)',
+              600: 'hsl(45, 90%, 28%)',
+              700: 'hsl(45, 90%, 20%)',
+              800: 'hsl(45, 90%, 12%)',
+              900: 'hsl(45, 90%, 6%)'
+            },
+            accent: {
+              50: 'hsl(0, 85%, 95%)',
+              100: 'hsl(0, 85%, 80%)',
+              200: 'hsl(0, 85%, 65%)',
+              300: 'hsl(0, 85%, 50%)',
+              400: 'hsl(0, 90%, 42%)',
+              500: 'hsl(0, 90%, 35%)',
+              600: 'hsl(0, 90%, 28%)',
+              700: 'hsl(0, 90%, 20%)',
+              800: 'hsl(0, 90%, 12%)',
+              900: 'hsl(0, 90%, 6%)'
+            },
+            abyss: {
+              50: 'hsl(230, 20%, 18%)',
+              100: 'hsl(230, 25%, 14%)',
+              200: 'hsl(230, 30%, 10%)',
+              300: 'hsl(230, 35%, 7%)',
+              400: 'hsl(230, 40%, 4%)',
+              500: 'hsl(230, 45%, 2%)'
+            }
+          },
+          fontFamily: {
+            mono: ['"JetBrains Mono"', 'monospace'],
+            serif: ['"Cinzel"', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; }
+    
+    .code-block {
+      background: #0a0a12;
+      border: 1px solid hsl(45, 90%, 20%);
+      border-radius: 8px;
+      overflow-x: auto;
+      position: relative;
+    }
+    
+    .code-block pre {
+      padding: 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #e5e7eb;
+    }
+    
+    .code-block .lang-tag {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: hsl(45, 90%, 35%);
+      color: #0a0a12;
+      padding: 2px 10px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      border-bottom-left-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    /* Syntax highlighting */
+    .kw { color: #c084fc; } /* keyword */
+    .tp { color: #60a5fa; } /* type */
+    .fn { color: #fbbf24; } /* function */
+    .st { color: #86efac; } /* string */
+    .cm { color: #6b7280; font-style: italic; } /* comment */
+    .nm { color: #f472b6; } /* number */
+    .at { color: #fbbf24; } /* attribute */
+    .vr { color: #e5e7eb; } /* variable */
+    .op { color: #94a3b8; } /* operator */
+    
+    .glow-gold {
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.15);
+    }
+    
+    .glow-red {
+      box-shadow: 0 0 20px rgba(220, 38, 38, 0.15);
+    }
+    
+    .ritual-border {
+      border: 1px solid hsl(45, 90%, 20%);
+      background: linear-gradient(135deg, hsl(230, 30%, 7%) 0%, hsl(230, 40%, 4%) 100%);
+    }
+    
+    .scroll-indicator {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 40;
+    }
+    
+    .scroll-indicator a {
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: hsl(45, 90%, 20%);
+      margin: 8px 0;
+      transition: all 0.3s;
+    }
+    
+    .scroll-indicator a.active {
+      background: hsl(45, 90%, 45%);
+      box-shadow: 0 0 10px hsl(45, 90%, 45%);
+      transform: scale(1.5);
+    }
+    
+    .mermaid {
+      background: transparent !important;
+    }
+    
+    .mermaid svg {
+      max-width: 100%;
+    }
+    
+    .card-ritual {
+      transition: all 0.3s ease-out;
+      border: 1px solid hsl(45, 90%, 15%);
+    }
+    
+    .card-ritual:hover {
+      border-color: hsl(45, 90%, 40%);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(251, 191, 36, 0.1);
+    }
+    
+    .input-sequence {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .key-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 10px;
+      background: linear-gradient(135deg, hsl(45, 90%, 20%) 0%, hsl(45, 90%, 10%) 100%);
+      border: 1px solid hsl(45, 90%, 40%);
+      border-radius: 6px;
+      color: hsl(45, 90%, 70%);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 0 hsl(45, 90%, 8%);
+    }
+    
+    .key-btn.active {
+      background: linear-gradient(135deg, hsl(45, 90%, 45%) 0%, hsl(45, 90%, 30%) 100%);
+      color: #0a0a12;
+      box-shadow: 0 0 15px hsl(45, 90%, 45%);
+    }
+    
+    .arrow-connector {
+      color: hsl(45, 90%, 40%);
+      font-size: 1.2rem;
+    }
+    
+    @media (max-width: 768px) {
+      .scroll-indicator { display: none; }
+    }
+  </style>
+</head>
+
+<body class="bg-abyss-400 text-gray-200 min-h-screen">
+
+  <!-- Progress Bar -->
+  <div class="fixed top-0 left-0 h-0.5 bg-primary-400 z-[60] transition-all duration-300" id="progressBar" style="width: 0%;"></div>
+
+  <!-- Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-abyss-500/80 border-b border-primary-700/30">
+    <nav class="max-w-7xl mx-auto px-6 py-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-primary-400 flex items-center justify-center">
+            <i data-lucide="flame" class="w-4 h-4 text-abyss-400"></i>
+          </div>
+          <div>
+            <h1 class="font-serif text-lg font-bold text-primary-300">Total Darkness</h1>
+            <p class="text-xs text-gray-500">Lógica de Programación · v1.0</p>
+          </div>
+        </div>
+        
+        <div class="hidden lg:flex items-center gap-5 text-sm">
+          <a href="#intro" class="text-gray-400 hover:text-primary-300 transition-colors">Intro</a>
+          <a href="#movimiento" class="text-gray-400 hover:text-primary-300 transition-colors">Movimiento</a>
+          <a href="#ramas" class="text-gray-400 hover:text-primary-300 transition-colors">Ramas</a>
+          <a href="#qte" class="text-gray-400 hover:text-primary-300 transition-colors">QTE</a>
+          <a href="#combate" class="text-gray-400 hover:text-primary-300 transition-colors">Combate</a>
+          <a href="#ritmo" class="text-gray-400 hover:text-primary-300 transition-colors">Ritmo</a>
+          <a href="#integracion" class="text-gray-400 hover:text-primary-300 transition-colors">Integración</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Scroll Indicator -->
+  <div class="scroll-indicator">
+    <a href="#intro" data-section="intro"></a>
+    <a href="#movimiento" data-section="movimiento"></a>
+    <a href="#ramas" data-section="ramas"></a>
+    <a href="#qte" data-section="qte"></a>
+    <a href="#combate" data-section="combate"></a>
+    <a href="#ritmo" data-section="ritmo"></a>
+    <a href="#integracion" data-section="integracion"></a>
+  </div>
+
+  <main class="pt-24 pb-20">
+
+    <!-- HERO -->
+    <section id="intro" class="py-20 border-b border-primary-800/30">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-12" data-aos="fade-up">
+          <p class="text-primary-400 font-mono text-sm mb-4 tracking-widest">DOCUMENTO TÉCNICO · CAPÍTULO III</p>
+          <h2 class="font-serif text-5xl md:text-6xl font-bold text-primary-300 mb-6 leading-tight">
+            Lógica de Programación<br>
+            <span class="text-accent-300">Sistemas Core</span>
+          </h2>
+          <p class="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            Arquitectura técnica para movimiento híbrido, narrativa ramificada, Quick Time Events y secuencias de combate rítmico en <em class="text-primary-300">Total Darkness</em>.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-4 mt-12">
+          <div class="card-ritual ritual-border rounded-lg p-5" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="gamepad-2" class="w-5 h-5 text-primary-400"></i>
+              <span class="text-xs font-mono text-primary-400">01</span>
+            </div>
+            <h3 class="font-serif text-lg text-primary-200 mb-1">Movimiento Híbrido</h3>
+            <p class="text-xs text-gray-500">Shooter 1ª/3ª persona · Arcade + Táctico</p>
+          </div>
+          <div class="card-ritual ritual-border rounded-lg p-5" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="git-branch" class="w-5 h-5 text-primary-400"></i>
+              <span class="text-xs font-mono text-primary-400">02</span>
+            </div>
+            <h3 class="font-serif text-lg text-primary-200 mb-1">Ramas Narrativas</h3>
+            <p class="text-xs text-gray-500">Karma ético + Decisiones explícitas</p>
+          </div>
+          <div class="card-ritual ritual-border rounded-lg p-5" data-aos="fade-up" data-aos-delay="300">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="timer" class="w-5 h-5 text-primary-400"></i>
+              <span class="text-xs font-mono text-primary-400">03</span>
+            </div>
+            <h3 class="font-serif text-lg text-primary-200 mb-1">Quick Time Events</h3>
+            <p class="text-xs text-gray-500">Timing estricto + Tolerante</p>
+          </div>
+          <div class="card-ritual ritual-border rounded-lg p-5" data-aos="fade-up" data-aos-delay="400">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="sword" class="w-5 h-5 text-primary-400"></i>
+              <span class="text-xs font-mono text-primary-400">04</span>
+            </div>
+            <h3 class="font-serif text-lg text-primary-200 mb-1">Fatality / Combate</h3>
+            <p class="text-xs text-gray-500">Secuencias de botones rítmicas</p>
+          </div>
+        </div>
+
+        <!-- Arquitectura general -->
+        <div class="mt-16 ritual-border rounded-xl p-8" data-aos="fade-up">
+          <h3 class="font-serif text-2xl text-primary-300 mb-4 flex items-center gap-3">
+            <i data-lucide="cpu" class="w-6 h-6"></i>
+            Arquitectura General del Sistema
+          </h3>
+          <p class="text-gray-400 mb-6 leading-relaxed">
+            Todos los sistemas core de <em>Total Darkness</em> comparten un bus de eventos central (<code class="text-primary-300 bg-abyss-300 px-2 py-0.5 rounded text-sm">GameEventBus</code>) y un sistema de estado global (<code class="text-primary-300 bg-abyss-300 px-2 py-0.5 rounded text-sm">GameStateManager</code>) que orquesta la transición entre modos de juego: exploración, combate, QTE, cinemática y secuencias rítmicas.
+          </p>
+          <div class="mermaid">
+flowchart LR
+    A[Input Manager] --> B[Event Bus]
+    B --> C[Movement System]
+    B --> D[Narrative Branch]
+    B --> E[QTE Controller]
+    B --> F[Combat System]
+    B --> G[Rhythm Sync]
+    C --> H[GameStateManager]
+    D --> H
+    E --> H
+    F --> H
+    G --> H
+    H --> I[Audio Engine]
+    H --> J[Visual FX]
+    H --> K[Save System]
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 1: MOVIMIENTO -->
+    <section id="movimiento" class="py-20 border-b border-primary-800/30">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8" data-aos="fade-up">
+          <div class="w-12 h-12 rounded-lg bg-primary-500/20 border border-primary-500/40 flex items-center justify-center">
+            <span class="font-serif text-2xl font-bold text-primary-300">01</span>
+          </div>
+          <div>
+            <p class="text-xs font-mono text-primary-400 tracking-widest">SISTEMA CORE</p>
+            <h2 class="font-serif text-4xl font-bold text-primary-300">Movimiento Híbrido</h2>
+          </div>
+        </div>
+
+        <p class="text-lg text-gray-400 mb-10 leading-relaxed" data-aos="fade-up">
+          El GDD define una <strong class="text-primary-200">perspectiva híbrida</strong>: tercera persona limitada durante exploración y primera persona simbólica en rituales. El movimiento debe mezclar la <em>fluidez arcade</em> (DOOM) con la <em>precisión táctica</em> (Rainbow Six), adaptándose al contexto narrativo y al estado ético del jugador.
+        </p>
+
+        <!-- Máquina de estados de movimiento -->
+        <div class="ritual-border rounded-xl p-8 mb-8" data-aos="fade-up">
+          <h3 class="font-serif text-2xl text-primary-300 mb-4 flex items-center gap-3">
+            <i data-lucide="workflow" class="w-6 h-6"></i>
+            Máquina de Estados de Locomoción
+          </h3>
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Walking: Input Movement
+    Walking --> Running: Hold Sprint
+    Walking --> Tactical: Hold Aim
+    Running --> Sliding: Crouch + Momentum
+    Tactical --> Idle: Release Aim
+    Sliding --> Idle: Momentum End
+    Idle --> RitualWalk: Enter Ritual Zone
+    RitualWalk --> Idle: Exit Ritual Zone
+    Walking --> Climbing: Ledge Detect
+    Climbing --> Idle: Top Reached
+    Idle --> Stagger: Damage Taken
+    Stagger --> Idle: Recovery Time
+          </div>
+        </div>
+
+        <!-- Código: CharacterMovementController -->
+        <div class="code-block mb-8" data-aos="fade-up">
+          <span class="lang-tag">C# · Unity</span>
+          <pre><span class="kw">using</span> UnityEngine;
+<span class="kw">using</span> UnityEngine.InputSystem;
+
+<span class="cm">/// &lt;summary&gt;
+/// Controlador de movimiento híbrido para Total Darkness.
+/// Mezcla respuesta arcade (aceleración rápida) con física táctica (inercia, cobertura).
+/// Se adapta al contexto: exploración, combate o ritual.
+/// &lt;/summary&gt;</span>
+<span class="kw">public class</span> <span class="tp">CharacterMovementController</span> : <span class="tp">MonoBehaviour</span>
+{
+    [<span class="at">Header</span>(<span class="st">"Referencias"</span>)]
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">CharacterController</span> controller;
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">Transform</span> cameraHolder;
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">Animator</span> animator;
+    
+    [<span class="at">Header</span>(<span class="st">"Curvas Arcade (respuesta rápida)"</span>)]
+    [<span class="at">SerializeField</span>] <span class="kw">private float</span> baseWalkSpeed = <span class="nm">4.5f</span>;
+    [<span class="at">SerializeField</span>] <span class="kw">private float</span> sprintSpeed = <span class="nm">7.8f</span>;
+    [<span class="at">SerializeField</span>] <span class="kw">private float</span> tacticalSpeed = <span class="nm">2.2f</span>;
+    [<span class="at">SerializeField</span>] <span class="kw">private float</span> acceleration = <span class="nm">12f</span>;   <span class="cm">// Arcade: respuesta rápida</span>
+    [<span class="at">SerializeField</span>] <span class="kw">private float</span> deceleration = <span class="nm">8f</span>;
+    
+    [<span class="at">Header</span>(<span class="st">"Curvas Tácticas (inercia y peso)"</span>)]
+    [<span class="at">SerializeField</span>] <span class="kw">private float</span> momentumDecay = <span class="nm">0.92f</span>; <span class="cm">// Táctico: inercia</span>
+    [<span class="at">SerializeField</span>] <span class="kw">private float</span> slopeLimit = <span class="nm">45f</span>;
+    [<span class="at">SerializeField</span>] <span class="kw">private float</span> gravity = <span class="nm">-20f</span>;
+    
+    [<span class="at">Header</span>(<span class="st">"Modos de Perspectiva (GDD §4.5)"</span>)]
+    [<span class="at">SerializeField</span>] <span class="kw">private float</span> thirdPersonOffset = <span class="nm">2.5f</span>;
+    [<span class="at">SerializeField</span>] <span class="kw">private float</span> firstPersonHeight = <span class="nm">1.7f</span>;
+    
+    <span class="cm">// Estado interno</span>
+    <span class="kw">private</span> <span class="tp">Vector2</span> moveInput;
+    <span class="kw">private</span> <span class="tp">Vector3</span> velocity;
+    <span class="kw">private</span> <span class="tp">Vector3</span> verticalVelocity;
+    <span class="kw">private bool</span> isSprinting, isAiming, isSliding;
+    <span class="kw">private</span> <span class="tp">MovementMode</span> currentMode = <span class="tp">MovementMode</span>.Exploration;
+    
+    <span class="kw">private enum</span> <span class="tp">MovementMode</span> { Exploration, Combat, Ritual, Staggered }
+    
+    <span class="kw">public void</span> <span class="fn">OnMove</span>(<span class="tp">InputAction</span>.<span class="tp">CallbackContext</span> ctx) 
+        =&gt; moveInput = ctx.ReadValue&lt;<span class="tp">Vector2</span>&gt;();
+    
+    <span class="kw">public void</span> <span class="fn">OnSprint</span>(<span class="tp">InputAction</span>.<span class="tp">CallbackContext</span> ctx) 
+        =&gt; isSprinting = ctx.performed &amp;&amp; currentMode == <span class="tp">MovementMode</span>.Exploration;
+    
+    <span class="kw">public void</span> <span class="fn">OnAim</span>(<span class="tp">InputAction</span>.<span class="tp">CallbackContext</span> ctx)
+    {
+        isAiming = ctx.performed;
+        <span class="fn">TransitionCamera</span>(isAiming ? <span class="tp">CameraMode</span>.AimDown : <span class="tp">CameraMode</span>.ThirdPerson);
+    }
+    
+    <span class="kw">private void</span> <span class="fn">Update</span>()
+    {
+        <span class="fn">CalculateDesiredVelocity</span>();
+        <span class="fn">ApplyGravity</span>();
+        <span class="fn">ApplyMovement</span>();
+        <span class="fn">UpdateAnimationParameters</span>();
+    }
+    
+    <span class="kw">private void</span> <span class="fn">CalculateDesiredVelocity</span>()
+    {
+        <span class="cm">// Dirección relativa a la cámara (estándar shooter)</span>
+        <span class="tp">Vector3</span> forward = cameraHolder.forward;
+        <span class="tp">Vector3</span> right = cameraHolder.right;
+        forward.y = <span class="nm">0</span>; right.y = <span class="nm">0</span>;
+        forward.Normalize(); right.Normalize();
+        
+        <span class="tp">Vector3</span> desiredDir = (forward * moveInput.y + right * moveInput.x).normalized;
+        
+        <span class="cm">// Velocidad objetivo según contexto</span>
+        <span class="kw">float</span> targetSpeed = currentMode <span class="kw">switch</span>
+        {
+            <span class="tp">MovementMode</span>.Exploration =&gt; isSprinting ? sprintSpeed : baseWalkSpeed,
+            <span class="tp">MovementMode</span>.Combat =&gt; isAiming ? tacticalSpeed : baseWalkSpeed * <span class="nm">0.85f</span>,
+            <span class="tp">MovementMode</span>.Ritual =&gt; baseWalkSpeed * <span class="nm">0.6f</span>, <span class="cm">// Paso ceremonial lento</span>
+            <span class="tp">MovementMode</span>.Staggered =&gt; <span class="nm">0f</span>,
+            _ =&gt; baseWalkSpeed
+        };
+        
+        <span class="cm">// Mezcla arcade/táctica según el modo</span>
+        <span class="kw">float</span> blendFactor = currentMode == <span class="tp">MovementMode</span>.Combat 
+            ? <span class="nm">0.5f</span>  <span class="cm">// Táctico: más peso, más inercia</span>
+            : <span class="nm">0.85f</span>; <span class="cm">// Arcade: respuesta rápida</span>
+        
+        <span class="tp">Vector3</span> targetVelocity = desiredDir * targetSpeed;
+        velocity = <span class="tp">Vector3</span>.Lerp(velocity, targetVelocity, 
+            (moveInput.sqrMagnitude &gt; <span class="nm">0.01f</span> ? acceleration : deceleration) 
+            * blendFactor * <span class="tp">Time</span>.deltaTime);
+    }
+    
+    <span class="kw">private void</span> <span class="fn">ApplyGravity</span>()
+    {
+        <span class="kw">if</span> (controller.isGrounded &amp;&amp; verticalVelocity.y &lt; <span class="nm">0</span>)
+            verticalVelocity.y = <span class="nm">-2f</span>;
+        verticalVelocity.y += gravity * <span class="tp">Time</span>.deltaTime;
+    }
+    
+    <span class="kw">private void</span> <span class="fn">ApplyMovement</span>()
+    {
+        <span class="tp">Vector3</span> finalMove = velocity + verticalVelocity;
+        controller.Move(finalMove * <span class="tp">Time</span>.deltaTime);
+    }
+    
+    <span class="kw">public void</span> <span class="fn">SetMode</span>(<span class="tp">MovementMode</span> mode)
+    {
+        currentMode = mode;
+        <span class="tp">GameEventBus</span>.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="tp">MovementModeChanged</span>(mode));
+    }
+}</pre>
+        </div>
+
+        <!-- Transición de cámara 1ª/3ª -->
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+          <div class="ritual-border rounded-xl p-6" data-aos="fade-right">
+            <h4 class="font-serif text-xl text-primary-300 mb-3 flex items-center gap-2">
+              <i data-lucide="video" class="w-5 h-5"></i>
+              Transición de Perspectiva
+            </h4>
+            <p class="text-sm text-gray-400 mb-4">
+              Según el GDD (§4.5), el juego usa <strong>3ª persona limitada</strong> en exploración y <strong>1ª persona simbólica</strong> en rituales. La transición debe ser suave y diegética.
+            </p>
+            <div class="code-block">
+              <span class="lang-tag">C#</span>
+              <pre><span class="kw">public void</span> <span class="fn">TransitionCamera</span>(<span class="tp">CameraMode</span> target)
+{
+    <span class="fn">StartCoroutine</span>(<span class="fn">SmoothTransition</span>(target));
+}
+
+<span class="kw">private</span> <span class="tp">IEnumerator</span> <span class="fn">SmoothTransition</span>(<span class="tp">CameraMode</span> t)
+{
+    <span class="kw">float</span> elapsed = <span class="nm">0f</span>;
+    <span class="tp">Vector3</span> startPos = cameraHolder.localPosition;
+    <span class="tp">Vector3</span> endPos = t == <span class="tp">CameraMode</span>.FirstPerson
+        ? <span class="kw">new</span> <span class="tp">Vector3</span>(<span class="nm">0</span>, firstPersonHeight, <span class="nm">0</span>)
+        : <span class="kw">new</span> <span class="tp">Vector3</span>(<span class="nm">0</span>, <span class="nm">1.5f</span>, -thirdPersonOffset);
+    
+    <span class="kw">while</span> (elapsed &lt; <span class="nm">0.4f</span>)
+    {
+        elapsed += <span class="tp">Time</span>.deltaTime;
+        cameraHolder.localPosition = <span class="tp">Vector3</span>.Lerp(
+            startPos, endPos, 
+            <span class="fn">EaseInOutCubic</span>(elapsed / <span class="nm">0.4f</span>));
+        <span class="kw">yield return null</span>;
+    }
+}</pre>
+            </div>
+          </div>
+          
+          <div class="ritual-border rounded-xl p-6" data-aos="fade-left">
+            <h4 class="font-serif text-xl text-primary-300 mb-3 flex items-center gap-2">
+              <i data-lucide="heart-pulse" class="w-5 h-5"></i>
+              Influencia del Estado Ético
+            </h4>
+            <p class="text-sm text-gray-400 mb-4">
+              El <strong class="text-primary-200">Eco Filosófico</strong> (GDD §2.3.4) modifica el movimiento: un jugador corrupto se mueve más pesado, uno redimido con mayor fluidez.
+            </p>
+            <div class="code-block">
+              <span class="lang-tag">C#</span>
+              <pre><span class="kw">private void</span> <span class="fn">ApplyEthicalModifier</span>()
+{
+    <span class="cm">// -1.0 (corrupto) a +1.0 (redimido)</span>
+    <span class="kw">float</span> karma = <span class="tp">GameStateManager</span>.Instance.Karma;
+    
+    <span class="cm">// Velocidad base afectada por karma</span>
+    <span class="kw">float</span> karmaModifier = <span class="nm">1f</span> + (karma * <span class="nm">0.15f</span>);
+    baseWalkSpeed = <span class="nm">4.5f</span> * karmaModifier;
+    
+    <span class="cm">// Inercia: corrupto = más pesado</span>
+    momentumDecay = <span class="nm">0.92f</span> - (karma * <span class="nm">0.05f</span>);
+    
+    <span class="cm">// Animación: blend hacia postura corrupta</span>
+    animator.<span class="fn">SetFloat</span>(<span class="st">"Corruption"</span>, 
+        <span class="tp">Mathf</span>.InverseLerp(-<span class="nm">1</span>, <span class="nm">1</span>, -karma));
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de parámetros -->
+        <div class="ritual-border rounded-xl p-6 overflow-x-auto" data-aos="fade-up">
+          <h4 class="font-serif text-xl text-primary-300 mb-4">Parámetros de Movimiento por Contexto</h4>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-primary-700/50 text-left">
+                <th class="py-2 text-primary-400 font-mono text-xs">CONTEXTO</th>
+                <th class="py-2 text-primary-400 font-mono text-xs">VELOCIDAD</th>
+                <th class="py-2 text-primary-400 font-mono text-xs">ACELERACIÓN</th>
+                <th class="py-2 text-primary-400 font-mono text-xs">INERCIA</th>
+                <th class="py-2 text-primary-400 font-mono text-xs">PERSPECTIVA</th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-300">
+              <tr class="border-b border-abyss-100">
+                <td class="py-3">Exploración</td>
+                <td>4.5 / 7.8 m/s</td>
+                <td>12 (Arcade)</td>
+                <td>0.92</td>
+                <td>3ª Persona</td>
+              </tr>
+              <tr class="border-b border-abyss-100">
+                <td class="py-3">Combate</td>
+                <td>3.8 / — m/s</td>
+                <td>8 (Táctico)</td>
+                <td>0.85</td>
+                <td>1ª/3ª ADS</td>
+              </tr>
+              <tr class="border-b border-abyss-100">
+                <td class="py-3">Ritual</td>
+                <td>2.7 m/s</td>
+                <td>6 (Ceremonial)</td>
+                <td>0.78</td>
+                <td>1ª Simbólica</td>
+              </tr>
+              <tr>
+                <td class="py-3">Staggered</td>
+                <td>0 m/s</td>
+                <td>—</td>
+                <td>—</td>
+                <td>1ª Persona</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: RAMAS NARRATIVAS -->
+    <section id="ramas" class="py-20 border-b border-primary-800/30">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8" data-aos="fade-up">
+          <div class="w-12 h-12 rounded-lg bg-primary-500/20 border border-primary-500/40 flex items-center justify-center">
+            <span class="font-serif text-2xl font-bold text-primary-300">02</span>
+          </div>
+          <div>
+            <p class="text-xs font-mono text-primary-400 tracking-widest">SISTEMA CORE</p>
+            <h2 class="font-serif text-4xl font-bold text-primary-300">Ramas Narrativas</h2>
+          </div>
+        </div>
+
+        <p class="text-lg text-gray-400 mb-10 leading-relaxed" data-aos="fade-up">
+          El GDD (§4.8) define <strong class="text-primary-200">cuatro finales</strong>: Redención arquetípica, Oblivion lúcido, Reescritura del símbolo y Dualidad persistente. El sistema combina <strong class="text-accent-300">decisiones explícitas</strong> (diálogos, pactos) con <strong class="text-accent-300">variables ocultas</strong> (karma, sincronía musical, fragmentos recolectados).
+        </p>
+
+        <!-- Diagrama de finales -->
+        <div class="ritual-border rounded-xl p-8 mb-8" data-aos="fade-up">
+          <h3 class="font-serif text-2xl text-primary-300 mb-4 flex items-center gap-3">
+            <i data-lucide="git-merge" class="w-6 h-6"></i>
+            Grafo de Finales (GDD §4.8.4)
+          </h3>
+          <div class="mermaid">
+flowchart TB
+    START[Inicio] --> D1{Dilema 1:<br/>Sacrificio}
+    D1 -->|Acepta| K1[Karma +0.3]
+    D1 -->|Rechaza| K2[Karma -0.3]
+    K1 --> D2{Dilema 2:<br/>Mentor Caído}
+    K2 --> D2
+    D2 -->|Redimir| K3[Karma +0.4]
+    D2 -->|Confrontar| K4[Karma -0.2]
+    D2 -->|Olvidar| K5[Karma -0.5]
+    K3 --> SYNC{Sincronía<br/>Musical}
+    K4 --> SYNC
+    K5 --> SYNC
+    SYNC -->|Alta > 80%| F1[Redención<br/>Arquetípica]
+    SYNC -->|Media 40-80%| F2[Dualidad<br/>Persistente]
+    SYNC -->|Baja < 40%| DEC{Decisión<br/>Final}
+    DEC -->|Aceptar vacío| F3[Oblivion<br/>Lúcido]
+    DEC -->|Negar narrativa| F4[Reescritura<br/>del Símbolo]
+          </div>
+        </div>
+
+        <!-- Código: NarrativeBranchManager -->
+        <div class="code-block mb-8" data-aos="fade-up">
+          <span class="lang-tag">C# · ScriptableObject</span>
+          <pre><span class="kw">using</span> System;
+<span class="kw">using</span> System.Collections.Generic;
+<span class="kw">using</span> UnityEngine;
+
+<span class="cm">/// &lt;summary&gt;
+/// Gestor de ramas narrativas. Combina decisiones explícitas con karma oculto.
+/// Cada nodo puede tener condiciones de desbloqueo basadas en múltiples variables.
+/// &lt;/summary&gt;</span>
+[<span class="at">CreateAssetMenu</span>(fileName = <span class="st">"NarrativeGraph"</span>, menuName = <span class="st">"TD/NarrativeGraph"</span>)]
+<span class="kw">public class</span> <span class="tp">NarrativeGraph</span> : <span class="tp">ScriptableObject</span>
+{
+    <span class="kw">public</span> <span class="tp">NarrativeNode</span> rootNode;
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">EndingDefinition</span>&gt; endings;
+}
+
+[<span class="at">Serializable</span>]
+<span class="kw">public class</span> <span class="tp">NarrativeNode</span>
+{
+    <span class="kw">public string</span> nodeId;
+    <span class="kw">public string</span> dialogueKey;
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">NarrativeChoice</span>&gt; choices;
+    <span class="kw">public</span> <span class="tp">NarrativeNode</span> nextNode; <span class="cm">// Si no hay elección</span>
+}
+
+[<span class="at">Serializable</span>]
+<span class="kw">public class</span> <span class="tp">NarrativeChoice</span>
+{
+    <span class="kw">public string</span> text;
+    <span class="kw">public float</span> karmaDelta;
+    <span class="kw">public float</span> syncBonus; <span class="cm">// Bonus si se ejecuta rítmicamente</span>
+    <span class="kw">public</span> <span class="tp">NarrativeNode</span> targetNode;
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Condition</span>&gt; unlockConditions; <span class="cm">// Condiciones ocultas</span>
+}
+
+[<span class="at">Serializable</span>]
+<span class="kw">public class</span> <span class="tp">Condition</span>
+{
+    <span class="kw">public</span> <span class="tp">ConditionType</span> type;
+    <span class="kw">public float</span> threshold;
+    <span class="kw">public string</span> flagId;
+}
+
+<span class="kw">public enum</span> <span class="tp">ConditionType</span> { Karma, RhythmSync, FragmentsCollected, FlagSet, TimeOfDay }
+
+<span class="cm">// ============================================</span>
+<span class="cm">// ESTADO GLOBAL DE NARRATIVA</span>
+<span class="cm">// ============================================</span>
+<span class="kw">public class</span> <span class="tp">NarrativeState</span>
+{
+    <span class="kw">public float</span> Karma { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="nm">0f</span>; <span class="cm">// -1.0 a +1.0</span>
+    <span class="kw">public float</span> RhythmAccuracy { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="nm">0.5f</span>; <span class="cm">// 0.0 a 1.0</span>
+    <span class="kw">public int</span> FragmentsCollected { <span class="kw">get</span>; <span class="kw">private set</span>; }
+    <span class="kw">public</span> <span class="tp">HashSet</span>&lt;<span class="kw">string</span>&gt; ActiveFlags { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="kw">string</span>&gt; DecisionHistory { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    
+    <span class="kw">public void</span> <span class="fn">ApplyChoice</span>(<span class="tp">NarrativeChoice</span> choice)
+    {
+        Karma = <span class="tp">Mathf</span>.Clamp(Karma + choice.karmaDelta, -<span class="nm">1f</span>, <span class="nm">1f</span>);
+        DecisionHistory.Add(choice.text);
+        <span class="tp">GameEventBus</span>.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="tp">KarmaChanged</span>(Karma));
+    }
+    
+    <span class="kw">public void</span> <span class="fn">UpdateRhythmAccuracy</span>(<span class="kw">float</span> latestSync)
+    {
+        <span class="cm">// Media móvil exponencial para suavizar</span>
+        RhythmAccuracy = RhythmAccuracy * <span class="nm">0.7f</span> + latestSync * <span class="nm">0.3f</span>;
+    }
+    
+    <span class="kw">public bool</span> <span class="fn">EvaluateCondition</span>(<span class="tp">Condition</span> c) =&gt; c.type <span class="kw">switch</span>
+    {
+        <span class="tp">ConditionType</span>.Karma =&gt; Karma &gt;= c.threshold,
+        <span class="tp">ConditionType</span>.RhythmSync =&gt; RhythmAccuracy &gt;= c.threshold,
+        <span class="tp">ConditionType</span>.FragmentsCollected =&gt; FragmentsCollected &gt;= (<span class="kw">int</span>)c.threshold,
+        <span class="tp">ConditionType</span>.FlagSet =&gt; ActiveFlags.Contains(c.flagId),
+        _ =&gt; <span class="kw">false</span>
+    };
+}</pre>
+        </div>
+
+        <!-- Evaluador de finales -->
+        <div class="ritual-border rounded-xl p-6 mb-8" data-aos="fade-up">
+          <h4 class="font-serif text-xl text-primary-300 mb-4 flex items-center gap-2">
+            <i data-lucide="flag" class="w-5 h-5"></i>
+            Evaluador de Finales
+          </h4>
+          <div class="code-block">
+            <span class="lang-tag">C#</span>
+            <pre><span class="kw">public class</span> <span class="tp">EndingEvaluator</span>
+{
+    <span class="kw">public</span> <span class="tp">EndingDefinition</span> <span class="fn">Evaluate</span>(<span class="tp">NarrativeState</span> state, <span class="tp">NarrativeGraph</span> graph)
+    {
+        <span class="cm">// 1. Prioridad: sincronía musical (GDD §1.4.2)</span>
+        <span class="kw">if</span> (state.RhythmAccuracy &gt; <span class="nm">0.80f</span>)
+            <span class="kw">return</span> graph.endings.<span class="fn">Find</span>(e =&gt; e.id == <span class="st">"ARCHETYPAL_REDEMPTION"</span>);
+        
+        <span class="kw">if</span> (state.RhythmAccuracy &gt;= <span class="nm">0.40f</span>)
+            <span class="kw">return</span> graph.endings.<span class="fn">Find</span>(e =&gt; e.id == <span class="st">"PERSISTENT_DUALITY"</span>);
+        
+        <span class="cm">// 2. Si sincronía baja, decisión final del jugador</span>
+        <span class="kw">string</span> lastDecision = state.DecisionHistory[^<span class="nm">1</span>];
+        <span class="kw">return</span> lastDecision.Contains(<span class="st">"aceptar"</span>)
+            ? graph.endings.<span class="fn">Find</span>(e =&gt; e.id == <span class="st">"LUCID_OBLIVION"</span>)
+            : graph.endings.<span class="fn">Find</span>(e =&gt; e.id == <span class="st">"SYMBOL_REWRITE"</span>);
+    }
+}</pre>
+          </div>
+        </div>
+
+        <!-- Visualización de karma -->
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="ritual-border rounded-xl p-6" data-aos="fade-right">
+            <h4 class="font-serif text-lg text-primary-300 mb-3">Fórmula de Karma Compuesto</h4>
+            <div class="bg-abyss-400 rounded-lg p-4 font-mono text-sm text-primary-200 mb-3">
+              K_final = (0.5 × Σ decisiones) + (0.3 × sincronía) + (0.2 × exploración)
+            </div>
+            <p class="text-xs text-gray-500">
+              Las decisiones explícitas pesan 50%, la precisión rítmica 30%, y la exploración simbólica 20%. Esto garantiza que el jugador que solo dialogue sin explorar no alcance los finales más profundos.
+            </p>
+          </div>
+          <div class="ritual-border rounded-xl p-6" data-aos="fade-left">
+            <h4 class="font-serif text-lg text-primary-300 mb-3">Flags Ocultas</h4>
+            <ul class="text-sm text-gray-400 space-y-2">
+              <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary-400 mt-0.5 shrink-0"></i><span><code class="text-primary-300">METOR_KNOWS_TRUTH</code> — desbloquea diálogo especial</span></li>
+              <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary-400 mt-0.5 shrink-0"></i><span><code class="text-primary-300">REJECTED_ALL_PACTS</code> — activa final alternativo</span></li>
+              <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary-400 mt-0.5 shrink-0"></i><span><code class="text-primary-300">HEARD_PRIMORDIAL_SONG</code> — modifica boss fight</span></li>
+              <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary-400 mt-0.5 shrink-0"></i><span><code class="text-primary-300">SAKRIFICED_ECHO</code> — desbloquea Redención</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: QTE -->
+    <section id="qte" class="py-20 border-b border-primary-800/30">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8" data-aos="fade-up">
+          <div class="w-12 h-12 rounded-lg bg-primary-500/20 border border-primary-500/40 flex items-center justify-center">
+            <span class="font-serif text-2xl font-bold text-primary-300">03</span>
+          </div>
+          <div>
+            <p class="text-xs font-mono text-primary-400 tracking-widest">SISTEMA CORE</p>
+            <h2 class="font-serif text-4xl font-bold text-primary-300">Quick Time Events</h2>
+          </div>
+        </div>
+
+        <p class="text-lg text-gray-400 mb-10 leading-relaxed" data-aos="fade-up">
+          Los QTE en <em>Total Darkness</em> no son simples "presiona X". Son <strong class="text-primary-200">rituales sincronizados con la música</strong> de Redemthor y Mike Hellawaits. El sistema mezcla <strong class="text-accent-300">timing estricto</strong> (ventanas de 80ms) con <strong class="text-accent-300">ventanas tolerantes</strong> (300ms) según el contexto narrativo.
+        </p>
+
+        <!-- Tipos de QTE -->
+        <div class="grid md:grid-cols-3 gap-4 mb-8">
+          <div class="card-ritual ritual-border rounded-xl p-5" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded bg-accent-500/20 flex items-center justify-center">
+                <i data-lucide="target" class="w-4 h-4 text-accent-300"></i>
+              </div>
+              <h4 class="font-serif text-primary-200">Ritual Estricto</h4>
+            </div>
+            <p class="text-xs text-gray-500 mb-3">Ventana: 80ms · Penalización alta</p>
+            <div class="flex items-center gap-1 text-xs font-mono">
+              <div class="h-2 w-2 bg-accent-400 rounded-full"></div>
+              <div class="h-2 flex-1 bg-abyss-100 rounded relative">
+                <div class="absolute left-[45%] w-[10%] h-full bg-accent-400 rounded"></div>
+              </div>
+              <div class="h-2 w-2 bg-accent-400 rounded-full"></div>
+            </div>
+          </div>
+          <div class="card-ritual ritual-border rounded-xl p-5" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded bg-primary-500/20 flex items-center justify-center">
+                <i data-lucide="timer" class="w-4 h-4 text-primary-300"></i>
+              </div>
+              <h4 class="font-serif text-primary-200">Narrativo Tolerante</h4>
+            </div>
+            <p class="text-xs text-gray-500 mb-3">Ventana: 300ms · Penalización baja</p>
+            <div class="flex items-center gap-1 text-xs font-mono">
+              <div class="h-2 w-2 bg-primary-400 rounded-full"></div>
+              <div class="h-2 flex-1 bg-abyss-100 rounded relative">
+                <div class="absolute left-[30%] w-[40%] h-full bg-primary-400/60 rounded"></div>
+              </div>
+              <div class="h-2 w-2 bg-primary-400 rounded-full"></div>
+            </div>
+          </div>
+          <div class="card-ritual ritual-border rounded-xl p-5" data-aos="fade-up" data-aos-delay="300">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded bg-primary-500/20 flex items-center justify-center">
+                <i data-lucide="music" class="w-4 h-4 text-primary-300"></i>
+              </div>
+              <h4 class="font-serif text-primary-200">Rítmico Musical</h4>
+            </div>
+            <p class="text-xs text-gray-500 mb-3">Sincronizado con BPM · Ventana variable</p>
+            <div class="flex items-center gap-1 text-xs font-mono">
+              <div class="h-2 w-2 bg-primary-400 rounded-full"></div>
+              <div class="h-2 flex-1 bg-abyss-100 rounded relative">
+                <div class="absolute left-[20%] w-[15%] h-full bg-primary-400 rounded"></div>
+                <div class="absolute left-[50%] w-[15%] h-full bg-primary-400 rounded"></div>
+                <div class="absolute left-[80%] w-[15%] h-full bg-primary-400 rounded"></div>
+              </div>
+              <div class="h-2 w-2 bg-primary-400 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Código QTE Controller -->
+        <div class="code-block mb-8" data-aos="fade-up">
+          <span class="lang-tag">C# · QTE System</span>
+          <pre><span class="kw">using</span> UnityEngine;
+<span class="kw">using</span> System;
+<span class="kw">using</span> System.Collections.Generic;
+
+<span class="cm">/// &lt;summary&gt;
+/// Controlador de Quick Time Events con tres modos:
+/// - Strict: ventana de 80ms, penalización alta
+/// - Tolerant: ventana de 300ms, penalización baja  
+/// - Rhythmic: sincronizado con BPM de la pista musical
+/// &lt;/summary&gt;</span>
+<span class="kw">public class</span> <span class="tp">QTEController</span> : <span class="tp">MonoBehaviour</span>
+{
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">AudioSource</span> musicSource;
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">CanvasGroup</span> qteUI;
+    
+    <span class="kw">private</span> <span class="tp">Queue</span>&lt;<span class="tp">QTEPrompt</span>&gt; promptQueue = <span class="kw">new</span>();
+    <span class="kw">private</span> <span class="tp">QTEPrompt</span> activePrompt;
+    <span class="kw">private float</span> currentWindowStart, currentWindowEnd;
+    <span class="kw">private bool</span> isActive;
+    
+    <span class="kw">public event</span> <span class="tp">Action</span>&lt;<span class="tp">QTEResult</span>&gt; OnPromptResolved;
+    
+    <span class="kw">public void</span> <span class="fn">StartSequence</span>(<span class="tp">QTESequence</span> sequence)
+    {
+        isActive = <span class="kw">true</span>;
+        <span class="kw">foreach</span> (<span class="kw">var</span> p <span class="kw">in</span> sequence.prompts)
+            promptQueue.<span class="fn">Enqueue</span>(p);
+        <span class="fn">SpawnNextPrompt</span>();
+    }
+    
+    <span class="kw">private void</span> <span class="fn">SpawnNextPrompt</span>()
+    {
+        <span class="kw">if</span> (promptQueue.Count == <span class="nm">0</span>) { <span class="fn">EndSequence</span>(); <span class="kw">return</span>; }
+        
+        activePrompt = promptQueue.<span class="fn">Dequeue</span>();
+        
+        <span class="cm">// Calcular ventana según el modo</span>
+        <span class="kw">float</span> windowSize = activePrompt.mode <span class="kw">switch</span>
+        {
+            <span class="tp">QTEMode</span>.Strict =&gt; <span class="nm">0.08f</span>,    <span class="cm">// 80ms</span>
+            <span class="tp">QTEMode</span>.Tolerant =&gt; <span class="nm">0.30f</span>,  <span class="cm">// 300ms</span>
+            <span class="tp">QTEMode</span>.Rhythmic =&gt; <span class="fn">CalculateRhythmicWindow</span>(),
+            _ =&gt; <span class="nm">0.20f</span>
+        };
+        
+        <span class="cm">// En modo rítmico, alinear ventana con el beat</span>
+        <span class="kw">if</span> (activePrompt.mode == <span class="tp">QTEMode</span>.Rhythmic)
+        {
+            <span class="kw">float</span> beatInterval = <span class="nm">60f</span> / activePrompt.bpm;
+            <span class="kw">float</span> nextBeat = <span class="tp">Mathf</span>.Ceiling(
+                (<span class="kw">float</span>)<span class="tp">AudioSettings</span>.dspTime / beatInterval) * beatInterval;
+            currentWindowStart = nextBeat - windowSize / <span class="nm">2f</span>;
+            currentWindowEnd = nextBeat + windowSize / <span class="nm">2f</span>;
+        }
+        <span class="kw">else</span>
+        {
+            currentWindowStart = <span class="tp">Time</span>.time + activePrompt.delay;
+            currentWindowEnd = currentWindowStart + windowSize;
+        }
+        
+        <span class="fn">ShowUI</span>(activePrompt);
+    }
+    
+    <span class="kw">private void</span> <span class="fn">Update</span>()
+    {
+        <span class="kw">if</span> (!isActive || activePrompt == <span class="kw">null</span>) <span class="kw">return</span>;
+        
+        <span class="cm">// Verificar input del jugador</span>
+        <span class="kw">if</span> (<span class="fn">CheckInput</span>(activePrompt.expectedInput))
+        {
+            <span class="kw">float</span> now = activePrompt.mode == <span class="tp">QTEMode</span>.Rhythmic
+                ? (<span class="kw">float</span>)<span class="tp">AudioSettings</span>.dspTime
+                : <span class="tp">Time</span>.time;
+            
+            <span class="kw">if</span> (now &gt;= currentWindowStart &amp;&amp; now &lt;= currentWindowEnd)
+            {
+                <span class="cm">// Calcular precisión (0 = perfecto, 1 = fuera)</span>
+                <span class="kw">float</span> center = (currentWindowStart + currentWindowEnd) / <span class="nm">2f</span>;
+                <span class="kw">float</span> accuracy = <span class="tp">Mathf</span>.Clamp01(
+                    <span class="tp">Mathf</span>.Abs(now - center) / (windowSize / <span class="nm">2f</span>));
+                
+                <span class="tp">QTEResult</span> result = accuracy &lt; <span class="nm">0.2f</span> ? <span class="tp">QTEResult</span>.Perfect
+                    : accuracy &lt; <span class="nm">0.5f</span> ? <span class="tp">QTEResult</span>.Good
+                    : accuracy &lt; <span class="nm">0.8f</span> ? <span class="tp">QTEResult</span>.Ok
+                    : <span class="tp">QTEResult</span>.Miss;
+                
+                OnPromptResolved?.<span class="fn">Invoke</span>(result);
+                <span class="fn">SpawnNextPrompt</span>();
+            }
+        }
+        
+        <span class="cm">// Timeout</span>
+        <span class="kw">if</span> (<span class="tp">Time</span>.time &gt; currentWindowEnd + <span class="nm">0.1f</span>)
+        {
+            OnPromptResolved?.<span class="fn">Invoke</span>(<span class="tp">QTEResult</span>.Fail);
+            <span class="kw">if</span> (activePrompt.mode == <span class="tp">QTEMode</span>.Strict)
+                <span class="fn">HandleFailure</span>(); <span class="cm">// Penalización alta</span>
+            <span class="kw">else</span>
+                <span class="fn">SpawnNextPrompt</span>(); <span class="cm">// Continuar en tolerante</span>
+        }
+    }
+    
+    <span class="kw">private float</span> <span class="fn">CalculateRhythmicWindow</span>()
+    {
+        <span class="cm">// Ventana más generosa en BPM bajos, más estricta en altos</span>
+        <span class="kw">float</span> bpm = activePrompt.bpm;
+        <span class="kw">return</span> <span class="tp">Mathf</span>.Lerp(<span class="nm">0.25f</span>, <span class="nm">0.08f</span>, (bpm - <span class="nm">80f</span>) / <span class="nm">120f</span>);
+    }
+}</pre>
+        </div>
+
+        <!-- Integración con narrativa -->
+        <div class="ritual-border rounded-xl p-6" data-aos="fade-up">
+          <h4 class="font-serif text-xl text-primary-300 mb-4 flex items-center gap-2">
+            <i data-lucide="link" class="w-5 h-5"></i>
+            Integración QTE → Narrativa
+          </h4>
+          <div class="code-block">
+            <span class="lang-tag">C#</span>
+            <pre><span class="cm">// Cada QTE resuelto alimenta el NarrativeState</span>
+<span class="kw">public class</span> <span class="tp">QTEToNarrativeBridge</span> : <span class="tp">MonoBehaviour</span>
+{
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">QTEController</span> qte;
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">NarrativeState</span> narrative;
+    
+    <span class="kw">private void</span> <span class="fn">OnEnable</span>() =&gt; qte.OnPromptResolved += <span class="fn">HandleResult</span>;
+    <span class="kw">private void</span> <span class="fn">OnDisable</span>() =&gt; qte.OnPromptResolved -= <span class="fn">HandleResult</span>;
+    
+    <span class="kw">private void</span> <span class="fn">HandleResult</span>(<span class="tp">QTEResult</span> result)
+    {
+        <span class="kw">float</span> syncValue = result <span class="kw">switch</span>
+        {
+            <span class="tp">QTEResult</span>.Perfect =&gt; <span class="nm">1.0f</span>,
+            <span class="tp">QTEResult</span>.Good =&gt; <span class="nm">0.75f</span>,
+            <span class="tp">QTEResult</span>.Ok =&gt; <span class="nm">0.5f</span>,
+            <span class="tp">QTEResult</span>.Miss =&gt; <span class="nm">0.2f</span>,
+            <span class="tp">QTEResult</span>.Fail =&gt; <span class="nm">0.0f</span>,
+            _ =&gt; <span class="nm">0f</span>
+        };
+        narrative.<span class="fn">UpdateRhythmAccuracy</span>(syncValue);
+    }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: COMBATE / FATALITY -->
+    <section id="combate" class="py-20 border-b border-primary-800/30">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8" data-aos="fade-up">
+          <div class="w-12 h-12 rounded-lg bg-accent-500/20 border border-accent-500/40 flex items-center justify-center">
+            <span class="font-serif text-2xl font-bold text-accent-300">04</span>
+          </div>
+          <div>
+            <p class="text-xs font-mono text-accent-400 tracking-widest">SISTEMA CORE</p>
+            <h2 class="font-serif text-4xl font-bold text-accent-300">Combate y Fatality</h2>
+          </div>
+        </div>
+
+        <p class="text-lg text-gray-400 mb-10 leading-relaxed" data-aos="fade-up">
+          Inspirado en <em>Killer Instinct</em> y <em>Mortal Kombat</em>, el sistema de combate de <em>Total Darkness</em> usa <strong class="text-primary-200">secuencias de botones rítmicas</strong> para ejecutar ataques especiales y Fatalities. Las secuencias se validan con un <strong class="text-accent-300">input buffer</strong> y se sincronizan con el BPM de la música de fondo.
+        </p>
+
+        <!-- Input Buffer -->
+        <div class="ritual-border rounded-xl p-8 mb-8" data-aos="fade-up">
+          <h3 class="font-serif text-2xl text-primary-300 mb-4 flex items-center gap-3">
+            <i data-lucide="database" class="w-6 h-6"></i>
+            Input Buffer con Ventana Temporal
+          </h3>
+          <p class="text-gray-400 mb-6">
+            El buffer almacena las últimas entradas del jugador con timestamps. Cada frame se limpia lo obsoleto y se busca coincidencia con las secuencias definidas en los <code class="text-primary-300 bg-abyss-300 px-2 py-0.5 rounded text-sm">MoveDefinition</code>.
+          </p>
+          <div class="code-block">
+            <span class="lang-tag">C# · Input Buffer</span>
+            <pre><span class="kw">using</span> System.Collections.Generic;
+<span class="kw">using</span> UnityEngine;
+
+<span class="kw">public class</span> <span class="tp">InputBuffer</span>
+{
+    <span class="kw">private readonly</span> <span class="tp">List</span>&lt;<span class="tp">BufferedInput</span>&gt; buffer = <span class="kw">new</span>();
+    <span class="kw">private readonly float</span> maxAge = <span class="nm">0.6f</span>; <span class="cm">// 600ms de memoria</span>
+    
+    <span class="kw">public struct</span> <span class="tp">BufferedInput</span>
+    {
+        <span class="kw">public</span> <span class="tp">CombatInput</span> input;
+        <span class="kw">public float</span> timestamp;
+        <span class="kw">public float</span> beatPhase; <span class="cm">// Fase del beat al presionar (0-1)</span>
+    }
+    
+    <span class="kw">public void</span> <span class="fn">Record</span>(<span class="tp">CombatInput</span> input, <span class="kw">float</span> beatPhase)
+    {
+        buffer.<span class="fn">Add</span>(<span class="kw">new</span> <span class="tp">BufferedInput</span> 
+        { 
+            input = input, 
+            timestamp = <span class="tp">Time</span>.time,
+            beatPhase = beatPhase
+        });
+        <span class="fn">Prune</span>();
+    }
+    
+    <span class="kw">private void</span> <span class="fn">Prune</span>()
+    {
+        <span class="kw">float</span> cutoff = <span class="tp">Time</span>.time - maxAge;
+        buffer.<span class="fn">RemoveAll</span>(b =&gt; b.timestamp &lt; cutoff);
+    }
+    
+    <span class="cm">/// &lt;summary&gt;
+    /// Busca coincidencia con una secuencia definida.
+    /// Tolerancia: cada input debe caer dentro de ±tolerance segundos
+    /// del momento esperado.
+    /// &lt;/summary&gt;</span>
+    <span class="kw">public</span> <span class="tp">MatchResult</span> <span class="fn">TryMatch</span>(<span class="tp">MoveDefinition</span> move, <span class="kw">float</span> tolerance)
+    {
+        <span class="kw">if</span> (buffer.Count &lt; move.sequence.Length) 
+            <span class="kw">return new</span> <span class="tp">MatchResult</span> { matched = <span class="kw">false</span> };
+        
+        <span class="cm">// Comparar desde el final del buffer hacia atrás</span>
+        <span class="kw">int</span> bufferIdx = buffer.Count - <span class="nm">1</span>;
+        <span class="kw">int</span> seqIdx = move.sequence.Length - <span class="nm">1</span>;
+        <span class="kw">float</span> totalRhythmScore = <span class="nm">0f</span>;
+        <span class="kw">int</span> rhythmHits = <span class="nm">0</span>;
+        
+        <span class="kw">while</span> (seqIdx &gt;= <span class="nm">0</span> &amp;&amp; bufferIdx &gt;= <span class="nm">0</span>)
+        {
+            <span class="kw">var</span> expected = move.sequence[seqIdx];
+            <span class="kw">var</span> actual = buffer[bufferIdx];
+            
+            <span class="kw">if</span> (actual.input == expected)
+            {
+                <span class="cm">// Evaluar sincronía rítmica</span>
+                <span class="kw">float</span> phaseDiff = <span class="tp">Mathf</span>.Abs(actual.beatPhase - expected.beatTarget);
+                phaseDiff = <span class="tp">Mathf</span>.Min(phaseDiff, <span class="nm">1f</span> - phaseDiff); <span class="cm">// wrap-around</span>
+                <span class="kw">float</span> rhythmQuality = <span class="nm">1f</span> - <span class="tp">Mathf</span>.Clamp01(phaseDiff / <span class="nm">0.15f</span>);
+                totalRhythmScore += rhythmQuality;
+                rhythmHits++;
+                
+                seqIdx--;
+            }
+            bufferIdx--;
+        }
+        
+        <span class="kw">bool</span> matched = seqIdx &lt; <span class="nm">0</span>;
+        <span class="kw">float</span> avgRhythm = rhythmHits &gt; <span class="nm">0</span> ? totalRhythmScore / rhythmHits : <span class="nm">0f</span>;
+        
+        <span class="kw">return new</span> <span class="tp">MatchResult</span> 
+        { 
+            matched = matched, 
+            rhythmScore = avgRhythm 
+        };
+    }
+}</pre>
+          </div>
+        </div>
+
+        <!-- Definición de movimientos -->
+        <div class="code-block mb-8" data-aos="fade-up">
+          <span class="lang-tag">C# · Move Definition</span>
+          <pre><span class="kw">using</span> UnityEngine;
+<span class="kw">using</span> System;
+
+[<span class="at">CreateAssetMenu</span>(menuName = <span class="st">"TD/Combat/MoveDefinition"</span>)]
+<span class="kw">public class</span> <span class="tp">MoveDefinition</span> : <span class="tp">ScriptableObject</span>
+{
+    <span class="kw">public string</span> moveName;
+    <span class="kw">public</span> <span class="tp">CombatInput</span>[] sequence;
+    <span class="kw">public float</span> rhythmTolerance = <span class="nm">0.15f</span>; <span class="cm">// ±15% del beat</span>
+    <span class="kw">public float</span> damage;
+    <span class="kw">public</span> <span class="tp">AnimationClip</span> animation;
+    <span class="kw">public</span> <span class="tp">VFXGraph</span> vfxPrefab;
+    <span class="kw">public bool</span> isFatality; <span class="cm">// Si es true, requiere enemigo en estado "ejecutable"</span>
+    <span class="kw">public</span> <span class="tp">AudioClip</span> impactSound;
+}
+
+<span class="kw">public enum</span> <span class="tp">CombatInput</span> 
+{ 
+    Light, Heavy, Block, Dodge, 
+    Up, Down, Left, Right,
+    Ritual <span class="cm">// Input especial para rituales</span>
+}
+
+[<span class="at">Serializable</span>]
+<span class="kw">public struct</span> <span class="tp">BeatTarget</span>
+{
+    <span class="kw">public</span> <span class="tp">CombatInput</span> input;
+    <span class="kw">public float</span> beatTarget; <span class="cm">// 0 = en el beat, 0.5 = entre beats</span>
+}
+
+<span class="cm">// ============================================</span>
+<span class="cm">// EJEMPLOS DE SECUENCIAS (GDD §3)</span>
+<span class="cm">// ============================================</span>
+<span class="cm">// Fatality "Abrazo del Verbo":
+//   sequence = [Down, Down+Right, Light, Heavy, Ritual]
+//   Requiere: enemigo &lt; 15% HP, en rango melee
+//   Animación: 4.5s cinemática
+//   Daño: letal instantáneo</span>
+
+<span class="cm">// Ataque Especial "Eco Fragmentado":
+//   sequence = [Left, Light, Light, Right, Heavy]
+//   Requiere: 3 Fragmentos de Crónica equipados
+//   Daño: 80 + AoE simbólico</span>
+
+<span class="cm">// Combo Básico "Golpe Primordial":
+//   sequence = [Light, Light, Heavy]
+//   Ventana: 800ms total
+//   Daño: 25</span></pre>
+        </div>
+
+        <!-- Visualización de secuencia Fatality -->
+        <div class="ritual-border rounded-xl p-8 mb-8" data-aos="fade-up">
+          <h4 class="font-serif text-xl text-accent-300 mb-6 flex items-center gap-2">
+            <i data-lucide="skull" class="w-5 h-5"></i>
+            Fatality: "Abrazo del Verbo"
+          </h4>
+          <div class="mb-4">
+            <p class="text-xs text-gray-500 mb-2 font-mono">SECUENCIA DE ENTRADA</p>
+            <div class="input-sequence">
+              <div class="key-btn">↓</div>
+              <span class="arrow-connector">→</span>
+              <div class="key-btn">↓→</div>
+              <span class="arrow-connector">→</span>
+              <div class="key-btn">L</div>
+              <span class="arrow-connector">→</span>
+              <div class="key-btn">H</div>
+              <span class="arrow-connector">→</span>
+              <div class="key-btn active">R</div>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-3 gap-4 text-sm">
+            <div class="bg-abyss-300 rounded-lg p-3">
+              <p class="text-xs text-gray-500 mb-1">VENTANA TOTAL</p>
+              <p class="text-primary-200 font-mono">1.8s (±BPM)</p>
+            </div>
+            <div class="bg-abyss-300 rounded-lg p-3">
+              <p class="text-xs text-gray-500 mb-1">REQUISITO</p>
+              <p class="text-primary-200 font-mono">Enemigo &lt;15% HP</p>
+            </div>
+            <div class="bg-abyss-300 rounded-lg p-3">
+              <p class="text-xs text-gray-500 mb-1">RITMO</p>
+              <p class="text-primary-200 font-mono">120 BPM · 4/4</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CombatController -->
+        <div class="code-block" data-aos="fade-up">
+          <span class="lang-tag">C# · Combat Controller</span>
+          <pre><span class="kw">public class</span> <span class="tp">CombatController</span> : <span class="tp">MonoBehaviour</span>
+{
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">InputBuffer</span> buffer;
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">List</span>&lt;<span class="tp">MoveDefinition</span>&gt; availableMoves;
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">RhythmTracker</span> rhythmTracker;
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">NarrativeState</span> narrative;
+    
+    <span class="kw">private</span> <span class="tp">Animator</span> animator;
+    <span class="kw">private bool</span> canAct = <span class="kw">true</span>;
+    
+    <span class="kw">public void</span> <span class="fn">RecordInput</span>(<span class="tp">CombatInput</span> input)
+    {
+        <span class="kw">float</span> beatPhase = rhythmTracker.<span class="fn">GetCurrentPhase</span>();
+        buffer.<span class="fn">Record</span>(input, beatPhase);
+        <span class="fn">TryExecuteMove</span>();
+    }
+    
+    <span class="kw">private void</span> <span class="fn">TryExecuteMove</span>()
+    {
+        <span class="kw">if</span> (!canAct) <span class="kw">return</span>;
+        
+        <span class="cm">// Priorizar Fatalities sobre combos</span>
+        <span class="kw">foreach</span> (<span class="kw">var</span> move <span class="kw">in</span> availableMoves)
+        {
+            <span class="kw">if</span> (move.isFatality &amp;&amp; !<span class="fn">CanExecuteFatality</span>()) <span class="kw">continue</span>;
+            
+            <span class="kw">var</span> match = buffer.<span class="fn">TryMatch</span>(move, move.rhythmTolerance);
+            <span class="kw">if</span> (match.matched)
+            {
+                <span class="fn">ExecuteMove</span>(move, match.rhythmScore);
+                <span class="kw">return</span>;
+            }
+        }
+    }
+    
+    <span class="kw">private void</span> <span class="fn">ExecuteMove</span>(<span class="tp">MoveDefinition</span> move, <span class="kw">float</span> rhythmScore)
+    {
+        canAct = <span class="kw">false</span>;
+        
+        <span class="cm">// Daño escalado por precisión rítmica</span>
+        <span class="kw">float</span> finalDamage = move.damage * (<span class="nm">0.7f</span> + rhythmScore * <span class="nm">0.6f</span>);
+        
+        <span class="cm">// Ejecutar animación</span>
+        animator.<span class="fn">Play</span>(move.animation.name);
+        
+        <span class="cm">// Spawn VFX</span>
+        <span class="fn">Instantiate</span>(move.vfxPrefab, transform.position, <span class="tp">Quaternion</span>.identity);
+        
+        <span class="cm">// Impacto en narrativa (GDD §2.1.4)</span>
+        <span class="kw">float</span> karmaDelta = move.isFatality ? <span class="nm">-0.05f</span> : <span class="nm">0f</span>;
+        narrative.Karma += karmaDelta;
+        
+        <span class="cm">// Restaurar capacidad de acción tras animación</span>
+        <span class="fn">Invoke</span>(<span class="kw">nameof</span>(<span class="fn">RestoreAction</span>), move.animation.length);
+        
+        <span class="tp">GameEventBus</span>.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="tp">MoveExecuted</span>(move, rhythmScore));
+    }
+    
+    <span class="kw">private bool</span> <span class="fn">CanExecuteFatality</span>()
+    {
+        <span class="kw">var</span> target = <span class="fn">GetMeleeTarget</span>();
+        <span class="kw">return</span> target != <span class="kw">null</span> 
+            &amp;&amp; target.CurrentHP &lt; target.MaxHP * <span class="nm">0.15f</span>
+            &amp;&amp; target.IsStaggered;
+    }
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 5: RITMO -->
+    <section id="ritmo" class="py-20 border-b border-primary-800/30">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8" data-aos="fade-up">
+          <div class="w-12 h-12 rounded-lg bg-primary-500/20 border border-primary-500/40 flex items-center justify-center">
+            <span class="font-serif text-2xl font-bold text-primary-300">05</span>
+          </div>
+          <div>
+            <p class="text-xs font-mono text-primary-400 tracking-widest">SISTEMA TRANSVERSAL</p>
+            <h2 class="font-serif text-4xl font-bold text-primary-300">Sincronización Rítmica</h2>
+          </div>
+        </div>
+
+        <p class="text-lg text-gray-400 mb-10 leading-relaxed" data-aos="fade-up">
+          La música de <strong class="text-primary-200">Redemthor y Mike Hellawaits</strong> no es solo ambientación: es el <strong class="text-accent-300">reloj maestro</strong> del juego. El <code class="text-primary-300 bg-abyss-300 px-2 py-0.5 rounded text-sm">RhythmTracker</code> expone la fase del beat actual a todos los sistemas (QTE, combate, narrativa).
+        </p>
+
+        <div class="code-block mb-8" data-aos="fade-up">
+          <span class="lang-tag">C# · Rhythm Tracker</span>
+          <pre><span class="kw">using</span> UnityEngine;
+
+<span class="cm">/// &lt;summary&gt;
+/// Rastrea el beat de la pista musical activa usando AudioSettings.dspTime
+/// para máxima precisión (independiente de Time.time).
+/// &lt;/summary&gt;</span>
+<span class="kw">public class</span> <span class="tp">RhythmTracker</span> : <span class="tp">MonoBehaviour</span>
+{
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">AudioSource</span> musicSource;
+    [<span class="at">SerializeField</span>] <span class="kw">private float</span> bpm = <span class="nm">120f</span>;
+    [<span class="at">SerializeField</span>] <span class="kw">private int</span> beatsPerBar = <span class="nm">4</span>;
+    [<span class="at">SerializeField</span>] <span class="kw">private double</span> songOffset = <span class="nm">0.0</span>; <span class="cm">// Ajuste manual de sync</span>
+    
+    <span class="kw">public float</span> BeatInterval =&gt; <span class="nm">60f</span> / bpm;
+    <span class="kw">public float</span> BarInterval =&gt; BeatInterval * beatsPerBar;
+    
+    <span class="kw">public event</span> <span class="tp">System.Action</span>&lt;<span class="kw">int</span>&gt; OnBeat;
+    <span class="kw">public event</span> <span class="tp">System.Action</span>&lt;<span class="kw">int</span>&gt; OnBar;
+    
+    <span class="kw">private int</span> lastBeat = -<span class="nm">1</span>;
+    <span class="kw">private int</span> lastBar = -<span class="nm">1</span>;
+    
+    <span class="kw">public float</span> <span class="fn">GetCurrentPhase</span>()
+    {
+        <span class="kw">double</span> songTime = <span class="tp">AudioSettings</span>.dspTime - songOffset;
+        <span class="kw">double</span> beatPos = songTime / BeatInterval;
+        <span class="kw">return</span> (<span class="kw">float</span>)(beatPos - <span class="tp">Mathf</span>.Floor((<span class="kw">float</span>)beatPos));
+    }
+    
+    <span class="kw">public int</span> <span class="fn">GetCurrentBeat</span>()
+    {
+        <span class="kw">double</span> songTime = <span class="tp">AudioSettings</span>.dspTime - songOffset;
+        <span class="kw">return</span> (<span class="kw">int</span>)(songTime / BeatInterval);
+    }
+    
+    <span class="kw">private void</span> <span class="fn">Update</span>()
+    {
+        <span class="kw">int</span> currentBeat = <span class="fn">GetCurrentBeat</span>();
+        <span class="kw">if</span> (currentBeat != lastBeat)
+        {
+            lastBeat = currentBeat;
+            OnBeat?.<span class="fn">Invoke</span>(currentBeat % beatsPerBar);
+            
+            <span class="kw">int</span> currentBar = currentBeat / beatsPerBar;
+            <span class="kw">if</span> (currentBar != lastBar)
+            {
+                lastBar = currentBar;
+                OnBar?.<span class="fn">Invoke</span>(currentBar);
+            }
+        }
+    }
+    
+    <span class="cm">/// &lt;summary&gt;
+    /// Calcula qué tan cerca está el jugador del beat perfecto.
+    /// 0 = perfecto, 1 = completamente fuera.
+    /// &lt;/summary&gt;</span>
+    <span class="kw">public float</span> <span class="fn">EvaluateTiming</span>(<span class="kw">float</span> inputTime)
+    {
+        <span class="kw">float</span> phase = <span class="fn">GetCurrentPhase</span>();
+        <span class="kw">float</span> distance = <span class="tp">Mathf</span>.Min(phase, <span class="nm">1f</span> - phase);
+        <span class="kw">return</span> distance / <span class="nm">0.5f</span>; <span class="cm">// Normalizar a 0-1</span>
+    }
+}</pre>
+        </div>
+
+        <!-- Diagrama de flujo rítmico -->
+        <div class="ritual-border rounded-xl p-8" data-aos="fade-up">
+          <h4 class="font-serif text-xl text-primary-300 mb-4">Flujo de Sincronización</h4>
+          <div class="mermaid">
+sequenceDiagram
+    participant Music as Audio Engine
+    participant RT as RhythmTracker
+    participant QTE as QTE Controller
+    participant Combat as Combat System
+    participant Narr as Narrative State
+    
+    Music->>RT: dspTime (alta precisión)
+    RT->>QTE: GetCurrentPhase()
+    RT->>Combat: GetCurrentPhase()
+    QTE->>QTE: Evaluar input vs ventana
+    QTE->>Narr: UpdateRhythmAccuracy()
+    Combat->>Combat: Escalar daño por ritmo
+    Combat->>Narr: Karma delta
+    Narr->>Narr: Recalcular final
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 6: INTEGRACIÓN -->
+    <section id="integracion" class="py-20">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8" data-aos="fade-up">
+          <div class="w-12 h-12 rounded-lg bg-primary-500/20 border border-primary-500/40 flex items-center justify-center">
+            <span class="font-serif text-2xl font-bold text-primary-300">06</span>
+          </div>
+          <div>
+            <p class="text-xs font-mono text-primary-400 tracking-widest">ARQUITECTURA</p>
+            <h2 class="font-serif text-4xl font-bold text-primary-300">Integración Final</h2>
+          </div>
+        </div>
+
+        <p class="text-lg text-gray-400 mb-10 leading-relaxed" data-aos="fade-up">
+          Todos los sistemas se orquestan desde el <code class="text-primary-300 bg-abyss-300 px-2 py-0.5 rounded text-sm">GameLoopManager</code>, que cambia entre estados globales y delega a los sistemas especializados.
+        </p>
+
+        <div class="code-block mb-8" data-aos="fade-up">
+          <span class="lang-tag">C# · Game Loop</span>
+          <pre><span class="kw">public class</span> <span class="tp">GameLoopManager</span> : <span class="tp">MonoBehaviour</span>
+{
+    <span class="kw">public enum</span> <span class="tp">GameState</span> { Exploration, Combat, QTE, Ritual, Cinematic, Dialog }
+    
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">CharacterMovementController</span> movement;
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">CombatController</span> combat;
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">QTEController</span> qte;
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">NarrativeState</span> narrative;
+    [<span class="at">SerializeField</span>] <span class="kw">private</span> <span class="tp">RhythmTracker</span> rhythm;
+    
+    <span class="kw">private</span> <span class="tp">GameState</span> currentState = <span class="tp">GameState</span>.Exploration;
+    
+    <span class="kw">public void</span> <span class="fn">TransitionTo</span>(<span class="tp">GameState</span> newState)
+    {
+        <span class="cm">// Desactivar sistema anterior</span>
+        <span class="kw">switch</span> (currentState)
+        {
+            <span class="kw">case</span> <span class="tp">GameState</span>.Exploration: movement.<span class="fn">SetMode</span>(<span class="tp">MovementMode</span>.Exploration); <span class="kw">break</span>;
+            <span class="kw">case</span> <span class="tp">GameState</span>.Combat: combat.<span class="fn">Disable</span>(); <span class="kw">break</span>;
+            <span class="kw">case</span> <span class="tp">GameState</span>.QTE: qte.<span class="fn">Stop</span>(); <span class="kw">break</span>;
+        }
+        
+        <span class="cm">// Activar nuevo sistema</span>
+        <span class="kw">switch</span> (newState)
+        {
+            <span class="kw">case</span> <span class="tp">GameState</span>.Exploration: movement.<span class="fn">SetMode</span>(<span class="tp">MovementMode</span>.Exploration); <span class="kw">break</span>;
+            <span class="kw">case</span> <span class="tp">GameState</span>.Combat: movement.<span class="fn">SetMode</span>(<span class="tp">MovementMode</span>.Combat); combat.<span class="fn">Enable</span>(); <span class="kw">break</span>;
+            <span class="kw">case</span> <span class="tp">GameState</span>.QTE: movement.<span class="fn">SetMode</span>(<span class="tp">MovementMode</span>.Staggered); qte.<span class="fn">Start</span>(); <span class="kw">break</span>;
+            <span class="kw">case</span> <span class="tp">GameState</span>.Ritual: movement.<span class="fn">SetMode</span>(<span class="tp">MovementMode</span>.Ritual); <span class="kw">break</span>;
+        }
+        
+        currentState = newState;
+        <span class="tp">GameEventBus</span>.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="tp">GameStateChanged</span>(newState));
+    }
+    
+    <span class="cm">// Ejemplo de flujo: exploración → combate → fatality → QTE ritual</span>
+    <span class="kw">public void</span> <span class="fn">OnEnemyDefeated</span>(<span class="tp">Enemy</span> enemy)
+    {
+        <span class="kw">if</span> (enemy.WasKilledByFatality)
+        {
+            <span class="cm">// Lanzar QTE ritual post-Fatality</span>
+            <span class="fn">TransitionTo</span>(<span class="tp">GameState</span>.QTE);
+            qte.<span class="fn">StartSequence</span>(<span class="fn">GetRitualSequence</span>(enemy));
+        }
+        <span class="kw">else</span>
+        {
+            <span class="fn">TransitionTo</span>(<span class="tp">GameState</span>.Exploration);
+        }
+    }
+}</pre>
+        </div>
+
+        <!-- Resumen final -->
+        <div class="grid md:grid-cols-2 gap-6" data-aos="fade-up">
+          <div class="ritual-border rounded-xl p-6 glow-gold">
+            <h4 class="font-serif text-xl text-primary-300 mb-4 flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+              Sistemas Implementados
+            </h4>
+            <ul class="space-y-2 text-sm text-gray-400">
+              <li>✓ Movimiento híbrido arcade/táctico</li>
+              <li>✓ Transición 1ª/3ª persona diegética</li>
+              <li>✓ Rama narrativa con karma + sincronía</li>
+              <li>✓ 4 finales evaluados dinámicamente</li>
+              <li>✓ QTE con 3 modos (estricto/tolerante/rítmico)</li>
+              <li>✓ Input buffer con validación rítmica</li>
+              <li>✓ Sistema de Fatality con secuencias</li>
+              <li>✓ RhythmTracker sincronizado con DSP</li>
+            </ul>
+          </div>
+          <div class="ritual-border rounded-xl p-6 glow-red">
+            <h4 class="font-serif text-xl text-accent-300 mb-4 flex items-center gap-2">
+              <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+              Consideraciones Críticas
+            </h4>
+            <ul class="space-y-2 text-sm text-gray-400">
+              <li>• Usar <code class="text-primary-300">AudioSettings.dspTime</code> para timing musical</li>
+              <li>• Input buffer de 600ms máximo para evitar "deuda"</li>
+              <li>• Karma debe ser persistente entre saves</li>
+              <li>• Fatalities requieren validación de estado enemigo</li>
+              <li>• QTE estricto solo en momentos narrativos clave</li>
+              <li>• Probar con BPMs de 80 a 180 para validar ventanas</li>
+              <li>• El movimiento táctico debe sentirse "pesado"</li>
+              <li>• La transición de cámara no debe causar mareo</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Cita del GDD -->
+        <div class="mt-12 ritual-border rounded-xl p-8 text-center" data-aos="fade-up">
+          <p class="font-serif text-xl text-primary-200 italic leading-relaxed">
+            "Invocamus Xlerion, Numen ex obscura,<br>
+            Imperium redemptoris, ex Lignum surgens."
+          </p>
+          <p class="text-xs text-gray-500 mt-4 font-mono">— GDD Total Darkness · Juramento de la Orden</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-primary-800/30 py-10">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <p class="font-serif text-primary-400 text-lg mb-2">Total Darkness · Documentos Técnicos</p>
+      <p class="text-xs text-gray-600 font-mono">Capítulo III · Lógica de Programación · v1.0</p>
+      <p class="text-xs text-gray-700 mt-4">Xlerion Game Studios · 2026</p>
+    </div>
+  </footer>
+
+  <script>
+    // Inicializar librerías
+    document.addEventListener('DOMContentLoaded', function() {
+      lucide.createIcons();
+      AOS.init({ duration: 600, once: true, offset: 80 });
+      
+      mermaid.initialize({ 
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+          primaryColor: '#fbbf24',
+          primaryTextColor: '#e5e7eb',
+          primaryBorderColor: '#92400e',
+          lineColor: '#fbbf24',
+          secondaryColor: '#dc2626',
+          tertiaryColor: '#1e1b4b',
+          background: '#0a0a12',
+          mainBkg: '#1a1a2e',
+          nodeBorder: '#fbbf24',
+          clusterBkg: '#1e1b4b',
+          titleColor: '#fbbf24'
+        }
+      });
+      
+      // Progress bar
+      window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const percent = (scrollTop / docHeight) * 100;
+        document.getElementById('progressBar').style.width = percent + '%';
+        
+        // Scroll indicator
+        const sections = ['intro', 'movimiento', 'ramas', 'qte', 'combate', 'ritmo', 'integracion'];
+        const scrollIndicator = document.querySelector('.scroll-indicator');
+        if (scrollIndicator) {
+          sections.forEach(id => {
+            const el = document.getElementById(id);
+            const link = scrollIndicator.querySelector(`[data-section="${id}"]`);
+            if (!el || !link) return;
+            const rect = el.getBoundingClientRect();
+            if (rect.top <= 150 && rect.bottom >= 150) {
+              link.classList.add('active');
+            } else {
+              link.classList.remove('active');
+            }
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

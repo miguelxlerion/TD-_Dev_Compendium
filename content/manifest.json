@@ -1,0 +1,303 @@
+{
+  "version": 1,
+  "generated": "2026-09-06T23:36:12+00:00",
+  "generator": "tools/build-manifest.py",
+  "categories": [
+    {
+      "id": "personajes",
+      "name": "Personajes & Pipeline 3D",
+      "description": "Diseño, modelado, texturizado, rigging, animación e integración en Unity — de concepto a motor.",
+      "icon": "users",
+      "color": "violet"
+    },
+    {
+      "id": "texturizado",
+      "name": "Texturizado & Optimización",
+      "description": "Atlas textures, PBR, Substance, memoria y rendimiento en Unity 3D.",
+      "icon": "layers",
+      "color": "amber"
+    },
+    {
+      "id": "automatizacion",
+      "name": "Automatización, Scripts & Plugins",
+      "description": "Python, MAXScript, UXP, Blender e integración inter-app para producción AAA.",
+      "icon": "bot",
+      "color": "cyan"
+    },
+    {
+      "id": "programacion",
+      "name": "Programación & Gameplay",
+      "description": "Sistemas core de Total Darkness: movimiento híbrido, narrativa, QTE, combate y ritmo.",
+      "icon": "gamepad-2",
+      "color": "emerald"
+    },
+    {
+      "id": "biblioteca",
+      "name": "Biblioteca PDF · Diseño",
+      "description": "Documentos de diseño y arquitectura del proyecto Total Darkness en PDF.",
+      "icon": "library",
+      "color": "rose"
+    }
+  ],
+  "pages": [
+    {
+      "id": "atlas-textures-unity",
+      "title": "Atlas Textures en Unity 3D — Guía Profesional Completa",
+      "short": "Atlas Textures en Unity 3D",
+      "file": "content/atlas-textures-unity.html",
+      "type": "html",
+      "category": "texturizado",
+      "description": "Creación, optimización y gestión de atlas textures con Substance 3D Painter, 3ds Max 2024 y Unity 3D. Empaquetado, automatización y estrategias de memoria/rendimiento.",
+      "tags": [
+        "atlas",
+        "texturas",
+        "unity",
+        "substance",
+        "3ds max",
+        "optimización",
+        "pbr",
+        "rendimiento"
+      ],
+      "badge": "Optimización",
+      "featured": true
+    },
+    {
+      "id": "automatizacion-xrerion",
+      "title": "XRERION Pipeline — Automatización Integral 3D",
+      "short": "XRERION · Scripts & Plugins",
+      "file": "content/automatizacion-scripts-plugins-xrerion.html",
+      "type": "html",
+      "category": "automatizacion",
+      "description": "Scripting y flujos profesionales para 3ds Max, ZBrush, Blender, Substance y Photoshop: retopología, PBR, automatización e integración inter-app.",
+      "tags": [
+        "python",
+        "maxscript",
+        "zbrush",
+        "blender",
+        "substance",
+        "photoshop",
+        "uxp",
+        "pbr",
+        "retopología"
+      ],
+      "badge": "v2.1",
+      "featured": true
+    },
+    {
+      "id": "creacion-personajes",
+      "title": "Creación de Personajes para Videojuegos: Diseño, Modelado y Rigging",
+      "short": "Creación de Personajes",
+      "file": "content/creacion-personajes-diseno-modelado-rigging.html",
+      "type": "html",
+      "category": "personajes",
+      "description": "Guía integral de diseño, modelado, texturizado y rigging de personajes 3D: del concepto a la implementación en el motor.",
+      "tags": [
+        "personajes",
+        "diseño",
+        "modelado",
+        "rigging",
+        "texturizado",
+        "pipeline"
+      ],
+      "featured": true
+    },
+    {
+      "id": "logica-programacion",
+      "title": "Total Darkness — Lógica de Programación: Sistemas Core",
+      "short": "Lógica de Programación",
+      "file": "content/logica-programacion-sistemas-core.html",
+      "type": "html",
+      "category": "programacion",
+      "description": "Capítulo III técnico: movimiento híbrido shooter 1ª/3ª persona, ramas narrativas con karma, QTE, combate fatality y secuencias rítmicas.",
+      "tags": [
+        "gameplay",
+        "movimiento",
+        "narrativa",
+        "qte",
+        "combate",
+        "ritmo",
+        "karma",
+        "total darkness"
+      ],
+      "badge": "Sistemas Core",
+      "featured": true
+    },
+    {
+      "id": "pipeline-zbrush",
+      "title": "Pipeline Completo de Creación de Personajes 3D en ZBrush",
+      "short": "Pipeline ZBrush",
+      "file": "content/Pipeline ZBrush.html",
+      "type": "html",
+      "category": "personajes",
+      "description": "Descubre el proceso integral de creación de personajes y assets 3D, desde la escultura inicial en ZBrush hasta la integración final en Unity, con enfoque en técnicas artísticas, optimización topológica, rigging profesional y rendimiento en tiempo real.",
+      "tags": [
+        "optimiz",
+        "personaje",
+        "pipeline",
+        "rendimiento",
+        "rigging",
+        "substance",
+        "textur",
+        "unity",
+        "zbrush"
+      ]
+    },
+    {
+      "id": "pipeline-modelado-aaa",
+      "title": "Pipeline de Modelado de Personajes AAA para Unity 3D",
+      "short": "Pipeline AAA · Modelado a Motor",
+      "file": "content/pipeline-modelado-personajes-motor3d-aaa.html",
+      "type": "html",
+      "category": "personajes",
+      "description": "Flujo AAA de estudios profesionales: del modelado inicial al renderizado e integración final en Unity 3D.",
+      "tags": [
+        "aaa",
+        "modelado",
+        "unity",
+        "render",
+        "pipeline",
+        "estudios"
+      ],
+      "badge": "AAA"
+    },
+    {
+      "id": "pipeline-personajes-v1",
+      "title": "Pipeline Completo de Personajes en Unity 3D (v1)",
+      "short": "Pipeline Personajes · v1",
+      "file": "content/pipeline-personajes-unity-v1.html",
+      "type": "html",
+      "category": "personajes",
+      "description": "Guía exhaustiva v1: diseño conceptual, modelado, texturizado, rigging, optimización e integración de jugables y NPCs en Unity.",
+      "tags": [
+        "pipeline",
+        "unity",
+        "personajes",
+        "rigging",
+        "npc",
+        "integración"
+      ],
+      "badge": "v1"
+    },
+    {
+      "id": "pipeline-personajes-v2",
+      "title": "Pipeline Completo de Personajes para Unity 3D (v2)",
+      "short": "Pipeline Personajes · v2",
+      "file": "content/pipeline-personajes-unity-v2.html",
+      "type": "html",
+      "category": "personajes",
+      "description": "Versión 2 del pipeline: conceptual, modelado, texturizado, rigging, optimización e integración con enfoque en interacción y animación.",
+      "tags": [
+        "pipeline",
+        "unity",
+        "personajes",
+        "animación",
+        "interacción",
+        "optimización"
+      ],
+      "badge": "v2"
+    },
+    {
+      "id": "pipeline-personajes-v3",
+      "title": "Pipeline Completo de Personajes en Unity 3D (v3 · actual)",
+      "short": "Pipeline Personajes · v3",
+      "file": "content/pipeline-personajes-unity-v3.html",
+      "type": "html",
+      "category": "personajes",
+      "description": "Versión 3 vigente: diseño, modelado, texturizado, rigging, animación e interacción, con transformaciones visuales ligadas a decisiones éticas y estados emocionales.",
+      "tags": [
+        "pipeline",
+        "unity",
+        "personajes",
+        "narrativa",
+        "ética",
+        "emociones",
+        "animación"
+      ],
+      "badge": "v3 · actual",
+      "featured": true
+    },
+    {
+      "id": "pdf-arquitectura-hibrida",
+      "title": "Arquitectura de un Sistema Híbrido en Unity — Combates Multigénero y Narrativa Interactiva",
+      "short": "Arquitectura Sistema Híbrido",
+      "file": "docs/arquitectura-sistema-hibrido-unity-combates-narrativa.pdf",
+      "type": "pdf",
+      "category": "biblioteca",
+      "topic": "programacion",
+      "description": "Enfoque integral de arquitectura para combates multigénero y narrativa interactiva en Unity.",
+      "tags": [
+        "arquitectura",
+        "unity",
+        "combate",
+        "narrativa",
+        "pdf"
+      ]
+    },
+    {
+      "id": "pdf-bloqueo-escena",
+      "title": "Del Bloqueo a la Escena — Pipeline Profesional para Personajes AAA en Unity 3D",
+      "short": "Del Bloqueo a la Escena",
+      "file": "docs/del-bloqueo-a-la-escena-pipeline-aaa-unity.pdf",
+      "type": "pdf",
+      "category": "biblioteca",
+      "topic": "personajes",
+      "description": "Pipeline profesional AAA: del bloqueo inicial a la escena final con personajes en Unity 3D.",
+      "tags": [
+        "aaa",
+        "pipeline",
+        "blocking",
+        "escena",
+        "pdf"
+      ]
+    },
+    {
+      "id": "pdf-concepto-interaccion",
+      "title": "Del Concepto a la Interacción Dinámica — Creación de Personajes en Unity 3D",
+      "short": "Del Concepto a la Interacción",
+      "file": "docs/del-concepto-a-la-interaccion-personajes-unity.pdf",
+      "type": "pdf",
+      "category": "biblioteca",
+      "topic": "personajes",
+      "description": "Guía técnica de creación de personajes: del concepto artístico a la interacción dinámica en Unity.",
+      "tags": [
+        "concepto",
+        "interacción",
+        "personajes",
+        "pdf"
+      ]
+    },
+    {
+      "id": "pdf-automatizacion",
+      "title": "Enfoque Integral de Automatización con Scripts y Plugins",
+      "short": "Automatización con Scripts",
+      "file": "docs/enfoque-integral-automatizacion-scripts-plugins.pdf",
+      "type": "pdf",
+      "category": "biblioteca",
+      "topic": "automatizacion",
+      "description": "Automatización del pipeline 3D con scripts y plugins para producción.",
+      "tags": [
+        "scripts",
+        "plugins",
+        "automatización",
+        "pdf"
+      ]
+    },
+    {
+      "id": "pdf-flujo-adaptativo",
+      "title": "Flujo de Trabajo Adaptativo para Personajes Narrativos en Total Darkness",
+      "short": "Flujo Adaptativo Narrativo",
+      "file": "docs/flujo-adaptativo-personajes-narrativos-total-darkness.pdf",
+      "type": "pdf",
+      "category": "biblioteca",
+      "topic": "personajes",
+      "description": "Workflow adaptativo para personajes con carga narrativa en el universo Total Darkness.",
+      "tags": [
+        "workflow",
+        "narrativa",
+        "personajes",
+        "total darkness",
+        "pdf"
+      ]
+    }
+  ]
+}

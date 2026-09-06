@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipeline Completo de Creación de Personajes 3D en ZBrush</title>
+
+  <!-- Essential CDN Libraries -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: 'hsl(210, 75%, 95%)',
+              100: 'hsl(210, 75%, 85%)',
+              200: 'hsl(210, 75%, 75%)',
+              300: 'hsl(210, 75%, 65%)',
+              400: 'hsl(210, 75%, 55%)',
+              500: 'hsl(210, 75%, 40%)',
+              600: 'hsl(210, 75%, 35%)',
+              700: 'hsl(210, 75%, 25%)',
+              800: 'hsl(210, 75%, 15%)',
+              900: 'hsl(210, 75%, 10%)'
+            },
+            accent: {
+              50: 'hsl(280, 70%, 95%)',
+              100: 'hsl(280, 70%, 85%)',
+              200: 'hsl(280, 70%, 75%)',
+              300: 'hsl(280, 70%, 65%)',
+              400: 'hsl(280, 70%, 60%)',
+              500: 'hsl(280, 70%, 55%)',
+              600: 'hsl(280, 70%, 50%)',
+              700: 'hsl(280, 70%, 40%)',
+              800: 'hsl(280, 70%, 30%)',
+              900: 'hsl(280, 70%, 20%)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+
+  <!-- Preline UI Components -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.js"></script>
+
+  <!-- Micro-interactions & Custom Styles -->
+  <style>
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+    .btn-interactive {
+      transition: all 0.2s ease-out;
+    }
+    
+    .btn-interactive:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn-interactive:active {
+      transform: scale(0.95);
+    }
+
+    .card-interactive {
+      transition: all 0.3s ease-out;
+      border: 1px solid transparent;
+      --border-lightness: 40%;
+    }
+
+    .dark .card-interactive {
+      --border-lightness: 60%;
+    }
+
+    .card-interactive:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      filter: brightness(0.98);
+    }
+    
+    /* Primary colored cards */
+    .card-interactive[class*="primary"]:hover,
+    .card-interactive[class*="white"]:hover,
+    .card-interactive[class*="gray-"]:hover {
+      border-color: hsl(210, 75%, var(--border-lightness));
+    }
+    
+    /* Accent colored cards */
+    .card-interactive[class*="accent"]:hover {
+      border-color: hsl(280, 70%, var(--border-lightness));
+    }
+
+    .dark .card-interactive:hover {
+      filter: brightness(1.05);
+    }
+  </style>
+
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      document.getElementById('sunIcon').style.display = isDark ? 'block' : 'none';
+      document.getElementById('moonIcon').style.display = isDark ? 'none' : 'block';
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+  <!-- Progress Bar -->
+  <div class="fixed top-0 left-0 h-1 bg-primary-500 dark:bg-primary-400 z-[60] transition-all duration-300 ease-out" id="progressBar" style="width: 0%;"></div>
+
+  <!-- Floating Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur bg-gray-50/90 dark:bg-gray-900/90 border-b border-primary-500/20 dark:border-primary-600/20">
+    <nav class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold text-primary-700 dark:text-primary-300">Pipeline ZBrush</h1>
+        
+        <div class="hidden md:flex items-center space-x-6">
+          <a href="#inicio" class="text-sm text-primary-600 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Inicio</a>
+          <a href="#escultura" class="text-sm text-primary-600 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Escultura</a>
+          <a href="#topologia" class="text-sm text-primary-600 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Topología</a>
+          <a href="#texturizado" class="text-sm text-primary-600 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Texturizado</a>
+          <a href="#rigging" class="text-sm text-primary-600 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Rigging</a>
+          <a href="#integracion" class="text-sm text-primary-600 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Integración</a>
+          <a href="#conclusion" class="text-sm text-primary-600 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Conclusión</a>
+        </div>
+
+        <button onclick="toggleDarkMode()" class="btn-interactive p-2 rounded-lg bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 transition-all">
+          <i data-lucide="sun" id="sunIcon" class="w-5 h-5" style="display:none;"></i>
+          <i data-lucide="moon" id="moonIcon" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="min-h-screen">
+    <!-- Hero Section -->
+    <section id="inicio" class="py-40 bg-primary-50/50 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-primary-700 dark:text-primary-300">
+          Guía Completa de Pipeline de Personajes 3D en ZBrush
+        </h2>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
+          Descubre el proceso integral de creación de personajes y assets 3D, desde la escultura inicial en ZBrush hasta la integración final en Unity, con enfoque en técnicas artísticas, optimización topológica, rigging profesional y rendimiento en tiempo real.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-8 items-center mt-12">
+          <div class="space-y-4">
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/akamandilee/posts/iam-artzystudios-embodimentart/1523295433147271/|7">
+              El proceso comienza con la utilización de formas geométricas para bloquear las proporciones generales en Maya, seguido del escultura detallada en ZBrush con poses dinámicas y variaciones dinámicas sobre una base sólida.
+            </p>
+            
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.mathnasium.com/blog/golden-ratio-in-nature|8">
+                <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Hallazgo clave: La proporción áurea influye profundamente en las proporciones naturales, desde la estructura floral hasta la anatomía humana, proporcionando un fundamento estético universal.
+              </p>
+            </div>
+          </div>
+          
+          <img
+            src="img/Pipeline ZBrush/01.png"
+            alt="Ilustración técnica mostrando un artista digital trabajando en una estación de trabajo 3D con tres pantallas: pantalla izquierda muestra Maya con formas geométricas básicas (cubos, esferas) en color gris claro #D3D3D3; pantalla central muestra ZBrush con una escultura de figura humana en proceso de refinamiento, con herramientas digitales visibles como pinceles virtuales en azul #1E90FF; pantalla derecha muestra Unity con una vista previa de la escena 3D en tiempo real. En primer plano hay un modelo de referencia físico de figura humana en color beige #F5DEB3 sobre una mesa de trabajo. El fondo es un estudio de arte minimalista en tonos grises claros #F0F0F0 con luz natural entrando por una ventana grande. La composición enfatiza el flujo de trabajo secuencial de Maya ? ZBrush ? Unity, con flechas sutiles en color azul primario #1A73B3 conectando las pantallas."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Escultura Section -->
+    <section id="escultura" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Técnicas de Escultura en ZBrush
+        </h2>
+
+        <div class="space-y-8">
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+            <h3 class="text-xl font-semibold mb-4 text-primary-700 dark:text-primary-300" data-ref="https://www.facebook.com/groups/artistsnadinaliligo2/posts/1635357057454300/|10">
+              Herramientas Avanzadas de Escultura
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 mb-4">
+              ZBrush ofrece herramientas poderosas para la creación de assets 3D precisos mediante inteligencia artificial, permitiendo generar activos digitales con fondos generados por IA, sin necesidad de estudios ni sesiones de captura.
+            </p>
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.instagram.com/reel/DaOBhxBSOAW/|13">
+              Es posible posar cualquier malla limpia y suave sin complicaciones, donde el enmascaramiento adecuado es todo lo que se necesita para lograr resultados profesionales.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold mb-3 text-accent-700 dark:text-accent-300" data-ref="https://www.linkedin.com/posts/takuya-goto_new-3d-ai-metahuman-workflow-for-a-modular-activity-7473767107759992832-DB-I|15">
+                Escultura de Proporciones
+              </h4>
+              <p class="text-gray-700 dark:text-gray-300">
+                Se utiliza una figura de cuerpo completo como guía de proporciones, donde todas las partes se escalan y ensamblan en ZBrush, seguido de la escultura base de MetaHuman para coincidir con la cara y el cuerpo generados por IA.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold mb-3 text-primary-700 dark:text-primary-300" data-ref="https://sanandres.uep.edu.py/index.jsp/TMY8ce/704538/Anatomy%20For%20Drawing.pdf|12">
+                Proporciones Anatómicas
+              </h4>
+              <p class="text-gray-700 dark:text-gray-300">
+                Las proporciones son cruciales para el arte figurativo, ya que el cuerpo humano tiene aproximadamente
+                <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">7.5 a 8 longitudes de cabeza</span>
+                de altura, lo que ayuda a mantener formas y relaciones corporales precisas.
+              </p>
+            </div>
+          </div>
+
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://thevirtualinstructor.com/facialproportions.html|9">
+              <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Consejo fundamental: El conocimiento preciso de las proporciones faciales es esencial para dibujar rostros realistas y expresivos, tanto en vistas frontal como lateral.
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            <h4 class="text-xl font-semibold text-primary-700 dark:text-primary-300">Estudios Anatómicos</h4>
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://polycount.com/discussion/214955/anatomy-i-require-help-to-understand-human-proportions-3d-sculpting|196">
+              El interés principal radica en las proporciones generales de la estructura, especialmente para abordar problemas con la cabeza, iniciando desde la comprensión de las proporciones para establecer una base sólida.
+            </p>
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/ryan.kingslien/videos/learn-anatomy-in-zbrush-it-makes-it-so-much-easier-to-place-muscles-and-dicepher/970049969532678/|197">
+              Aprender anatomía en ZBrush facilita enormemente la colocación precisa de estructuras musculares y óseas, mejorando significativamente la calidad de las esculturas digitales.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Topología Section -->
+    <section id="topologia" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Optimización Topológica para Pintura
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 items-start mb-8">
+          <div class="space-y-6">
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/groups/290530545401744/posts/545407116580751/|19">
+              El flujo de trabajo común para modelado de superficies duras implica escultura burda en ZBrush, seguida de re-topología en otro software, aunque algunos prefieren quedarse en Blender para el proceso completo.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.reddit.com/r/3Dmodeling/comments/1hpfgik/an_attempt_at_hard_surface_modeling_hows_my/|20">
+              Se recomienda practicar la redirección del flujo de aristas y evitar cortes de bucles innecesarios, como los que aparecen en la parte superior de la cabina, para lograr topología más eficiente.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-amber-500 bg-amber-50/40 dark:bg-amber-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-amber-900 dark:text-amber-100 leading-relaxed" data-ref="https://www.freelancer.com/job-search/retopology/|147">
+                <i data-lucide="alert-triangle" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Advertencia: La re-topología es un servicio especializado que puede requerir contratación externa para proyectos profesionales que demandan alta calidad.
+              </p>
+            </div>
+          </div>
+
+          <img
+            src="img/Pipeline ZBrush/02.png"
+            alt="Ilustración técnica comparativa mostrando dos modelos 3D de un torso humano lado a lado: modelo izquierdo en gris oscuro #555555 con malla densa de triángulos irregulares representando una escultura de alta resolución en ZBrush; modelo derecho en azul primario #1A73B3 con malla de cuadriláteros ordenados mostrando flujo de aristas limpio siguiendo la anatomía muscular. Entre ambos modelos hay flechas direccionales en color morado #9333EA indicando el proceso de re-topología. En el fondo hay iconos pequeños de ZBrush (logo azul) y Maya (logo verde) flotando sobre un gradiente de fondo gris claro #F5F5F5. La composición visualiza claramente la transformación de geometría densa a topología limpia y funcional para animación."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-topo-1">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="layers" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Flujo de Aristas para Animación</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-topo-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-topo-1">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/groups/1004934783490808/posts/1578007429516871/|76">
+                  Siga la anatomía con el flujo de aristas para asegurar que los bucles de aristas coincidan con la forma natural del cuerpo y evitar detalles no deseados durante la animación.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://thundercloud-studio.com/article/topology-for-low-poly-game-characters/|240">
+                  Estos bucles ayudan a determinar la colocación de articulaciones durante el rigging y guían la pintura de pesos de piel para garantizar movimientos suaves de manos.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-topo-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="zap" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Técnicas de Re-topología</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-topo-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-topo-2">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.instagram.com/reel/DSNd13rje68/|78">
+                  Quad Remesher es una poderosa herramienta de re-topología automática que ahorra tiempo mientras mantiene flujo de aristas preciso y geometría basada en cuadriláteros.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://resources.turbosquid.com/training/modeling/quad-based-topology/|79">
+                  Una topología basada en cuadriláteros crea una estructura predecible, proporciona flujo de aristas que se puede ajustar fácilmente y produce resultados consistentes durante la animación.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.youtube.com/watch?v=-0c1e-hNsa4|85">
+                  Se puede tomar un modelo denso de alta resolución y convertirlo en una versión de baja poligonal lista para juegos utilizando zRemesher, manteniendo la calidad visual esencial.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-topo-3">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="shield-check" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Topología para Personajes Estilizados</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-topo-3" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-topo-3">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.instagram.com/p/DcP4-GsE6Kj/|75">
+                  Para personajes estilizados, la topología debe seguir un flujo de aristas dominado por cuadriláteros para lograr animaciones limpias y deformaciones predecibles.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/3dblendertips/posts/the-fastest-way-to-wrap-quad-meshes-on-stylized-faces-shorts-3dartspeed-up-your-/122142333201049099/|74">
+                  Aprenda la mecánica exacta de enrutamiento de topología necesaria para mapear limpiamente los bucles faciales esenciales, enfocándose en rejillas matriciales oculares, pliegues nasolabiales y otras características faciales clave.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.linkedin.com/posts/hafez-yadollahi-971642203_zbrush-zwrap-retopology-activity-7281650049300758528-n1ng|83">
+                  La flexibilidad permite trabajar en diferentes tipos de personajes: humanos, criaturas o modelos estilizados, siempre asegurando que el flujo de malla siga las líneas naturales del cuerpo.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Texturizado Section -->
+    <section id="texturizado" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Texturizado en Substance 3D Painter
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+          <div class="space-y-6">
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://polycount.com/discussion/204978/zbrush-retopo-to-substance-painter-workflow|94">
+              Después de esculturar un personaje en ZBrush, el siguiente paso lógico es realizar la re-topología, crear UVs y texturizarlos en Substance Painter para obtener resultados profesionales.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://experienceleague.adobe.com/en/docs/substance-3d-painter/using/features/plugins/zbrush-bridge|97">
+              ZBrush puede manejar una cantidad mucho mayor de polígonos que Painter, por lo tanto, es crucial asegurar que la malla de baja poligonal tenga un tamaño de trabajo óptimo para el flujo de trabajo eficiente.
+            </p>
+
+            <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.reddit.com/r/ZBrush/comments/sg04qr/do_i_need_to_retopologize_for_texturing_in/|95">
+                <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+                Consideración importante: Si no se planea usar el modelo para películas o producción profesional, se puede evitar la re-topología si el propósito es diseño e ilustración de carácter personal.
+              </p>
+            </div>
+          </div>
+
+          <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+            <h3 class="text-xl font-semibold mb-4 text-accent-700 dark:text-accent-300" data-ref="https://www.instagram.com/reel/DYhbVy9vJsM/|46">
+              Mapas de Detalle y Renderizado
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 mb-3">
+              Los mapas de detalle incluyen información de normal, dispersión subsuperficial y desplazamiento, cada uno contribuyendo a la apariencia final del personaje mediante el uso de shaders de piel, flujos de trabajo de Painter y mapas de normal versus desplazamiento.
+            </p>
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://80.lv/articles/exploring-character-art-workflows-skin-texturing-tips|49">
+              También es necesario agregar detalles en el mapa de desplazamiento como arrugas, cicatrices o manchas en ZBrush, mientras que conectar un mapa de color en el color subsuperficial influye en la apariencia general.
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300">Técnicas de Texturizado Realista</h3>
+          
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="card-interactive p-5 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="droplet" class="w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.facebook.com/groups/2260502854/posts/10158517237597855/|50">Mapas de Dispersión</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Se pueden crear mapas especulares, de brillo y de dispersión subsuperficial en ZBrush, donde los poros de la piel marcados en rojo reflejan menos luz, permitiendo pintar alfas, brillos, metálicos o especulares.
+              </p>
+            </div>
+
+            <div class="card-interactive p-5 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="eye" class="w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <h4 class="font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.facebook.com/LevelEighty/posts/ronja-stucken-discussed-the-workflow-behind-the-nymera-project-explaining-how-sh/1645631837573399/|47">Detalles de Alta Frecuencia</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Se puede esculturar en ZBrush para crear detalles de alta frecuencia como poros de piel, exportando mapas de desplazamiento que capturan información de superficie fina para uso en motores de renderizado.
+              </p>
+            </div>
+
+            <div class="card-interactive p-5 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="palette" class="w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <h4 class="font-semibold text-primary-700 dark:text-primary-300" data-ref="https://marmoset.co/posts/texturing-rendering-zbrush-sketches-toolbag-4/|48">Polypaint Workflow</h4>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                El flujo de trabajo de polypaint es más rápido y sencillo, simplemente implica pintar la escultura de ZBrush usando polypaint, ideal para proyectos donde el color es prioritario sobre los detalles geométricos.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rigging Section -->
+    <section id="rigging" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Rigging Completo de Personajes y Assets
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-8 items-center mb-8">
+          <img
+            src="img/Pipeline ZBrush/03.png"
+            alt="Ilustración técnica de un esqueleto digital 3D de figura humana masculina mostrando un sistema de rigging completo: huesos en color azul brillante #0066FF conectados con articulaciones esféricas en color morado #9333EA; cables de control en color naranja #FF8C00 saliendo de las articulaciones principales (hombros, codos, rodillas, tobillos) hacia controles manipulables; el torso muestra bucles de aristas limpios en verde #22C55E siguiendo la anatomía muscular; la cabeza tiene controles faciales adicionales en color rosa #FF69B4 para expresiones. En segundo plano hay una vista previa de Unity mostrando el modelo en una escena 3D en tiempo real. El fondo es un gradiente suave de gris claro #E5E5E5 a blanco #FFFFFF. La composición enfatiza la complejidad del sistema de rigging con etiquetas sutiles de texto en español indicando las áreas clave de control."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+          
+          <div class="space-y-6">
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://sol-g-brennan.medium.com/rigging-tips-methods-for-extra-character-deformation-in-game-dev-e4c0e89e7b00|1">
+              Todos los huesos deben sumar un total de
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">1</span>,
+              lo que significa que existe un equilibrio delicado al hacer skinning, donde al mover un hueso competirá con otros huesos durante la deformación.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.instagram.com/reel/DPPreH2iNmo/|2">
+              Los huesos correctivos son una de las mayores mejoras que se pueden hacer en un rig de personaje, aunque no reemplazan una buena topología o skinning adecuada.
+            </p>
+          </div>
+        </div>
+
+        <div class="pl-4 pr-3 py-3 border-l-4 border-amber-500 bg-amber-50/40 dark:bg-amber-900/30 rounded-r-lg mb-8">
+          <p class="text-sm font-medium text-amber-900 dark:text-amber-100 leading-relaxed" data-ref="https://www.instagram.com/reel/DWO6roAiIRY/|4">
+            <i data-lucide="alert-triangle" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+            Advertencia crítica: Los huesos correctivos deben activarse solo cuando sea necesario para restaurar volumen, limpiar deformaciones y hacer que el rig esté listo para producción.
+          </p>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-rig-1">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="face-smile" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Rigging Facial</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-rig-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-rig-1">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.thegnomonworkshop.com/workshops/introduction-to-creating-facial-blendshapes-in-maya|5">
+                  El rigging facial efectivo requiere comprender tanto el movimiento anatómico como las estrategias de deformación técnica para lograr expresiones realistas y convincentes.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://blenderartists.org/t/facial-rigging-how-do-you-decide-what-goes-to-bones-vs-blendshapes/1645021|6">
+                  Las formas blend se utilizan para partes del rostro que se mantienen estrictamente como huesos (por ejemplo, mandíbula, rotación ocular) mientras que los personajes estilizados tienen más formas correctivas para expresiones exageradas.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.tech-artists.org/t/blend-shapes-vs-joints-in-unreal/5777|35">
+                  Las formas blend consumen mucha memoria en general, mientras que los huesos son más eficientes, aunque no son lineales, existiendo un tamaño de lote específico para huesos en el motor de renderizado.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-rig-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="cpu" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300">Superficies Duras</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-rig-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-rig-2">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://game-ace.com/blog/game-character-skinning/|34">
+                  El skinning rígido adjunta cada vértice a un solo hueso y se usa principalmente para props de superficie dura o personajes mecánicos, mientras que el skinning de mezcla lineal ofrece mayor flexibilidad.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.autodesk.com/autodesk-university/de/article/Rigging-Mechanical-Objects-3ds-Max-2019|57">
+                  Se puede usar software 3ds Max para automatizar la animación de vehículos, motores, pistones, ensambles, bandas transportadoras y otros objetos y sistemas mecánicos mediante técnicas avanzadas de rigging.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.youtube.com/watch?v=WqdPD2SQAnk|395">
+                  Todo lo que necesita saber para hacer rigging de superficie dura en Blender, desde conceptos básicos como hacer rigging de mallas hasta técnicas más avanzadas, con ejemplos prácticos.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-rig-3">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="settings" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300">Skinning y Pesos</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-rig-3" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-rig-3">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.3dfiggins.com/writeups/paintingWeights/|3">
+                  Este documento cubre la importancia de la colocación de huesos, la creación de una malla de baja resolución para pesar y transferir esos pesos de vuelta a la alta resolución, ahorrando tiempo adicional.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/groups/3dartistsb/posts/7925430350828273/|239">
+                  Aplicar pesos automáticos a un personaje con múltiples mallas se puede hacer en ZBrush uniéndolas en un solo subherramienta, inflándolas ligeramente y usando Dynamesh para preparar la deformación.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.youtube.com/watch?v=hs2goLjUz4U|214">
+                  El paquete de rigging de animación puede mejorar significativamente el workflow de animación en el proyecto mediante mejores herramientas y opciones más flexibles para manipulación de huesos.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Integración Unity Section -->
+    <section id="integracion" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Integración Óptima en Unity 3D
+        </h2>
+
+        <div class="space-y-8">
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+            <h3 class="text-xl font-semibold mb-4 text-primary-700 dark:text-primary-300" data-ref="https://www.reddit.com/r/Maya/comments/1emdrru/how_to_export_rigged_characters_from_maya_to_unity/|17">
+              Exportación desde Maya a Unity
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              No se puede exportar el controlador rigged de Maya, pero sí se puede exportar el skinning, la malla y la animación (una vez que se bake la animación) usando el formato FBX, que es compatible con Unity.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card-interactive p-6 bg-accent-50/50 dark:bg-accent-900/20 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold mb-3 text-accent-700 dark:text-accent-300" data-ref="https://docs.unity3d.com/Packages/com.unity.formats.fbx@5.1/manual/knownissues.html|18">
+                Problemas Comunes de Exportación
+              </h4>
+              <p class="text-gray-700 dark:text-gray-300">
+                Si las mallas animadas con skinning no se exportan con el skinning correcto, puede deberse a que no están en la pose bind al momento de la exportación, por lo tanto, es crucial verificar esta condición antes de exportar.
+              </p>
+            </div>
+
+            <div class="card-interactive p-6 bg-primary-50/50 dark:bg-primary-900/20 rounded-xl shadow-md">
+              <h4 class="text-lg font-semibold mb-3 text-primary-700 dark:text-primary-300" data-ref="https://mocaponline.com/blogs/mocap-news/unity-animation-rigging-guide?srsltid=AfmBOoqJ0Y-b0sZ9OsUlymzOwVESfYEzOyTmzIVqN4mt4-ZiWK6dhSED|24">
+                Sistema de Animación en Unity
+              </h4>
+              <p class="text-gray-700 dark:text-gray-300">
+                El paquete de rigging de animación de Unity es un sistema de animación procedural en tiempo real que permite capas de manipulación de huesos basada en restricciones sobre el sistema de animación existente.
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300">Optimización de Rendimiento</h3>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+              <div class="card-interactive p-5 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+                <div class="flex items-center space-x-3 mb-3">
+                  <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="octagon-alert" class="w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+                  </div>
+                  <h4 class="font-semibold text-primary-700 dark:text-primary-300" data-ref="https://docs.unity3d.com/6000.5/Documentation/Manual/ModelingOptimizedCharacters.html|25">Minimizar Polígonos</h4>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                  Minimizar el conteo de polígonos, usar tantos materiales como sea posible, usar una sola malla con skinning y tantos huesos como sea posible para lograr rendimiento óptimo en tiempo real.
+                </p>
+              </div>
+
+              <div class="card-interactive p-5 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+                <div class="flex items-center space-x-3 mb-3">
+                  <div class="w-10 h-10 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="layers" class="w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+                  </div>
+                  <h4 class="font-semibold text-accent-700 dark:text-accent-300" data-ref="https://docs.unity.com/en-us/asset-transformer-sdk/2026.1/manual/sdktips/lod-guidelines|98">Generación de LOD</h4>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                  Aprenda cómo generar niveles de detalle (LOD) para optimizar el rendimiento de renderizado en tiempo real, reduciendo la complejidad geométrica a medida que los objetos se alejan de la cámara.
+                </p>
+              </div>
+
+              <div class="card-interactive p-5 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+                <div class="flex items-center space-x-3 mb-3">
+                  <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="zap" class="w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+                  </div>
+                  <h4 class="font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.youtube.com/watch?v=apD2NgXulxE|174">GPU Skinning</h4>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                  Unity 6 introdujo el skinning GPU por lotes, que permite procesar grandes cantidades de personajes animados con mejor rendimiento al distribuir la carga de cálculo entre la CPU y la GPU.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://docs.unity3d.com/6000.5/Documentation/Manual/MecanimPeformanceandOptimization.html|175">
+              <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Consejo de optimización: Siempre optimice animaciones configurando el modo de culling del animator a Cull Completely y deshabilitando la propiedad Update When Offscreen del renderer de malla con skinning.
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300">Shaders y Materiales</h3>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+                <h4 class="text-lg font-semibold mb-3 text-primary-700 dark:text-primary-300" data-ref="https://discussions.unity.com/t/pbr-shader-doesnt-show-up-in-the-shader-graph/822604|104">
+                  Shaders PBR en Unity
+                </h4>
+                <p class="text-gray-700 dark:text-gray-300 mb-3">
+                  El shader 'PBR' ha sido renombrado a 'Lit' para coincidir con los esquemas de nombramiento de shaders incorporados en URP y HDRP, manteniendo la compatibilidad con flujos de trabajo existentes.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300" data-ref="https://docs.unity3d.com/Packages/com.unity.shadergraph@17.4/manual/Shader-Graph-Sample-Production-Ready-Lit.html|105">
+                  Tanto URP como HDRP vienen con shaders basados en código, e incluyen versiones de shader graph del shader Lit para ambas pipelines, ofreciendo flexibilidad en el desarrollo visual.
+                </p>
+              </div>
+
+              <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+                <h4 class="text-lg font-semibold mb-3 text-accent-700 dark:text-accent-300" data-ref="https://medium.com/unity-coder-corner/unity-shader-graph-how-to-create-a-pbr-shader-113aabdbd9f1|109">
+                  Creación de Shaders Personalizados
+                </h4>
+                <p class="text-gray-700 dark:text-gray-300">
+                  Cree un nuevo proyecto Unity URP, luego cree un nuevo shader, defina variables personalizadas y cree samplers de textura para construir shaders PBR completamente funcionales y personalizados.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300">Importación de Modelos</h3>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+                <h4 class="text-lg font-semibold mb-3 text-primary-700 dark:text-primary-300" data-ref="https://docs.unity3d.com/6000.5/Documentation/Manual/ImportingModelFiles.html|111">
+                  Importación de Formas Blend
+                </h4>
+                <p class="text-gray-700 dark:text-gray-300">
+                  Unity admite formas blend (morphing) y puede importar formas blend desde archivos FBX y DAE exportados desde aplicaciones de modelado 3D, permitiendo animaciones faciales y expresiones complejas.
+                </p>
+              </div>
+
+              <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+                <h4 class="text-lg font-semibold mb-3 text-accent-700 dark:text-accent-300" data-ref="https://help.maxon.net/zbr/en-us/Content/html/user-guide/zbrush-plugins/fbx-exportimport/fbx-exportimport.html|113">
+                  Flujo de Trabajo FBX
+                </h4>
+                <p class="text-gray-700 dark:text-gray-300">
+                  Antes de comenzar, el modelo debe estar en modo de edición. Importar un archivo FBX en ZBrush es muy fácil, simplemente presione el botón Importar para seleccionar un archivo.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conclusión Section -->
+    <section id="conclusion" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">
+          Conclusión y Mejores Prácticas
+        </h2>
+
+        <div class="space-y-8">
+          <div class="card-interactive p-8 bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-xl shadow-md">
+            <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6" data-ref="https://www.argentics.io/what-is-3d-art|387">
+              En el mundo del arte 3D para videojuegos, los artistas no solo dibujan, sino que construyen. Escultan en ZBrush, hacen rigging en Maya, texturizan en Substance y renderizan en Unreal o Unity. El pipeline completo integra todas estas disciplinas para crear experiencias visuales cohesivas y funcionales.
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300">Elementos Clave del Pipeline</h3>
+                <ul class="space-y-3">
+                  <li class="flex items-start space-x-3">
+                    <i data-lucide="circle-check" class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5"></i>
+                    <span class="text-gray-700 dark:text-gray-300" data-ref="https://gamesartist.co.uk/spirit-of-battle/|120">Alinear aristas de diferentes mallas cercanas para mejorar la deformación durante el rigging</span>
+                  </li>
+                  <li class="flex items-start space-x-3">
+                    <i data-lucide="circle-check" class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5"></i>
+                    <span class="text-gray-700 dark:text-gray-300" data-ref="https://www.youtube.com/watch?v=249DeKIQSug|128">Transicionar desde ZBrush a Substance Painter cuando los detalles de alta frecuencia estén completos</span>
+                  </li>
+                  <li class="flex items-start space-x-3">
+                    <i data-lucide="circle-check" class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5"></i>
+                    <span class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/groups/2260502854/posts/10164653349227855/|96">Aprender re-topología, UVs y texturizado en Substance como habilidades fundamentales para artistas 3D</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-accent-700 dark:text-accent-300">Consideraciones de Producción</h3>
+                <ul class="space-y-3">
+                  <li class="flex items-start space-x-3">
+                    <i data-lucide="triangle-alert" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"></i>
+                    <span class="text-gray-700 dark:text-gray-300" data-ref="https://www.facebook.com/groups/290530545401744/posts/1120935195694604/|262">La re-topología es crucial
+                      <span class="mx-1 px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-semibold text-sm">99%</span>
+                      del tiempo, especialmente para UVs, texturizado y animación</span>
+                  </li>
+                  <li class="flex items-start space-x-3">
+                    <i data-lucide="triangle-alert" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"></i>
+                    <span class="text-gray-700 dark:text-gray-300" data-ref="https://www.instagram.com/reel/DCaWEsxSQ2K/|136">Un personaje estilizado no es solo sobre el render final, sino sobre topología limpia y rigging listo para animación</span>
+                  </li>
+                  <li class="flex items-start space-x-3">
+                    <i data-lucide="triangle-alert" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"></i>
+                    <span class="text-gray-700 dark:text-gray-300" data-ref="https://vsquad.art/blog/articles/modeling-guide-to-achieving-good-face-topology/|270">La diferencia entre buena y mala topología es clara en movimiento, la animación nunca oculta problemas de estructura</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.instagram.com/reel/DaaVwz4MPOT/|259">
+              <i data-lucide="lightbulb" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Mejores prácticas recomendadas: Escultura de alta resolución conceptualmente precisa en ZBrush, re-topología y desajuste de UVs optimizados para juegos, texturizado PBR en Substance Painter, rigging y skinning para animación, y exportación en formato FBX para integración en Unity.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-primary-900 dark:bg-gray-950 text-gray-300 py-12">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="grid md:grid-cols-3 gap-8 mb-8">
+        <div>
+          <h3 class="text-lg font-semibold text-primary-300 dark:text-primary-400 mb-4">Sobre Esta Guía</h3>
+          <p class="text-sm text-gray-400">
+            Una guía integral centrada en el pipeline completo de creación de personajes y assets 3D, desde la modelación inicial en ZBrush hasta la integración final en Unity.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-primary-300 dark:text-primary-400 mb-4">Tecnologías Clave</h3>
+          <ul class="text-sm text-gray-400 space-y-2">
+            <li>ZBrush - Escultura Digital</li>
+            <li>Substance 3D Painter - Texturizado</li>
+            <li>Maya/3ds Max - Rigging</li>
+            <li>Unity 3D - Integración</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-primary-300 dark:text-primary-400 mb-4">Enfoques</h3>
+          <ul class="text-sm text-gray-400 space-y-2">
+            <li>Personajes Realistas</li>
+            <li>Criaturas Estilizadas</li>
+            <li>Assets Hard-Surface</li>
+            <li>Optimización para Juegos</li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 pt-8 text-center text-sm text-gray-500">
+        <p>&copy; 2025 Pipeline Completo de Personajes 3D. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Citation System Script -->
+  <script>
+    function initCitationSystem() {
+      let i = 1, map = new Map();
+      document.querySelectorAll('[data-ref]').forEach(el => {
+        if (el.dataset.citationProcessed) return;
+        const raw = (el.getAttribute('data-ref')||'').trim();
+        if (!raw) return;
+
+        const parts = raw.split('|');
+        const url = parts[0].trim();
+        const idx = (parts[1]||'').trim() || map.get(raw) || (map.set(raw, String(i)), String(i++));
+
+        if (!el.textContent || !el.textContent.trim()) { el.dataset.citationProcessed = 'true'; return; }
+
+        const btn = document.createElement('sup'); btn.textContent = String(idx);
+        Object.assign(btn.style, { fontSize:'8px', color:'#fff', cursor:'pointer', top: '1px', fontWeight:'bold', backgroundColor:'#0284c7', borderRadius:'50%', transition:'all .15s', userSelect:'none', minWidth:'19px', height:'19px', marginLeft:'6px', display:'inline-flex', alignItems:'center', justifyContent:'center', boxShadow:'0 1px 3px rgba(0,0,0,.2)', lineHeight:'1'});
+        btn.addEventListener('mouseenter', ()=> Object.assign(btn.style, { backgroundColor:'#0369a1', transform:'scale(1.12)' }));
+        btn.addEventListener('mouseleave', ()=> Object.assign(btn.style, { backgroundColor:'#0284c7', transform:'scale(1)' }));
+        btn.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); window.open(url, '_blank'); });
+
+        el.appendChild(btn); el.dataset.citationProcessed = 'true';
+      });
+    }
+  </script>
+
+  <!-- Initialize Libraries and Scripts -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize AOS
+      AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+      });
+
+      // Initialize Lucide Icons
+      lucide.createIcons();
+
+      // Initialize Preline components
+      setTimeout(() => {
+        Preline.autoInit();
+      }, 100);
+
+      // Initialize Citation System
+      initCitationSystem();
+
+      // Progress bar functionality
+      const progressBar = document.getElementById('progressBar');
+      
+      function updateProgressBar() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrollPercent = (scrollTop / docHeight) * 100;
+        progressBar.style.width = scrollPercent + '%';
+      }
+
+      window.addEventListener('scroll', updateProgressBar);
+      updateProgressBar();
+
+      // Smooth scrolling for navigation links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
