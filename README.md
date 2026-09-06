@@ -36,6 +36,20 @@ Abre `http://127.0.0.1:8080` (o el puerto libre que indique el lanzador).
 > embebido), pero el botón ⟳ Re-escanear requiere el servidor: el navegador
 > bloquea esas peticiones en `file://` por CORS. La propia página lo avisa.
 
+## Capturas
+
+| Portada | Categoría por contexto |
+|---|---|
+| ![Portada de TD Dev Compendium](docs/screenshots/01-inicio.png) | ![Categoría Personajes y Pipeline 3D](docs/screenshots/02-categoria.png) |
+
+| Buscador | Visor de guía |
+|---|---|
+| ![Buscador filtrando por "qte"](docs/screenshots/03-buscador.png) | ![Guía abierta en el visor integrado](docs/screenshots/04-visor.png) |
+
+| Biblioteca PDF |
+|---|
+| ![Biblioteca de documentos de diseño en PDF](docs/screenshots/05-biblioteca.png) |
+
 ## Contenido por contexto
 
 | Categoría | Recursos |
