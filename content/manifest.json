@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated": "2026-09-06T23:36:12+00:00",
+  "generated": "2026-09-07T00:16:01+00:00",
   "generator": "tools/build-manifest.py",
   "categories": [
     {
@@ -47,7 +47,7 @@
       "file": "content/atlas-textures-unity.html",
       "type": "html",
       "category": "texturizado",
-      "description": "Creación, optimización y gestión de atlas textures con Substance 3D Painter, 3ds Max 2024 y Unity 3D. Empaquetado, automatización y estrategias de memoria/rendimiento.",
+      "description": "Creación, optimización y gestión de atlas textures con Substance 3D Painter, 3ds Max 2024 y Unity 3D: empaquetado, automatización y estrategias de memoria y rendimiento — la esencia visual, sin que nada se consuma en vano.",
       "tags": [
         "atlas",
         "texturas",
@@ -68,7 +68,7 @@
       "file": "content/automatizacion-scripts-plugins-xrerion.html",
       "type": "html",
       "category": "automatizacion",
-      "description": "Scripting y flujos profesionales para 3ds Max, ZBrush, Blender, Substance y Photoshop: retopología, PBR, automatización e integración inter-app.",
+      "description": "El pipeline que comparte nombre con la voluntad que devoró el tiempo: scripting y flujos para 3ds Max, ZBrush, Blender, Substance y Photoshop — retopología, PBR, automatización e integración inter-app.",
       "tags": [
         "python",
         "maxscript",
@@ -78,7 +78,8 @@
         "photoshop",
         "uxp",
         "pbr",
-        "retopología"
+        "retopología",
+        "xlerion"
       ],
       "badge": "v2.1",
       "featured": true
@@ -90,14 +91,17 @@
       "file": "content/creacion-personajes-diseno-modelado-rigging.html",
       "type": "html",
       "category": "personajes",
-      "description": "Guía integral de diseño, modelado, texturizado y rigging de personajes 3D: del concepto a la implementación en el motor.",
+      "description": "Guía integral de diseño, modelado, texturizado y rigging: del primer hombre, Adapa, a los últimos descendientes, Dumu Ul y Ninti — del concepto a la implementación en el motor.",
       "tags": [
         "personajes",
         "diseño",
         "modelado",
         "rigging",
         "texturizado",
-        "pipeline"
+        "pipeline",
+        "adapa",
+        "ninhursag",
+        "clanes"
       ],
       "featured": true
     },
@@ -108,7 +112,7 @@
       "file": "content/logica-programacion-sistemas-core.html",
       "type": "html",
       "category": "programacion",
-      "description": "Capítulo III técnico: movimiento híbrido shooter 1ª/3ª persona, ramas narrativas con karma, QTE, combate fatality y secuencias rítmicas.",
+      "description": "Los sistemas que deciden el destino: movimiento híbrido shooter 1ª/3ª persona, ramas de libre albedrío con karma, QTE, combate fatality y secuencias rítmicas — ¿proteger el Gen Final, destruir el núcleo o reescribir el universo desde dentro?",
       "tags": [
         "gameplay",
         "movimiento",
@@ -117,7 +121,10 @@
         "combate",
         "ritmo",
         "karma",
-        "total darkness"
+        "total darkness",
+        "gen final",
+        "red tormenthor",
+        "libre albedrío"
       ],
       "badge": "Sistemas Core",
       "featured": true
@@ -129,17 +136,16 @@
       "file": "content/Pipeline ZBrush.html",
       "type": "html",
       "category": "personajes",
-      "description": "Descubre el proceso integral de creación de personajes y assets 3D, desde la escultura inicial en ZBrush hasta la integración final en Unity, con enfoque en técnicas artísticas, optimización topológica, rigging profesional y rendimiento en tiempo real.",
+      "description": "Esculpir portadores del código: proceso integral desde la escultura inicial en ZBrush hasta la integración final en Unity — técnicas artísticas, optimización topológica, rigging profesional y rendimiento en tiempo real.",
       "tags": [
-        "optimiz",
-        "personaje",
+        "zbrush",
+        "esculpido",
+        "personajes",
         "pipeline",
-        "rendimiento",
         "rigging",
-        "substance",
-        "textur",
         "unity",
-        "zbrush"
+        "optimización",
+        "rendimiento"
       ]
     },
     {
@@ -149,14 +155,15 @@
       "file": "content/pipeline-modelado-personajes-motor3d-aaa.html",
       "type": "html",
       "category": "personajes",
-      "description": "Flujo AAA de estudios profesionales: del modelado inicial al renderizado e integración final en Unity 3D.",
+      "description": "Flujo AAA de estudios profesionales: del modelado inicial al renderizado e integración final en Unity 3D — para que las armaduras rotas vuelvan a reflejar la luz.",
       "tags": [
         "aaa",
         "modelado",
         "unity",
         "render",
         "pipeline",
-        "estudios"
+        "estudios",
+        "forja"
       ],
       "badge": "AAA"
     },
@@ -167,14 +174,15 @@
       "file": "content/pipeline-personajes-unity-v1.html",
       "type": "html",
       "category": "personajes",
-      "description": "Guía exhaustiva v1: diseño conceptual, modelado, texturizado, rigging, optimización e integración de jugables y NPCs en Unity.",
+      "description": "Guía exhaustiva v1: diseño conceptual, modelado, texturizado, rigging, optimización e integración de jugables y NPCs en Unity — los primeros pasos de los clanes.",
       "tags": [
         "pipeline",
         "unity",
         "personajes",
         "rigging",
         "npc",
-        "integración"
+        "integración",
+        "clanes"
       ],
       "badge": "v1"
     },
@@ -185,7 +193,7 @@
       "file": "content/pipeline-personajes-unity-v2.html",
       "type": "html",
       "category": "personajes",
-      "description": "Versión 2 del pipeline: conceptual, modelado, texturizado, rigging, optimización e integración con enfoque en interacción y animación.",
+      "description": "Versión 2 del pipeline: conceptual, modelado, texturizado, rigging, optimización e integración, con enfoque en interacción y animación — el ciclo se repite, distinto.",
       "tags": [
         "pipeline",
         "unity",
@@ -203,7 +211,7 @@
       "file": "content/pipeline-personajes-unity-v3.html",
       "type": "html",
       "category": "personajes",
-      "description": "Versión 3 vigente: diseño, modelado, texturizado, rigging, animación e interacción, con transformaciones visuales ligadas a decisiones éticas y estados emocionales.",
+      "description": "Versión 3 vigente: diseño, modelado, texturizado, rigging, animación e interacción, con transformaciones visuales ligadas a decisiones éticas y estados emocionales — el experimento de Enki: cada elección guía el destino.",
       "tags": [
         "pipeline",
         "unity",
@@ -211,7 +219,9 @@
         "narrativa",
         "ética",
         "emociones",
-        "animación"
+        "animación",
+        "libre albedrío",
+        "enki"
       ],
       "badge": "v3 · actual",
       "featured": true
@@ -224,13 +234,14 @@
       "type": "pdf",
       "category": "biblioteca",
       "topic": "programacion",
-      "description": "Enfoque integral de arquitectura para combates multigénero y narrativa interactiva en Unity.",
+      "description": "Arquitectura para combates multigénero y narrativa interactiva en Unity: los sistemas para enfrentar a XLERION en todas sus formas.",
       "tags": [
         "arquitectura",
         "unity",
         "combate",
         "narrativa",
-        "pdf"
+        "pdf",
+        "xlerion"
       ]
     },
     {
@@ -241,7 +252,7 @@
       "type": "pdf",
       "category": "biblioteca",
       "topic": "personajes",
-      "description": "Pipeline profesional AAA: del bloqueo inicial a la escena final con personajes en Unity 3D.",
+      "description": "Pipeline profesional AAA: del bloqueo inicial a la escena final — del campo que ya no sueña a la batalla que decide el universo.",
       "tags": [
         "aaa",
         "pipeline",
@@ -258,12 +269,14 @@
       "type": "pdf",
       "category": "biblioteca",
       "topic": "personajes",
-      "description": "Guía técnica de creación de personajes: del concepto artístico a la interacción dinámica en Unity.",
+      "description": "Del concepto artístico — Adapa y Ninhursag — a la interacción dinámica en Unity.",
       "tags": [
         "concepto",
         "interacción",
         "personajes",
-        "pdf"
+        "pdf",
+        "adapa",
+        "ninhursag"
       ]
     },
     {
@@ -274,7 +287,7 @@
       "type": "pdf",
       "category": "biblioteca",
       "topic": "automatizacion",
-      "description": "Automatización del pipeline 3D con scripts y plugins para producción.",
+      "description": "Los rituales para que la forja no repita el ciclo: automatización del pipeline 3D con scripts y plugins para producción.",
       "tags": [
         "scripts",
         "plugins",
@@ -290,13 +303,16 @@
       "type": "pdf",
       "category": "biblioteca",
       "topic": "personajes",
-      "description": "Workflow adaptativo para personajes con carga narrativa en el universo Total Darkness.",
+      "description": "Workflow adaptativo para personajes con carga narrativa: Dumu Ul, Ninti y los portadores del código Tiamatu Enuma.",
       "tags": [
         "workflow",
         "narrativa",
         "personajes",
         "total darkness",
-        "pdf"
+        "pdf",
+        "dumu ul",
+        "ninti",
+        "tiamatu enuma"
       ]
     }
   ]

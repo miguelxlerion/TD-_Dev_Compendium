@@ -1,7 +1,7 @@
 {
   "name": "TD Dev Compendium · Documentación de Total Darkness",
   "short_name": "TD Compendium",
-  "description": "Guías HTML y PDFs del proyecto Total Darkness organizados por contexto.",
+  "description": "El códice de Total Darkness: guías y crónicas de diseño organizadas por contexto.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a12",

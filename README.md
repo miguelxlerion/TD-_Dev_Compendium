@@ -1,6 +1,6 @@
 # TD Dev Compendium
 
-> Centro de conocimiento del videojuego **Total Darkness**: guías HTML, pipelines 3D, sistemas de gameplay y documentos de diseño, unificados en una sola plataforma navegable.
+> El códice del videojuego **Total Darkness** (Mike Hellawaits): guías HTML, pipelines 3D, sistemas de gameplay y crónicas de diseño — del prólogo de Adamu al despertar de XLERION. *Porque en cada fin… siempre hay un comienzo.*
 
 ![HTML](https://img.shields.io/badge/guías-9_HTML-8b5cf6)
 ![PDF](https://img.shields.io/badge/docs-5_PDF-e8c15a)
@@ -44,7 +44,7 @@ Abre `http://127.0.0.1:8080` (o el puerto libre que indique el lanzador).
 
 | Buscador | Visor de guía |
 |---|---|
-| ![Buscador filtrando por "qte"](docs/screenshots/03-buscador.png) | ![Guía abierta en el visor integrado](docs/screenshots/04-visor.png) |
+| ![Buscador filtrando por "xlerion"](docs/screenshots/03-buscador.png) | ![Guía abierta en el visor integrado](docs/screenshots/04-visor.png) |
 
 | Biblioteca PDF |
 |---|
@@ -54,11 +54,11 @@ Abre `http://127.0.0.1:8080` (o el puerto libre que indique el lanzador).
 
 | Categoría | Recursos |
 |---|---|
-| Personajes & Pipeline 3D | Creación de personajes, pipelines Unity v1/v2/v3, ZBrush, AAA |
-| Texturizado & Optimización | Atlas Textures (Substance, 3ds Max, Unity) |
-| Automatización, Scripts & Plugins | XRERION Pipeline (Python, MAXScript, Blender, UXP) |
-| Programación & Gameplay | Sistemas core: movimiento híbrido, narrativa/karma, QTE, fatality |
-| Biblioteca PDF · Diseño | Arquitectura híbrida, pipelines AAA, flujos narrativos |
+| Personajes & Pipeline 3D | Forja de los portadores del código: Adapa, Ninhursag, clanes, ZBrush, AAA |
+| Texturizado & Optimización | Esencia visual: Atlas Textures (Substance, 3ds Max, Unity) |
+| Automatización, Scripts & Plugins | Rituales XRERION (Python, MAXScript, Blender, UXP) |
+| Programación & Gameplay | Sistemas que deciden el destino: Gen Final, karma, QTE, fatality |
+| Biblioteca PDF · Diseño | Crónicas de Mike Hellawaits: del prólogo de Adamu a Red Tormenthor |
 
 ## Estructura del proyecto
 

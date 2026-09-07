@@ -95,12 +95,11 @@
 
     $("#view").innerHTML=`
       <div class="hero">
-        <div class="crumbs">TD DEV COMPENDIUM · Documentación de Total Darkness</div>
-        <h1 class="font-display">Centro de conocimiento del proyecto</h1>
-        <p>Todas las guías HTML y documentos PDF en un solo lugar, organizados por contexto.
-        Para agregar una página nueva: copia el <code class="inline">.html</code> a
+        <div class="crumbs">TD DEV COMPENDIUM · Archivo de Total Darkness</div>
+        <h1 class="font-display">El códice del proyecto</h1>
+        <p>Del prólogo de Adamu al despertar de XLERION: guías HTML y documentos PDF en un solo lugar, organizados por contexto — forja de personajes, esencia visual, rituales de automatización, sistemas que deciden el destino y crónicas de diseño. Para agregar una página nueva: copia el <code class="inline">.html</code> a
         <code class="inline">content/</code> (o el PDF a <code class="inline">docs/</code>) y ejecuta
-        <code class="inline">python tools/build-manifest.py</code>. Al recargar, aparece sola.</p>
+        <code class="inline">python tools/build-manifest.py</code>. Al recargar, aparece sola. Porque en cada fin… siempre hay un comienzo.</p>
         <div class="stats">
           <div class="stat"><b>${state.manifest.pages.filter(p=>p.type==="html").length}</b><span>Guías HTML</span></div>
           <div class="stat"><b>${state.manifest.pages.filter(p=>p.type==="pdf").length}</b><span>Documentos PDF</span></div>
@@ -109,8 +108,8 @@
         </div>
       </div>
       ${q?`<div class="section-title"><h2>Resultados para “${escapeHTML(q)}” (${pages.length})</h2></div>
-      <div class="grid">${pages.map(cardHTML).join("")||`<div class="empty">Sin resultados. Prueba con “pipeline”, “unity”, “qte”…</div>`}</div>`:`
-      ${featured.length?`<div class="section-title">${icon("sparkles")} <h2>Destacados</h2></div>
+      <div class="grid">${pages.map(cardHTML).join("")||`<div class="empty">Sin resultados. Prueba con “xlerion”, “tiamatu”, “qte”…</div>`}</div>`:`
+      ${featured.length?`<div class="section-title">${icon("sparkles")} <h2>Fragmentos del código</h2></div>
       <div class="grid">${featured.map(cardHTML).join("")}</div>`:""}
       <div class="section-title">${icon("layout-grid")} <h2>Categorías</h2></div>
       <div class="grid">${state.manifest.categories.map(c=>`
@@ -173,7 +172,7 @@
         <iframe class="viewer" id="viewer" src="${p.file}" title="${escapeHTML(p.title)}"></iframe>
       </div>
       <div class="meta">
-        <div class="meta-box"><h4>ACERCA DE ESTE RECURSO</h4><p>${escapeHTML(p.description||"")}</p>
+        <div class="meta-box"><h4>CRÓNICA DEL RECURSO</h4><p>${escapeHTML(p.description||"")}</p>
           <p>Etiquetas: ${(p.tags||[]).map(t=>`<code class="inline">#${escapeHTML(t)}</code>`).join(" ")}</p></div>
         <div class="meta-box"><h4>FICHA</h4>
           <p>Tipo: <b>${p.type.toUpperCase()}</b><br>Categoría: <b>${escapeHTML(cat?.name||"")}</b><br>Archivo: <code class="inline">${escapeHTML(p.file)}</code>${p.badge?`<br>Marca: <b>${escapeHTML(p.badge)}</b>`:""}</p></div>

@@ -1,7 +1,7 @@
 {
   "name": "td-dev-compendium",
   "version": "1.0.0",
-  "description": "TD Dev Compendium — plataforma unificada de documentación de Total Darkness (HTML + PDF con auto-integración)",
+  "description": "TD Dev Compendium — el códice de Total Darkness: guías HTML + PDF con auto-integración, del prólogo de Adamu al despertar de XLERION",
   "type": "module",
   "scripts": {
     "up": "python tools/launcher.py",
