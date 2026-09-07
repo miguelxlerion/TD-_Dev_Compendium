@@ -37,9 +37,12 @@ def manifest_stats():
     try:
         data = json.loads(MANIFEST.read_text(encoding="utf-8"))
         pages = data.get("pages", [])
+        imgdir = ROOT / "content" / "img"
+        images = sum(1 for _ in imgdir.rglob("*") if _.is_file()) if imgdir.exists() else 0
         return {
             "html": sum(1 for p in pages if p.get("type") == "html"),
             "pdf": sum(1 for p in pages if p.get("type") == "pdf"),
+            "imagenes": images,
             "generated": data.get("generated", ""),
         }
     except Exception as exc:

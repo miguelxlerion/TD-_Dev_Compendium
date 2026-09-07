@@ -234,7 +234,7 @@
       state.manifest=await loadManifest(); // recarga sin refrescar la página
       state.query=""; $("#search").value="";
       renderSidebar(); router(); refreshIcons();
-      const msg=`Índice regenerado: ${j.html} HTML + ${j.pdf} PDF`;
+      const msg=`Índice regenerado: ${j.html} HTML + ${j.pdf} PDF · ${j.imagenes||0} imágenes locales`;
       set("✔ "+msg); toast("✔ "+msg);
       return true;
     }catch(err){

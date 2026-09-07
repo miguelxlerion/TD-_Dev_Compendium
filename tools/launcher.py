@@ -113,7 +113,8 @@ def main() -> int:
         print(f"[ok] plataforma en {url}")
         if status.get("ok"):
             print(f"[ok] índice: {status.get('html', '?')} HTML + "
-                  f"{status.get('pdf', '?')} PDF "
+                  f"{status.get('pdf', '?')} PDF + "
+                  f"{status.get('imagenes', '?')} imágenes "
                   f"(botón ⟳ Re-escanear activo)")
         if not args.no_browser:
             webbrowser.open(url)

@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía Completa para Modelar Personajes Hiperrealistas en ZBrush</title>
+
+  <!-- Essential CDN Libraries -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: 'hsl(200, 80%, 95%)',
+              100: 'hsl(200, 80%, 85%)',
+              200: 'hsl(200, 80%, 75%)',
+              300: 'hsl(200, 80%, 65%)',
+              400: 'hsl(200, 80%, 55%)',
+              500: 'hsl(200, 75%, 40%)',
+              600: 'hsl(200, 75%, 35%)',
+              700: 'hsl(200, 75%, 25%)',
+              800: 'hsl(200, 75%, 15%)',
+              900: 'hsl(200, 75%, 10%)'
+            },
+            accent: {
+              50: 'hsl(160, 70%, 95%)',
+              100: 'hsl(160, 70%, 85%)',
+              200: 'hsl(160, 70%, 75%)',
+              300: 'hsl(160, 70%, 65%)',
+              400: 'hsl(160, 70%, 60%)',
+              500: 'hsl(160, 65%, 50%)',
+              600: 'hsl(160, 65%, 45%)',
+              700: 'hsl(160, 65%, 35%)',
+              800: 'hsl(160, 65%, 25%)',
+              900: 'hsl(160, 65%, 15%)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+
+  <!-- Preline UI Components -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.js"></script>
+
+  <!-- Micro-interactions & Custom Styles -->
+  <style>
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+    .btn-interactive {
+      transition: all 0.2s ease-out;
+    }
+    
+    .btn-interactive:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn-interactive:active {
+      transform: scale(0.95);
+    }
+
+    .card-interactive {
+      transition: all 0.3s ease-out;
+      border: 1px solid transparent;
+      --border-lightness: 40%;
+    }
+
+    .dark .card-interactive {
+      --border-lightness: 60%;
+    }
+
+    .card-interactive:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      filter: brightness(0.98);
+    }
+    
+    /* Primary colored cards */
+    .card-interactive[class*="primary"]:hover,
+    .card-interactive[class*="white"]:hover,
+    .card-interactive[class*="gray-"]:hover {
+      border-color: hsl(200, 75%, var(--border-lightness));
+    }
+    
+    /* Accent colored cards */
+    .card-interactive[class*="accent"]:hover {
+      border-color: hsl(160, 65%, var(--border-lightness));
+    }
+  </style>
+
+  <!-- Dark Mode Toggle Script -->
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      document.getElementById('sunIcon').style.display = isDark ? 'block' : 'none';
+      document.getElementById('moonIcon').style.display = isDark ? 'none' : 'block';
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
+  <!-- Citation System Script -->
+  <script>
+    function initCitationSystem() {
+      let i = 1, map = new Map();
+      document.querySelectorAll('[data-ref]').forEach(el => {
+        if (el.dataset.citationProcessed) return;
+        const raw = (el.getAttribute('data-ref')||'').trim();
+        if (!raw) return;
+
+        const parts = raw.split('|');
+        const url = parts[0].trim();
+        const idx = (parts[1]||'').trim() || map.get(raw) || (map.set(raw, String(i)), String(i++));
+
+        if (!el.textContent || !el.textContent.trim()) { el.dataset.citationProcessed = 'true'; return; }
+
+        const btn = document.createElement('sup'); btn.textContent = String(idx);
+        Object.assign(btn.style, { fontSize:'8px', color:'#fff', cursor:'pointer', top: '1px', fontWeight:'bold', backgroundColor:'#0284c7', borderRadius:'50%', transition:'all .15s', userSelect:'none', minWidth:'19px', height:'19px', marginLeft:'6px', display:'inline-flex', alignItems:'center', justifyContent:'center', boxShadow:'0 1px 3px rgba(0,0,0,.2)', lineHeight:'1'});
+        btn.addEventListener('mouseenter', ()=> Object.assign(btn.style, { backgroundColor:'#0369a1', transform:'scale(1.12)' }));
+        btn.addEventListener('mouseleave', ()=> Object.assign(btn.style, { backgroundColor:'#0284c7', transform:'scale(1)' }));
+        btn.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); window.open(url, '_blank'); });
+
+        el.appendChild(btn); el.dataset.citationProcessed = 'true';
+      });
+    }
+  </script>
+
+  <!-- Progress Bar -->
+  <div class="fixed top-0 left-0 h-1 bg-primary-500 dark:bg-primary-400 z-[60] transition-all duration-300 ease-out" id="progressBar" style="width: 0%"></div>
+
+  <!-- Floating Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur bg-gray-50/90 dark:bg-gray-900/90 border-b border-primary-500/20 dark:border-primary-600/20">
+    <nav class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold text-primary-700 dark:text-primary-300">Modelado Hiperrealista en ZBrush</h1>
+        
+        <div class="flex items-center gap-4">
+          <button onclick="toggleDarkMode()" class="btn-interactive p-2 rounded-lg bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 transition-all">
+            <i id="sunIcon" data-lucide="sun" class="w-5 h-5" style="display: none;"></i>
+            <i id="moonIcon" data-lucide="moon" class="w-5 h-5" style="display: block;"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="mt-4">
+        <div class="flex flex-wrap gap-2 overflow-x-auto pb-2">
+          <a href="#inicio" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 whitespace-nowrap">Inicio</a>
+          <a href="#antropometria" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 hover:bg-accent-200 dark:hover:bg-accent-700 whitespace-nowrap">Antropometría</a>
+          <a href="#proporciones" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 whitespace-nowrap">Proporciones</a>
+          <a href="#rostro" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 hover:bg-accent-200 dark:hover:bg-accent-700 whitespace-nowrap">Rostro</a>
+          <a href="#ojos" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 whitespace-nowrap">Ojos</a>
+          <a href="#manos" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 hover:bg-accent-200 dark:hover:bg-accent-700 whitespace-nowrap">Manos</a>
+          <a href="#flujotrabajo" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 whitespace-nowrap">Flujo Trabajo</a>
+          <a href="#conclusion" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 hover:bg-accent-200 dark:hover:bg-accent-700 whitespace-nowrap">Conclusión</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="pt-40 pb-20">
+    <!-- Hero Section -->
+    <section id="inicio" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-4xl font-bold mb-6 text-primary-700 dark:text-primary-300" data-ref="https://www.sciencedirect.com/science/article/abs/pii/S0169814118301185|1">Guía Integral para Modelar Personajes Hiperrealistas en ZBrush</h2>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-8">
+          Esta guía completa proporciona plantillas de proporciones anatómicas precisas derivadas de referencias fotográficas reales, escaneos 3D y cánones artísticos establecidos para crear personajes hiperrealistas en ZBrush.
+        </p>
+        
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+          <div class="space-y-4">
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://paahjournal.com/articles/10.5334/paah.379|2">
+              Las mediciones antropométricas como método tradicional para estimar dimensiones corporales han sido ampliamente utilizadas entre diversas disciplinas científicas, proporcionando datos fundamentales para el modelado preciso.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://experts.umn.edu/en/publications/comparison-and-validation-of-traditional-and-3d-scanning-anthropo|4">
+              Los escáneres tridimensionales de mano permiten recopilar datos antropométricos fuera de entornos de laboratorio, facilitando la obtención de medidas precisas en condiciones naturales.
+            </p>
+          </div>
+          
+          <img
+            src="img/Modelado-Hiperrealista-ZBrush/01.png"
+            alt="Ilustración técnica de un artista digital trabajando en ZBrush para crear un personaje hiperrealista. En primer plano, un monitor grande muestra la interfaz de ZBrush con un modelo 3D de un rostro humano detallado en proceso de escultura, con herramientas visibles como DynaMesh activo y alphas aplicados. Sobre la mesa, varios dispositivos tecnológicos: un escáner 3D portátil blanco y negro capturando datos antropométricos de un modelo humano, una tableta gráfica negra con lápiz digital, y un libro físico abierto mostrando planos anatómicos del rostro. Al fondo, una pared blanca con referencias visuales: diagramas anatómicos del cráneo humano, proporciones faciales en diferentes ángulos (frente, perfil, tres cuartos), y muestras de piel con texturas realistas. El ambiente es moderno y profesional con iluminación suave, predominando tonos azules (#1a73b3) y verdes (#10b981) en elementos técnicos y anatómicos. Todo el conjunto comunica precisión científica combinada con creatividad artística para el modelado hiperrealista."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+
+        <div class="mt-8 pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+          <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.semanticscholar.org/paper/Analysis-of-a-3D-Anthropometric-Data-Set-of-for-Goto-Lee/5fe043f86240d8ebc7d7ff13b49617597279c9ef|5">
+            <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+            Hallazgo clave: Los avances en tecnologías de imagen 3D han facilitado la recolección de mediciones y formas de personas mayores o niños, proporcionando datos antropométricos precisos para aplicaciones diversas.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Antropometría -->
+    <section id="antropometria" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Datos Antropométricos Precisos</h2>
+        
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.tegakari.net/en/2021/01/caesar/|9">Base de Datos CAESAR</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              La base de datos antropométrica CAESAR 3D contiene datos de superficie de
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">2,400</span>
+              miembros del público general en Estados Unidos y Canadá, proporcionando mediciones precisas para diseño de productos y modelos digitales.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.humaneticsgroup.com/products/body-data-solutions/size-surveys/sizenorthamerica|10">
+              El estudio Size NorthAmerica entregó el conjunto de datos antropométricos más preciso y completo jamás recopilado en Estados Unidos y Canadá, utilizando estándares ISO para garantizar calidad científica.
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.cdc.gov/nchs/data/series/sr_11/sr11_252.pdf|6">Referencia CDC</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Los datos antropométricos de referencia del CDC para niños y adultos de
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">2 a 19 años</span>
+              incluyen representantes de otras razas y etnias, proporcionando un marco demográfico completo para análisis comparativos.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.academia.edu/24488185/The_anthropometric_database_for_children_and_young_adults_in_Taiwan|8">
+              La base de datos taiwanesa captura datos antropométricos para edades
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">6-65 años</span>,
+              enfocándose en estudiantes de
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">6-18 años</span>.
+              Un total de
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">8,052</span>
+              sujetos estudiantiles fueron medidos en cuatro ocasiones.
+            </p>
+          </div>
+        </div>
+
+        <div class="pl-4 pr-3 py-3 border-l-4 border-amber-500 bg-amber-50/40 dark:bg-amber-900/30 rounded-r-lg mb-8">
+          <p class="text-sm font-medium text-amber-900 dark:text-amber-100 leading-relaxed" data-ref="https://pmc.ncbi.nlm.nih.gov/articles/PMC9213209/|3">
+            <i data-lucide="alert-triangle" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+            Importante: El objetivo fue evaluar la aceptabilidad y experiencias con escáneres 3D midiendo antropometría infantil de
+            <span class="mx-1 px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-semibold text-xs">0-59 meses</span>
+            en encuestas poblacionales, destacando la necesidad de métodos no invasivos para poblaciones vulnerables.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="database" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://datadryad.org/dataset/doi:10.5061/dryad.fbg79cnxc|7">Precisión de Escaneo</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Exactitud de un sistema de imágenes 3D portátil para mediciones antropométricas infantiles en encuestas domiciliarias basadas en población y plataformas de vigilancia.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="scan" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.sciencedirect.com/science/article/abs/pii/S0360835218300305|25">Formato CAESAR</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              CAESAR contiene imágenes escaneadas 3D con más de
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-xs">250,000 triángulos</span>
+              en formato PLY con textura de color, 73 puntos de referencia antropométricos y 40 mediciones convencionales.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="users" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://humanshape.org/CAESAR/|24">Diversidad Demográfica</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              La base de datos incluye mediciones de hombres y mujeres de diversas razas étnicas, edades y tipos corporales, proporcionando cobertura demográfica completa.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Proporciones -->
+    <section id="proporciones" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Proporciones Anatómicas Fundamentales</h2>
+        
+        <div class="grid md:grid-cols-2 gap-8 items-start mb-12">
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.researchgate.net/publication/10969517_The_anthropometric_database_for_children_and_young_adults_in_Taiwan|109">Bases de Datos Antropométricas</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Estas bases de datos antropométricas 3D se han establecido para la población general o una población objetivo específica, proporcionando datos fundamentales para apoyo en diseño y modelado.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://pmc.ncbi.nlm.nih.gov/articles/PMC10865212/|110">
+              Consiste en
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">23 mediciones</span>
+              antropométricas tales como: estatura, altura sentado, altura rodilla, altura ojo sentado, profundidad pecho y anchura hombro, entre otras.
+            </p>
+          </div>
+
+          <img
+            src="img/Modelado-Hiperrealista-ZBrush/02.png"
+            alt="Diagrama técnico de proporciones anatómicas humanas mostrando un modelo 3D masculino adulto en vista frontal y lateral sobre fondo blanco limpio. El modelo está superpuesto con líneas de medición anatómicas codificadas por colores: líneas azules (#1a73b3) horizontales indican altura total (175cm), anchura de hombros (45cm), anchura de cadera (35cm), y altura de cintura. Líneas verdes (#10b981) verticales miden altura sentado (92cm), longitud de brazo (70cm), y longitud de pierna (85cm). Líneas rojas (#dc2626) diagonales señalan ángulos anatómicos clave. En el lado derecho del diagrama, una tabla vertical muestra las proporciones estándar: cabeza a cuerpo total 1:8, anchura hombros a altura total 1:3.8, anchura cadera a anchura hombros 1:1.3, y altura sentado a altura total 1:1.9. El texto usa tipografía sans-serif clara, números en negrita, y todos los elementos están dispuestos en una cuadrícula ordenada con espaciado uniforme. La paleta de colores utiliza azul (#1a73b3) y verde (#10b981) para énfasis técnico, con bordes sutiles y sombras leves para profundidad visual."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+
+        <div class="mb-12">
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.science.gov/topicpages/c/caesar+anthropometric+database|111">
+              <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Este estudio fue diseñado para obtener dimensiones antropométricas de niños iraníes (etnia Fars) de
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-xs">7-11 años</span>,
+              proporcionando datos específicos para esta población.
+            </p>
+          </div>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-proporcion-1">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="ruler" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://pubmed.ncbi.nlm.nih.gov/41226857/|112">Mediciones de Mano en Niños</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-proporcion-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-proporcion-1">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300">
+                  El objetivo de este estudio observacional fue recopilar mediciones de mano y datos antropométricos en niños de
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">1-15 años</span>.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-proporcion-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="activity" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.researchgate.net/publication/235145489_CAESAR_Summary_Statistics_for_the_Adult_Population_Ages_18-65_of_the_United_States_of_America|107">Estudio CAESAR Adulto</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-proporcion-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-proporcion-2">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300">
+                  CAESAR fue una importante encuesta antropométrica de las poblaciones civiles en Estados Unidos, Países Bajos e Italia. La encuesta CAESAR europea de superficie antropométrica civil americana y europea es una encuesta de mediciones corporales para personas de
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-sm">18-65 años</span>
+                  en tres países.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-proporcion-3">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="trending-up" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://roymech.org/Useful_Tables/Human/Human_sizes.html|141">Variaciones por Edad</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-proporcion-3" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-proporcion-3">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300">
+                  Las estadísticas de tamaños varían con la edad. La altura promedio para una persona mayor sería hasta
+                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">80mm</span>
+                  menor que para una persona más joven.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Rostro -->
+    <section id="rostro" class="py-20 bg-accent-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-accent-700 dark:text-accent-300">Anatomía Facial Detallada</h2>
+        
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.scribd.com/document/733330233/Shortcut-Secrets-of-Figure-Drawing-FULL-VERSION|23">Proporciones del Rostro</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Este método asegura que la figura esté correctamente centrada y proporcionada, permitiendo al artista hacer ajustes y mejorar el equilibrio en la representación.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://journals.sagepub.com/doi/10.1177/10519815241303337|41">
+              Este estudio tiene como objetivo presentar un conjunto de dimensiones antropométricas de la cabeza humana y la cara calculadas a partir de datos tridimensionales de trabajadores chilenos para equipos de protección personal.
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.researchgate.net/publication/322837858_A_3D_Anthropometric_Sizing_Analysis_System_Based_on_North_American_CAESAR_3D_Scan_Data_for_Design_of_Head_Wearable_Products|42">Dimensiones de Cabeza y Cara</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Este estudio tiene como objetivo presentar un conjunto de dimensiones antropométricas de la cabeza humana y la cara calculadas a partir de datos tridimensionales de trabajadores chilenos para equipos de protección personal.
+            </p>
+          </div>
+        </div>
+
+        <div class="mb-12">
+          <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed" data-ref="https://www.caesar-database.com/3d%20data%20information.htm|43">
+              <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Las vistas de cámara de los escaneos 3D se han unido con precisión para proporcionar modelos 3D completos de cada pose. Las poses escaneadas incluyen de pie, relajado y otras posiciones anatómicas clave.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="eye" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.semanticscholar.org/paper/3D-Anthropometric-Data-Set-of-the-Head-and-Face-of-Goto-Molenbroek/059b04752ab4837433a10d8bda2e1c709a7f5d99|222">Datos Antropométricos de Cabeza Infantil</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              El objetivo de este estudio es mapear la variación de cabezas y caras de niños y definir una nueva forma de presentar estos datos antropométricos 3D.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="layers" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.researchgate.net/publication/259006467_3D_Anthropometric_Data_Set_of_the_Head_and_Face_of_Children_Aged_05-7_Years_for_Design_Applications|223">Datos 3D de Cabeza y Cara Infantil</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              El objetivo de este estudio es mapear la variación de cabezas y caras de niños y definir una nueva forma de presentar estos datos antropométricos 3D para que sea útil.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="ruler" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.mdpi.com/2076-3417/14/16/7185|225">Canon de Longitud de Cabeza</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Este estudio tiene como objetivo analizar las proporciones de longitud de cabeza y altura corporal de niños de
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-xs">2 a 16 años</span>
+              según género.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Ojos -->
+    <section id="ojos" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Detalles de los Ojos y Estructura Facial</h2>
+        
+        <div class="grid md:grid-cols-2 gap-8 items-start mb-12">
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.nature.com/articles/s41598-024-78101-2|64">Segmento Anterior del Ojo</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Presentamos una plataforma óptica de imagen novedosa para visualizar y caracterizar estructuras oculares anteriores, incluyendo córnea, iris, lente, esclera y otras estructuras anatómicas clave.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://link.springer.com/article/10.1007/s00414-026-03733-0|65">
+              La medición cuantitativa de fotografías faciales, denominada fotogrametría, es un procedimiento importante en múltiples campos incluyendo oftalmológico, dental y bioanálisis.
+            </p>
+          </div>
+
+          <img
+            src="img/Modelado-Hiperrealista-ZBrush/03.png"
+            alt="Diagrama anatómico detallado del ojo humano en vista frontal y lateral mostrando estructuras internas con etiquetas. El globo ocular es una esfera tridimensional de color gris claro (#e5e7eb) con superficie lisa. La córnea es una capa transparente semiesférica en la parte frontal, coloreada en azul claro (#bfdbfe) con reflejo brillante. El iris aparece como un disco circular con textura radial, en tono verde oliva (#10b981) con patrones concéntricos sutiles. La pupila es un círculo negro central con borde definido. La esclera es la superficie blanca externa (#ffffff) con venas sanguíneas rojas (#dc2621) visibles. Los párpados superior e inferior son estructuras anatómicas en tonos beige (#fbbf24) con textura suave. El borde palpebral es una línea curva oscura (#1f2937). Encima del párpado superior, la ceja es una franja curva en tono marrón oscuro (#7c2d12). La fórmula matemática 'Diámetro corneal = 11.7mm ± 0.5mm' aparece en texto pequeño en la esquina inferior derecha. Todas las etiquetas usan tipografía sans-serif clara en negro (#1f2937), con líneas de conexión finas apuntando a cada estructura. El fondo es blanco limpio (#ffffff) con sombras sutiles debajo del globo ocular para efecto tridimensional."
+            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+          />
+        </div>
+
+        <div class="mb-12">
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://arxiv.org/html/2607.23687v1|66">
+              <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              GNM engloba la cabeza, cara, cuello, globos oculares, dientes y lengua. GNM modela la dilatación pupilar así como la forma de esclera y córnea variando con la identidad humana.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="eye" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.mdpi.com/1424-8220/20/15/4285|67">Biometría del Segmento Anterior</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              El segmento anterior del ojo humano incluye principalmente la córnea, modelado tridimensional computacional del ojo humano.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="move" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.collaborative-ai.org/publications/wood15_arxiv.pdf|68">Movimiento de Párpados</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Modelamos el movimiento de párpados usando formas de mezcla para párpados mirando hacia arriba y hacia abajo, interpolando entre ellos basado en el tono global del globo ocular.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="eye-off" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.researchgate.net/publication/346109122_Custom-made_artificial_eyes_using_3D_printing_for_dogs_A_preliminary_study|69">Modelos 3D de Ojos</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Los modelos 3D pueden usarse para evaluar la correlación entre diferentes espesores corneales, para simulación de presión intraocular.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-8 pl-4 pr-3 py-3 border-l-4 border-amber-500 bg-amber-50/40 dark:bg-amber-900/30 rounded-r-lg">
+          <p class="text-sm font-medium text-amber-900 dark:text-amber-100 leading-relaxed" data-ref="https://www.facebook.com/MedmontInternational/posts/are-you-in-the-market-for-a-corneal-topographer-dr-daddi-fadel-builds-a-case-for/1182537677211157/|71">
+            <i data-lucide="alert-triangle" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+            El tonómetro Diaton introdujo una solución audaz: medir la PIO a través del párpado y sobre la esclera, evitando completamente la córnea.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Manos -->
+    <section id="manos" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Anatomía de las Manos</h2>
+        
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://anatomy4sculptors.com/blog/hand-anatomy-for-artists/?_gl=1*1mj460h*_up*MQ..*_gs*Mg..&gclid=Cj0KCQiArOvIBhDLARIsAPwJXOZydeY4oTUWtxxZe6CZ4stn3BhYNJ8vTBy_CeLz77eDpk2EtptjW2saAvcwEALw_wcB|19">Anatomía de Manos para Artistas</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Este blog sobre anatomía de manos para artistas ayuda con las dificultades de dibujar y esculturar manos. En este blog, examinaremos los huesos y músculos de la mano.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://dogtownsculptors.org/books/|20">
+              Libros sobre escultura y dibujo de figuras: Bridgman's Life Drawing (George Bridgman), Constructive Anatomy (George Bridgman), The Human Machine (George Bridgman), The Book of a Hundred Hands (George Bridgman).
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.reddit.com/r/learnart/comments/15ao49n/who_is_better_for_learning_human_anatomy_george/|21">Enfoque de Bridgman</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Loomis es increíble en dibujo de figuras pero no aprenderás anatomía de sus libros de dibujo de figuras. Eso no es lo que ese libro trata.
+            </p>
+          </div>
+        </div>
+
+        <div class="mb-12">
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.facebook.com/groups/conceptartorg/posts/10156244558282516/|22">
+              <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Este curso intensivo te enseña cómo dibujar el cuerpo humano en cualquier ángulo (rotación en el espacio). También te enseña cómo inventar tus propias poses.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="hand" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.youtube.com/watch?v=xZj02G4v4qw|14">Estilo de Bridgman</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              El estilo de Bridgman es muy orgánico, suelto y formas muy precisas del cuerpo, toneladas de manos.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="book-open" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.amazon.com/Bridgmans-Constructive-Anatomy-Artists-Illustrations/dp/B0G2BJHTF5|16">Anatomía Constructiva</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              La guía de anatomía de Bridgman presenta casi
+              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-xs">500 ilustraciones</span>
+              enseñando a los artistas a dibujar el cuerpo humano usando su método de masas cuñas para capturar movimiento.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="camera" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.facebook.com/groups/anatomy4artists/posts/1064928080273703/|17">Fotos de Esculturas Clásicas</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Presentando fotos de alta resolución de esculturas clásicas para validar las teorías de Bridgman, este libro está diseñado para ser práctico y manos a la obra.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Flujo de Trabajo -->
+    <section id="flujotrabajo" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Flujo de Trabajo en ZBrush</h2>
+        
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://help.maxon.net/zbp/en-us/Content/html/4_palettes_tool-3-geometry-dynamesh.html|11">DynaMesh</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              DynaMesh es una operación de remallado que crea topología ideal para escultura. Aprende el flujo de trabajo básico de DynaMesh en la sección de Esenciales de Escultura DynaMesh proporcionada.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.zbrushcentral.com/t/workflow-for-dynamesh-zremesher/414755|12">
+              Me gustaría obtener información sobre un flujo de trabajo. Estoy usando el sistema para preparar modelos. Hasta ahora las funciones con las que estoy obteniendo resultados son DynaMesh y ZRemesher.
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://80.lv/articles/zbrush-dynamesh-workflow-tutorial|13">Tutorial de DynaMesh</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              El propósito de este tutorial es ayudar a otros artistas a mejorar su flujo de trabajo de modelado de alto polígono. Velocidad y capacidad para modelar complejidades.
+            </p>
+          </div>
+        </div>
+
+        <div class="mb-12">
+          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.youtube.com/watch?v=7T6XpKxwniA|75">
+              <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              ZRemesher es una gran herramienta para obtener rápidamente buena topología de ZBrush. En este tutorial rápido te mostraré lo básico de ZRemesher.
+            </p>
+          </div>
+        </div>
+
+        <div class="hs-accordion-group space-y-4">
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-flujo-1">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="layers" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.reddit.com/r/ZBrush/comments/l79xu6/workflow_questionhow_do_you_avoid_warbling_when/|76">Evitar Distorsiones en DynaMesh</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-flujo-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-flujo-1">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300">
+                  Es inevitable con DynaMesh. Para ayudar a recuperarlo con ZRemesh, agrupa las caras originales y activa la opción mantener grupos.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-flujo-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="refresh-cw" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.tiktok.com/@lefties_3d/video/7562571097669979414|78">De DynaMesh a ZRemesher</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
+            </button>
+            <div id="hs-collapse-flujo-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-flujo-2">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300">
+                  Cuando tu escultura está lista pero la topología parece desordenada, este truco te ayuda a pasar del bloqueo a formas limpias rápidamente, manteniendo todos tus detalles.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-flujo-3">
+              <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <i data-lucide="git-branch" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.youtube.com/watch?v=mTNzWZF6IMk|79">Topología Dinámica</span>
+              </div>
+              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+            </button>
+            <div id="hs-collapse-flujo-3" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-flujo-3">
+              <div class="p-6 pt-0 space-y-4">
+                <p class="text-gray-700 dark:text-gray-300">
+                  Proponemos un marco 3D+tiempo para modelar secuencias dinámicas de formas faciales 3D que representa movimiento no rígido realista durante una actuación, usando un modelo paramétrico.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Referencias Artísticas -->
+    <section class="py-20 bg-accent-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-accent-700 dark:text-accent-300">Referencias Artísticas y Canónicas</h2>
+        
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.sciencedirect.com/science/article/pii/S0379073824000744|84">Estándares de Identificación Craneofacial</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Hay numerosos estándares anatómicos y antropométricos que pueden utilizarse para análisis e identificación craneofacial. Estos estándares provienen de métodos tradicionales y tecnologías modernas.
+            </p>
+            
+            <p class="text-gray-700 dark:text-gray-300" data-ref="https://anatomypubs.onlinelibrary.wiley.com/doi/10.1002/ar.23146|85">
+              La posición del pliegue epicántico se describe como medial, central o lateral, y puede predecirse usando la forma del margen supraorbitario.
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <h3 class="text-2xl font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.scott-eaton.com/category/anatomy|98">Curso de Scott Eaton</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              El curso compañero de Anatomía para Artistas explora la anatomía de la cara en profundidad. Cubre la construcción del cráneo, rasgos, grasa facial, musculatura, expresiones y el sistema de Codificación de Acción Facial (FACS).
+            </p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="book" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.scott-eaton.com/|99">Curso Facial de Scott Eaton</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              El curso compañero de Anatomía para Artistas explora la anatomía de la cara en profundidad. Cubre la construcción del cráneo, rasgos, grasa facial, musculatura, expresiones y FACS.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="palette" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://learning.scott-eaton.com/|100">Portraiture &amp; Facial Anatomy</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Curso intensivo en escultura figurativa digital usando ZBrush. Cubre construcción del cráneo, rasgos faciales, grasa, musculatura y expresiones.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
+                <i data-lucide="video" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
+              </div>
+              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.youtube.com/watch?v=fLByCGMCV3Y|102">Curso Online de Scott Eaton</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              El curso está disponible en línea para compartir las lecciones de anatomía de los viejos maestros con artistas decididos a dominar la figura humana.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Conclusión -->
+    <section id="conclusion" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Conclusión</h2>
+        
+        <div class="space-y-6">
+          <p class="text-lg text-gray-700 dark:text-gray-300" data-ref="https://www.sciencedirect.com/science/article/abs/pii/S0169814118301185|1">
+            Los escáneres 3D ofrecen la oportunidad de reunir datos antropométricos de manera menos invasiva y por lo tanto son más adecuados para personas mayores o físicamente impedidas, facilitando la recolección de mediciones precisas.
+          </p>
+          
+          <p class="text-lg text-gray-700 dark:text-gray-300" data-ref="https://www.kaggle.com/datasets/thedevastator/3-d-anthropometry-measurements-of-human-body-sur|45">
+            Esta encuesta utiliza tecnología avanzada de antropometría superficial tridimensional que mide la superficie externa del cuerpo humano, proporcionando datos precisos para aplicaciones médicas y de diseño.
+          </p>
+          
+          <p class="text-lg text-gray-700 dark:text-gray-300" data-ref="https://arxiv.org/abs/2101.02515|46">
+            Con la ayuda de los dos nuevos conjuntos de datos, proponemos un modelo de forma basado en partes y una red neuronal profunda para estimar mediciones antropométricas a partir de imágenes 2D, mejorando la precisión de análisis.
+          </p>
+
+          <div class="mt-8 pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://pmc.ncbi.nlm.nih.gov/articles/PMC10875237/|47">
+              <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+              Presentamos un conjunto de datos que toma puntos clave de pose humana 2D y 3D estimados de imágenes y los relaciona con la ubicación de puntos anatómicos 3D, proporcionando una base sólida para modelado digital.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-primary-900 dark:bg-gray-950 text-gray-300 py-12">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center">
+        <p class="text-lg font-semibold text-primary-300 dark:text-primary-400 mb-4">Guía Completa para Modelado Hiperrealista en ZBrush</p>
+        <p class="text-sm text-gray-400 dark:text-gray-500">
+          © 2024 Guía de Investigación. Todos los derechos reservados.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Initialize Libraries -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize AOS
+      AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+      });
+
+      // Initialize Lucide icons
+      lucide.createIcons();
+
+      // Initialize Preline components
+      setTimeout(() => {
+        HSStaticMethods.autoInit();
+      }, 100);
+
+      // Initialize citation system
+      setTimeout(() => {
+        initCitationSystem();
+      }, 200);
+
+      // Progress bar functionality
+      const progressBar = document.getElementById('progressBar');
+      
+      window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrollPercent = (scrollTop / docHeight) * 100;
+        
+        progressBar.style.width = scrollPercent + '%';
+      });
+
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

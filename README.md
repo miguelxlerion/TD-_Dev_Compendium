@@ -90,8 +90,7 @@ Iniciar-Plataforma.bat      # Lanzador con doble clic para Windows
 
 1. Copia `mi-guia.html` en `content/` (PDFs en `docs/`). Sin espacios ni tildes.
 2. Pulsa **⟳ Re-escanear** (o `npm run manifest` por terminal).
-3. Si trae imágenes remotas: `npm run imagenes` para fijarlas en local.
-4. Listo — aparece sola con título, descripción, categoría y etiquetas.
+3. Listo — aparece sola con título, descripción, categoría, etiquetas e **imágenes fijadas en local** (el re-escaneo las descarga solo).
 
 Las ediciones manuales de `content/manifest.json` (badges, `featured`, categorías
 corregidas) se respetan en regeneraciones futuras.
@@ -101,8 +100,8 @@ corregidas) se respetan en regeneraciones futuras.
 | Comando | Qué hace |
 |---|---|
 | `npm run up` | Lanza todo (puerto libre + navegador) |
-| `npm run manifest` | Regenera el índice |
-| `npm run imagenes` | Localiza imágenes remotas |
+| `npm run manifest` | Regenera el índice (+ fija imágenes remotas) |
+| `npm run imagenes` | Fija imágenes remotas (manual, ya incluido en re-escanear) |
 | `python tools/server.py [puerto]` | Solo el servidor |
 | `python tools/launcher.py [--port P] [--no-browser]` | Lanzador avanzado |
 
@@ -118,7 +117,7 @@ corregidas) se respetan en regeneraciones futuras.
 |---|---|
 | ⟳ Re-escanear no hace nada / error CORS | Abriste `index.html` como archivo: usa `Iniciar-Plataforma.bat` |
 | Puerto 8080 ocupado | El lanzador usa el siguiente libre automáticamente |
-| Imágenes rotas en guía nueva | Ejecuta `npm run imagenes` (las URLs firmadas caducan) |
+| Imágenes rotas en guía nueva | Re-escanear las fija en local (las URLs firmadas caducan) |
 | Página nueva no aparece | Nombre sin espacios + regenerar índice + recarga forzada (Ctrl+F5) |
 
 ## Licencia

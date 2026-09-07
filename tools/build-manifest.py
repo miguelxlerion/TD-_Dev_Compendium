@@ -94,8 +94,34 @@ def load_previous():
             pass
     return {}, 1
 
+def localizar_imagenes():
+    """Descarga las imágenes remotas de content/*.html a content/img/.
+
+    Idempotente: las páginas sin URLs remotas no se tocan. Si algo falla,
+    solo avisa — el índice se genera igual. Se omite con --sin-imagenes.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "localizar_imagenes", str(ROOT / "tools" / "localizar-imagenes.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        total_ok = total_fail = 0
+        for page in sorted(CONTENT.glob("*.html")):
+            ok, fail = mod.localize_page(page)
+            total_ok += ok
+            total_fail += fail
+        print(f"[img] {total_ok} localizadas, {total_fail} fallidas")
+        return total_ok, total_fail
+    except Exception as exc:  # noqa: BLE001
+        print(f"[img] omitido: {exc}")
+        return 0, 0
+
+
 def main():
     prev, version = load_previous()
+    if "--sin-imagenes" not in sys.argv:
+        localizar_imagenes()
     pages = []
     seen_hash = set()
 
