@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guía Completa para Modelar Personajes Hiperrealistas en ZBrush</title>
+  <title>Pipeline AAA de Personajes en Unity 3D — Guía Profesional Completa</title>
 
-  <!-- Essential CDN Libraries -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -42,848 +41,1095 @@
       }
     }
   </script>
+  <script>
+    // Tema inicial antes del primer pintado (evita parpadeo): preferencia
+    // guardada > esquema del sistema. La clase .dark va en <html> para que
+    // TODAS las variantes dark: de Tailwind apliquen, incluido el <body>
+    // (un elemento no puede ser descendiente de sí mismo).
+    (function () {
+      try {
+        var stored = localStorage.getItem('td-hiperrealista-theme');
+        var dark = stored ? stored === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (dark) document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      } catch (e) {}
+    })();
+  </script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
 
-  <!-- Preline UI Components -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.js"></script>
-
-  <!-- Micro-interactions & Custom Styles -->
   <style>
     html { scroll-behavior: smooth; }
-
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
       html { scroll-behavior: auto; }
     }
-
-    .btn-interactive {
-      transition: all 0.2s ease-out;
+    .btn-interactive { transition: all 0.2s ease-out; }
+    .btn-interactive:hover { transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    .btn-interactive:active { transform: scale(0.95); }
+    .card-interactive { transition: all 0.3s ease-out; border: 1px solid transparent; }
+    .card-interactive:hover { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); filter: brightness(0.98); }
+    .dark .card-interactive:hover { border-color: hsl(200, 75%, 60%); }
+    .card-interactive:hover { border-color: hsl(200, 75%, 40%); }
+    .gradient-text {
+      background: linear-gradient(135deg, hsl(200, 75%, 40%), hsl(160, 65%, 50%));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    
-    .btn-interactive:hover {
-      transform: scale(1.05);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    .phase-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.25rem;
     }
-    
-    .btn-interactive:active {
-      transform: scale(0.95);
+    .resource-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.875rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      background: hsl(200, 80%, 95%);
+      color: hsl(200, 75%, 25%);
     }
-
-    .card-interactive {
-      transition: all 0.3s ease-out;
-      border: 1px solid transparent;
-      --border-lightness: 40%;
+    .dark .resource-link {
+      background: hsl(200, 75%, 15%);
+      color: hsl(200, 80%, 85%);
     }
-
-    .dark .card-interactive {
-      --border-lightness: 60%;
+    .resource-link:hover {
+      background: hsl(200, 80%, 85%);
+      transform: translateY(-1px);
     }
-
-    .card-interactive:hover {
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      filter: brightness(0.98);
+    .dark .resource-link:hover {
+      background: hsl(200, 75%, 25%);
     }
-    
-    /* Primary colored cards */
-    .card-interactive[class*="primary"]:hover,
-    .card-interactive[class*="white"]:hover,
-    .card-interactive[class*="gray-"]:hover {
-      border-color: hsl(200, 75%, var(--border-lightness));
+    .resource-link.accent {
+      background: hsl(160, 70%, 95%);
+      color: hsl(160, 65%, 25%);
     }
-    
-    /* Accent colored cards */
-    .card-interactive[class*="accent"]:hover {
-      border-color: hsl(160, 65%, var(--border-lightness));
+    .dark .resource-link.accent {
+      background: hsl(160, 65%, 15%);
+      color: hsl(160, 70%, 85%);
+    }
+    .resource-link.accent:hover {
+      background: hsl(160, 70%, 85%);
+    }
+    .dark .resource-link.accent:hover {
+      background: hsl(160, 65%, 25%);
+    }
+    .video-card {
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+    .video-card:hover .play-icon {
+      background: hsl(200, 75%, 40%);
+      color: white;
+    }
+    .dark .video-card:hover .play-icon {
+      background: hsl(200, 80%, 65%);
     }
   </style>
-
-  <!-- Dark Mode Toggle Script -->
-  <script>
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark');
-      const isDark = document.body.classList.contains('dark');
-      document.getElementById('sunIcon').style.display = isDark ? 'block' : 'none';
-      document.getElementById('moonIcon').style.display = isDark ? 'none' : 'block';
-    }
-  </script>
 </head>
 
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-  <!-- Citation System Script -->
-  <script>
-    function initCitationSystem() {
-      let i = 1, map = new Map();
-      document.querySelectorAll('[data-ref]').forEach(el => {
-        if (el.dataset.citationProcessed) return;
-        const raw = (el.getAttribute('data-ref')||'').trim();
-        if (!raw) return;
-
-        const parts = raw.split('|');
-        const url = parts[0].trim();
-        const idx = (parts[1]||'').trim() || map.get(raw) || (map.set(raw, String(i)), String(i++));
-
-        if (!el.textContent || !el.textContent.trim()) { el.dataset.citationProcessed = 'true'; return; }
-
-        const btn = document.createElement('sup'); btn.textContent = String(idx);
-        Object.assign(btn.style, { fontSize:'8px', color:'#fff', cursor:'pointer', top: '1px', fontWeight:'bold', backgroundColor:'#0284c7', borderRadius:'50%', transition:'all .15s', userSelect:'none', minWidth:'19px', height:'19px', marginLeft:'6px', display:'inline-flex', alignItems:'center', justifyContent:'center', boxShadow:'0 1px 3px rgba(0,0,0,.2)', lineHeight:'1'});
-        btn.addEventListener('mouseenter', ()=> Object.assign(btn.style, { backgroundColor:'#0369a1', transform:'scale(1.12)' }));
-        btn.addEventListener('mouseleave', ()=> Object.assign(btn.style, { backgroundColor:'#0284c7', transform:'scale(1)' }));
-        btn.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); window.open(url, '_blank'); });
-
-        el.appendChild(btn); el.dataset.citationProcessed = 'true';
-      });
-    }
-  </script>
 
   <!-- Progress Bar -->
-  <div class="fixed top-0 left-0 h-1 bg-primary-500 dark:bg-primary-400 z-[60] transition-all duration-300 ease-out" id="progressBar" style="width: 0%"></div>
+  <div class="fixed top-0 left-0 h-1 bg-gradient-to-r from-primary-500 to-accent-500 z-[60] transition-all duration-300" id="progressBar" style="width: 0%"></div>
 
-  <!-- Floating Header -->
-  <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur bg-gray-50/90 dark:bg-gray-900/90 border-b border-primary-500/20 dark:border-primary-600/20">
+  <!-- Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur bg-gray-50/90 dark:bg-gray-900/90 border-b border-primary-500/20">
     <nav class="max-w-7xl mx-auto px-6 py-4">
       <div class="flex items-center justify-between">
-        <h1 class="text-xl font-bold text-primary-700 dark:text-primary-300">Modelado Hiperrealista en ZBrush</h1>
-        
-        <div class="flex items-center gap-4">
-          <button onclick="toggleDarkMode()" class="btn-interactive p-2 rounded-lg bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 transition-all">
-            <i id="sunIcon" data-lucide="sun" class="w-5 h-5" style="display: none;"></i>
-            <i id="moonIcon" data-lucide="moon" class="w-5 h-5" style="display: block;"></i>
+        <h1 class="text-xl font-bold gradient-text">Pipeline AAA de Personajes</h1>
+        <div class="flex items-center gap-3">
+          <button onclick="toggleDarkMode()" class="btn-interactive p-2 rounded-lg bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300">
+            <i id="sunIcon" data-lucide="sun" class="w-5 h-5" style="display:none;"></i>
+            <i id="moonIcon" data-lucide="moon" class="w-5 h-5"></i>
           </button>
         </div>
       </div>
-      
-      <div class="mt-4">
-        <div class="flex flex-wrap gap-2 overflow-x-auto pb-2">
-          <a href="#inicio" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 whitespace-nowrap">Inicio</a>
-          <a href="#antropometria" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 hover:bg-accent-200 dark:hover:bg-accent-700 whitespace-nowrap">Antropometría</a>
-          <a href="#proporciones" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 whitespace-nowrap">Proporciones</a>
-          <a href="#rostro" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 hover:bg-accent-200 dark:hover:bg-accent-700 whitespace-nowrap">Rostro</a>
-          <a href="#ojos" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 whitespace-nowrap">Ojos</a>
-          <a href="#manos" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 hover:bg-accent-200 dark:hover:bg-accent-700 whitespace-nowrap">Manos</a>
-          <a href="#flujotrabajo" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700 whitespace-nowrap">Flujo Trabajo</a>
-          <a href="#conclusion" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 hover:bg-accent-200 dark:hover:bg-accent-700 whitespace-nowrap">Conclusión</a>
-        </div>
+      <div class="mt-3 flex flex-wrap gap-2 overflow-x-auto pb-2">
+        <a href="#inicio" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 whitespace-nowrap">Inicio</a>
+        <a href="#fase1" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 whitespace-nowrap">1. Concept</a>
+        <a href="#fase2" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 whitespace-nowrap">2. Modelado</a>
+        <a href="#fase3" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 whitespace-nowrap">3. Retopo/UV</a>
+        <a href="#fase4" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 whitespace-nowrap">4. Texturas</a>
+        <a href="#fase5" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 whitespace-nowrap">5. Rigging</a>
+        <a href="#fase6" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 whitespace-nowrap">6. Unity</a>
+        <a href="#fase7" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 whitespace-nowrap">7. Optimización</a>
+        <a href="#recursos" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 whitespace-nowrap">Recursos</a>
+        <a href="#totaldarkness" class="btn-interactive px-3 py-1.5 text-sm rounded-full bg-accent-100 dark:bg-accent-800 text-accent-700 dark:text-accent-300 whitespace-nowrap">Caso: Total Darkness</a>
       </div>
     </nav>
   </header>
 
-  <!-- Main Content -->
   <main class="pt-40 pb-20">
-    <!-- Hero Section -->
-    <section id="inicio" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
-      <div class="max-w-5xl mx-auto px-6">
-        <h2 class="text-4xl font-bold mb-6 text-primary-700 dark:text-primary-300" data-ref="https://www.sciencedirect.com/science/article/abs/pii/S0169814118301185|1">Guía Integral para Modelar Personajes Hiperrealistas en ZBrush</h2>
-        <p class="text-xl text-gray-700 dark:text-gray-300 mb-8">
-          Esta guía completa proporciona plantillas de proporciones anatómicas precisas derivadas de referencias fotográficas reales, escaneos 3D y cánones artísticos establecidos para crear personajes hiperrealistas en ZBrush.
+
+    <!-- HERO -->
+    <section id="inicio" class="py-16" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium mb-6">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Guía profesional AAA · 100% recursos gratuitos
+        </div>
+        <h2 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+          Del <span class="gradient-text">Concepto</span> a la <span class="gradient-text">Escena</span>
+        </h2>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-8 max-w-3xl">
+          Un pipeline profesional completo para crear personajes AAA en Unity 3D. Desde el concept art hasta la optimización final, con todos los recursos, tutoriales y herramientas <strong>100% gratuitos</strong> verificados.
         </p>
-        
-        <div class="grid md:grid-cols-2 gap-8 items-center">
+
+        <div class="grid md:grid-cols-3 gap-4 mb-10">
+          <div class="card-interactive p-5 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="phase-badge bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">7</div>
+              <div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Fases</div>
+                <div class="font-semibold">Pipeline completo</div>
+              </div>
+            </div>
+          </div>
+          <div class="card-interactive p-5 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="phase-badge bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300">50+</div>
+              <div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Recursos</div>
+                <div class="font-semibold">Videos y tutoriales gratis</div>
+              </div>
+            </div>
+          </div>
+          <div class="card-interactive p-5 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="phase-badge bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">∞</div>
+              <div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Caso real</div>
+                <div class="font-semibold">Total Darkness</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
+          <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed">
+            <i data-lucide="check-circle-2" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+            <strong>Nota:</strong> Todos los enlaces de esta guía son gratuitos — videos de YouTube completos, documentación oficial, blogs abiertos y herramientas libres. Cero paywalls.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FASE 1: CONCEPT ART -->
+    <section id="fase1" class="py-16 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="phase-badge bg-primary-500 text-white text-2xl">1</div>
+          <div>
+            <h2 class="text-3xl font-bold text-primary-700 dark:text-primary-300">Diseño Conceptual</h2>
+            <p class="text-gray-600 dark:text-gray-400">La piedra angular de todo el pipeline</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-10">
           <div class="space-y-4">
-            <p class="text-gray-700 dark:text-gray-300" data-ref="https://paahjournal.com/articles/10.5334/paah.379|2">
-              Las mediciones antropométricas como método tradicional para estimar dimensiones corporales han sido ampliamente utilizadas entre diversas disciplinas científicas, proporcionando datos fundamentales para el modelado preciso.
+            <p class="text-gray-700 dark:text-gray-300">
+              El concept art no es solo dibujar personajes bonitos: es un <strong>documento técnico-artístico</strong> que define apariencia, personalidad, paleta de materiales y estados de transformación. Para proyectos como <em>Total Darkness</em>, debe anticipar las necesidades técnicas de transformación ética y expresión emocional.
             </p>
-            
-            <p class="text-gray-700 dark:text-gray-300" data-ref="https://experts.umn.edu/en/publications/comparison-and-validation-of-traditional-and-3d-scanning-anthropo|4">
-              Los escáneres tridimensionales de mano permiten recopilar datos antropométricos fuera de entornos de laboratorio, facilitando la obtención de medidas precisas en condiciones naturales.
+            <p class="text-gray-700 dark:text-gray-300">
+              El proceso incluye: investigación visual (moodboards), bocetos exploratorios de siluetas, character sheets con múltiples vistas, estudios de expresión y transformación, y especificaciones de materialidad.
             </p>
           </div>
-          
-          <img
-            src="img/Modelado-Hiperrealista-ZBrush/01.png"
-            alt="Ilustración técnica de un artista digital trabajando en ZBrush para crear un personaje hiperrealista. En primer plano, un monitor grande muestra la interfaz de ZBrush con un modelo 3D de un rostro humano detallado en proceso de escultura, con herramientas visibles como DynaMesh activo y alphas aplicados. Sobre la mesa, varios dispositivos tecnológicos: un escáner 3D portátil blanco y negro capturando datos antropométricos de un modelo humano, una tableta gráfica negra con lápiz digital, y un libro físico abierto mostrando planos anatómicos del rostro. Al fondo, una pared blanca con referencias visuales: diagramas anatómicos del cráneo humano, proporciones faciales en diferentes ángulos (frente, perfil, tres cuartos), y muestras de piel con texturas realistas. El ambiente es moderno y profesional con iluminación suave, predominando tonos azules (#1a73b3) y verdes (#10b981) en elementos técnicos y anatómicos. Todo el conjunto comunica precisión científica combinada con creatividad artística para el modelado hiperrealista."
-            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
-          />
+
+          <div class="card-interactive p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <h4 class="font-semibold mb-4 flex items-center gap-2">
+              <i data-lucide="list-checks" class="w-5 h-5 text-primary-500"></i>
+              Entregables de la fase
+            </h4>
+            <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-accent-500 mt-0.5"></i>Moodboards curados (Photoshop, Pinterest, Figma)</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-accent-500 mt-0.5"></i>Bocetos exploratorios (Fresco, Sketchbook)</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-accent-500 mt-0.5"></i>Concept art final (Photoshop, Corel Painter)</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-accent-500 mt-0.5"></i>Character sheets con vistas múltiples</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-accent-500 mt-0.5"></i>Variaciones de estado (transformaciones éticas)</li>
+            </ul>
+          </div>
         </div>
 
-        <div class="mt-8 pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
-          <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.semanticscholar.org/paper/Analysis-of-a-3D-Anthropometric-Data-Set-of-for-Goto-Lee/5fe043f86240d8ebc7d7ff13b49617597279c9ef|5">
-            <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
-            Hallazgo clave: Los avances en tecnologías de imagen 3D han facilitado la recolección de mediciones y formas de personas mayores o niños, proporcionando datos antropométricos precisos para aplicaciones diversas.
-          </p>
+        <h4 class="font-semibold mb-4 text-lg">🎥 Tutoriales gratuitos recomendados</h4>
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <a href="https://www.youtube.com/watch?v=4iw8XLusQ7s" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">I Studied Character Design — Everything I Know</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Tutorial completo de character design</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=tHj4GDi0LbM" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Dark Fantasy Character Design: Shape Language</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Lenguaje de formas aplicado</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=-9DdfMD6bLY" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">I Was Designing Characters WRONG!</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Errores comunes y cómo evitarlos</p>
+          </a>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <a href="https://www.youtube.com/playlist?list=PL2e4mYbwSTbbHAJT7OdK5mv-idhlLOTl0" target="_blank" class="resource-link"><i data-lucide="youtube" class="w-4 h-4"></i>Animation Artistry Playlist</a>
+          <a href="https://vsquad.art/blog/articles/exploring-unique-character-art-styles-fresh-inspiration-for-artists/" target="_blank" class="resource-link accent"><i data-lucide="palette" class="w-4 h-4"></i>Art Styles Guide (VSQUAD)</a>
+          <a href="https://www.abalian.com/character-design.html" target="_blank" class="resource-link"><i data-lucide="book-open" class="w-4 h-4"></i>Character Design Guide</a>
         </div>
       </div>
     </section>
 
-    <!-- Sección Antropometría -->
-    <section id="antropometria" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+    <!-- FASE 2: MODELADO HIGH-POLY -->
+    <section id="fase2" class="py-16" data-aos="fade-up">
       <div class="max-w-6xl mx-auto px-6">
-        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Datos Antropométricos Precisos</h2>
-        
-        <div class="grid md:grid-cols-2 gap-8 mb-12">
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.tegakari.net/en/2021/01/caesar/|9">Base de Datos CAESAR</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              La base de datos antropométrica CAESAR 3D contiene datos de superficie de
-              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">2,400</span>
-              miembros del público general en Estados Unidos y Canadá, proporcionando mediciones precisas para diseño de productos y modelos digitales.
-            </p>
-            
-            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.humaneticsgroup.com/products/body-data-solutions/size-surveys/sizenorthamerica|10">
-              El estudio Size NorthAmerica entregó el conjunto de datos antropométricos más preciso y completo jamás recopilado en Estados Unidos y Canadá, utilizando estándares ISO para garantizar calidad científica.
-            </p>
-          </div>
-
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.cdc.gov/nchs/data/series/sr_11/sr11_252.pdf|6">Referencia CDC</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Los datos antropométricos de referencia del CDC para niños y adultos de
-              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">2 a 19 años</span>
-              incluyen representantes de otras razas y etnias, proporcionando un marco demográfico completo para análisis comparativos.
-            </p>
-            
-            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.academia.edu/24488185/The_anthropometric_database_for_children_and_young_adults_in_Taiwan|8">
-              La base de datos taiwanesa captura datos antropométricos para edades
-              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">6-65 años</span>,
-              enfocándose en estudiantes de
-              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">6-18 años</span>.
-              Un total de
-              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">8,052</span>
-              sujetos estudiantiles fueron medidos en cuatro ocasiones.
-            </p>
+        <div class="flex items-center gap-4 mb-8">
+          <div class="phase-badge bg-accent-500 text-white text-2xl">2</div>
+          <div>
+            <h2 class="text-3xl font-bold text-accent-700 dark:text-accent-300">Modelado High-Poly en ZBrush</h2>
+            <p class="text-gray-600 dark:text-gray-400">El estándar de la industria AAA</p>
           </div>
         </div>
 
-        <div class="pl-4 pr-3 py-3 border-l-4 border-amber-500 bg-amber-50/40 dark:bg-amber-900/30 rounded-r-lg mb-8">
-          <p class="text-sm font-medium text-amber-900 dark:text-amber-100 leading-relaxed" data-ref="https://pmc.ncbi.nlm.nih.gov/articles/PMC9213209/|3">
-            <i data-lucide="alert-triangle" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
-            Importante: El objetivo fue evaluar la aceptabilidad y experiencias con escáneres 3D midiendo antropometría infantil de
-            <span class="mx-1 px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-semibold text-xs">0-59 meses</span>
-            en encuestas poblacionales, destacando la necesidad de métodos no invasivos para poblaciones vulnerables.
+        <div class="grid md:grid-cols-2 gap-8 mb-10">
+          <div class="space-y-4">
+            <p class="text-gray-700 dark:text-gray-300">
+              El modelo de alta poligonación captura <strong>todos los detalles finos</strong>: arrugas, cicatrices, texturas de tejidos, imperfecciones. Se trabaja con millones de polígonos sin restricciones de rendimiento. <strong>ZBrush</strong> es el estándar universal en estudios AAA, aunque Blender (con Multiresolution Modifier) es una alternativa creciente.
+            </p>
+            <p class="text-gray-700 dark:text-gray-300">
+              El workflow híbrido típico: bloqueo inicial en Maya/Blender → importación a ZBrush → refinamiento con DynaMesh y herramientas de escultura → subdivisión para añadir detalles finos.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <h4 class="font-semibold mb-4 flex items-center gap-2">
+              <i data-lucide="table" class="w-5 h-5 text-accent-500"></i>
+              Aspectos clave del High-Poly
+            </h4>
+            <table class="w-full text-sm">
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tr><td class="py-2 font-medium">Herramienta</td><td class="py-2 text-gray-600 dark:text-gray-400">ZBrush (estándar), Blender</td></tr>
+                <tr><td class="py-2 font-medium">Polígonos</td><td class="py-2 text-gray-600 dark:text-gray-400">Cientos de miles a millones</td></tr>
+                <tr><td class="py-2 font-medium">Topología</td><td class="py-2 text-gray-600 dark:text-gray-400">No requiere ser perfecta</td></tr>
+                <tr><td class="py-2 font-medium">Propósito</td><td class="py-2 text-gray-600 dark:text-gray-400">Referencia maestra para baking</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <h4 class="font-semibold mb-4 text-lg">🎥 Tutoriales gratuitos recomendados</h4>
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <a href="https://www.youtube.com/watch?v=zPcbx_XeN7E" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">How to Make Game Character | Full Workflow</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Pipeline completo de character</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=x7I4_jJZy-c" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">The Complete AAA VIDEO GAME Character Art Pipeline</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Pipeline AAA paso a paso</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=JPrqXzgoe0A" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Blender — AAA Game Character Workflow</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Cómo empezar tu proyecto</p>
+          </a>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <a href="https://help.maxon.net/zbrush" target="_blank" class="resource-link"><i data-lucide="book" class="w-4 h-4"></i>Documentación oficial ZBrush</a>
+          <a href="https://www.youtube.com/@ZBrushOfficial" target="_blank" class="resource-link accent"><i data-lucide="youtube" class="w-4 h-4"></i>Canal oficial ZBrush</a>
+          <a href="https://www.youtube.com/@MichaelPavlovich" target="_blank" class="resource-link"><i data-lucide="youtube" class="w-4 h-4"></i>Michael Pavlovich (ZBrush)</a>
+          <a href="https://www.youtube.com/@FlippedNormals" target="_blank" class="resource-link accent"><i data-lucide="youtube" class="w-4 h-4"></i>FlippedNormals</a>
+          <a href="https://80.lv/articles/learn-how-to-create-a-real-time-character-for-aaa-games-in-zbrush" target="_blank" class="resource-link"><i data-lucide="file-text" class="w-4 h-4"></i>80 Level: Real-Time Character</a>
+          <a href="https://www.youtube.com/@DannyMac3D" target="_blank" class="resource-link accent"><i data-lucide="youtube" class="w-4 h-4"></i>Danny Mac 3D</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FASE 3: RETOPOLOGÍA Y UV -->
+    <section id="fase3" class="py-16 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="phase-badge bg-primary-500 text-white text-2xl">3</div>
+          <div>
+            <h2 class="text-3xl font-bold text-primary-700 dark:text-primary-300">Retopología, UV y Baking</h2>
+            <p class="text-gray-600 dark:text-gray-400">La columna vertebral de la optimización</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6 mb-10">
+          <div class="card-interactive p-5 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="layers" class="w-5 h-5 text-primary-500"></i>
+              <h4 class="font-semibold">Retopología</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+              Crear una malla low-poly limpia a partir del high-poly. Topología con quads, loops siguiendo anatomía, sin n-gons.
+            </p>
+            <div class="text-xs text-gray-500 dark:text-gray-400">
+              <strong>Herramientas:</strong> RetopoFlow (Blender), ZRemesher (ZBrush), Quad Draw (Maya)
+            </div>
+          </div>
+
+          <div class="card-interactive p-5 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="grid-3x3" class="w-5 h-5 text-accent-500"></i>
+              <h4 class="font-semibold">Mapeo UV</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+              Desplegar la malla 3D en 2D. Principios: densidad de texel uniforme, empaquetado eficiente, sin superposiciones.
+            </p>
+            <div class="text-xs text-gray-500 dark:text-gray-400">
+              <strong>Herramientas:</strong> UVPackmaster, Blender UV, RizomUV
+            </div>
+          </div>
+
+          <div class="card-interactive p-5 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="zap" class="w-5 h-5 text-primary-500"></i>
+              <h4 class="font-semibold">Baking de Mapas</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+              Transferir detalles del high al low-poly mediante mapas: Normal, AO, Height/Displacement.
+            </p>
+            <div class="text-xs text-gray-500 dark:text-gray-400">
+              <strong>Herramientas:</strong> Marmoset Toolbag, Substance Painter, xNormal
+            </div>
+          </div>
+        </div>
+
+        <h4 class="font-semibold mb-4 text-lg">🎥 Tutoriales gratuitos recomendados</h4>
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <a href="https://www.youtube.com/watch?v=duJYSHALJjQ" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Low Poly Retopology Masterclass</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Pro Tips para modelos complejos</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=fIi1nW_bcWI" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Learn How to Retopologise Any Head</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Retopo workflow en Blender</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=-PlP0phqTqY" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">MASTER UV Mapping in MAYA for AAA</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">UVs profesionales para juegos</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=6c7FEYn1ER0" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Pro UV Unwrapping Techniques (Blender Eyes)</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Técnicas pro de UV</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=YDu9pYMkkSM" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">High to Low Poly Workflow in 3D Modeling</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Workflow completo high→low</p>
+          </a>
+          <a href="https://marmoset.co/posts/toolbag-baking-tutorial/" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">The Toolbag Baking Tutorial</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Guía oficial Marmoset</p>
+          </a>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <a href="https://thundercloud-studio.com/article/topology-for-low-poly-game-characters/" target="_blank" class="resource-link"><i data-lucide="file-text" class="w-4 h-4"></i>Topology for Low Poly Characters</a>
+          <a href="https://rebusfarm.net/blog/texel-density-basics-every-artist-should-know" target="_blank" class="resource-link accent"><i data-lucide="file-text" class="w-4 h-4"></i>Texel Density Basics</a>
+          <a href="https://www.youtube.com/@Arrimus3D" target="_blank" class="resource-link"><i data-lucide="youtube" class="w-4 h-4"></i>Arrimus 3D (Retopo)</a>
+          <a href="https://polycount.com/discussion/210568/retopology-for-games" target="_blank" class="resource-link accent"><i data-lucide="message-circle" class="w-4 h-4"></i>Polycount: Retopology for Games</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FASE 4: TEXTURIZADO PBR -->
+    <section id="fase4" class="py-16" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="phase-badge bg-accent-500 text-white text-2xl">4</div>
+          <div>
+            <h2 class="text-3xl font-bold text-accent-700 dark:text-accent-300">Texturizado PBR</h2>
+            <p class="text-gray-600 dark:text-gray-400">Substance Painter y el flujo de trabajo físico</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-10">
+          <div class="space-y-4">
+            <p class="text-gray-700 dark:text-gray-300">
+              El estándar moderno AAA es el <strong>Renderizado Basado en Físicas (PBR)</strong>. Simula el comportamiento real de la luz con parámetros como rugosidad y metalicidad, garantizando consistencia bajo cualquier iluminación.
+            </p>
+            <p class="text-gray-700 dark:text-gray-300">
+              <strong>Adobe Substance Painter</strong> es la herramienta estándar, con sistema de capas tipo Photoshop, smart masks para desgaste automático, y generación procedural.
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <h4 class="font-semibold mb-4">📦 Mapas PBR esenciales</h4>
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-start gap-2"><span class="font-mono text-xs px-1.5 py-0.5 rounded bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">Albedo</span><span class="text-gray-600 dark:text-gray-400">Color base sin iluminación</span></li>
+              <li class="flex items-start gap-2"><span class="font-mono text-xs px-1.5 py-0.5 rounded bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300">Normal</span><span class="text-gray-600 dark:text-gray-400">Simula detalles geométricos</span></li>
+              <li class="flex items-start gap-2"><span class="font-mono text-xs px-1.5 py-0.5 rounded bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">Metallic</span><span class="text-gray-600 dark:text-gray-400">Metal vs no-metal (0 o 1)</span></li>
+              <li class="flex items-start gap-2"><span class="font-mono text-xs px-1.5 py-0.5 rounded bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300">Roughness</span><span class="text-gray-600 dark:text-gray-400">Brillo vs mate</span></li>
+              <li class="flex items-start gap-2"><span class="font-mono text-xs px-1.5 py-0.5 rounded bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">AO</span><span class="text-gray-600 dark:text-gray-400">Oclusión ambiental</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg mb-8">
+          <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed">
+            <i data-lucide="lightbulb" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
+            <strong>Channel Packing:</strong> Técnica clave en URP/HDRP que empaqueta Metallic, Roughness y AO en los canales R, G, B de una sola textura RGBA. Reduce drásticamente el consumo de VRAM y las llamadas a dibujar.
           </p>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="database" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+        <h4 class="font-semibold mb-4 text-lg">🎥 Tutoriales gratuitos recomendados</h4>
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <a href="https://www.youtube.com/watch?v=61BRzaUDkuA" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
               </div>
-              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://datadryad.org/dataset/doi:10.5061/dryad.fbg79cnxc|7">Precisión de Escaneo</h4>
+              <div class="text-sm font-semibold">95% AAA Studios Use Substance PBR Workflow</div>
             </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              Exactitud de un sistema de imágenes 3D portátil para mediciones antropométricas infantiles en encuestas domiciliarias basadas en población y plataformas de vigilancia.
+            <p class="text-xs text-gray-500 dark:text-gray-400">Workflow PBR en Substance</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=MZuIppd531Q" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">$35 AAA Game PBR Textures Workflow</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Personajes realistas</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=Q0G1SMaeEwI" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Unity PBR Workflow — Part 2</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">PBR dentro de Unity</p>
+          </a>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <a href="https://www.adobe.com/learn/substance-3d-designer/web/the-pbr-guide-part-2" target="_blank" class="resource-link"><i data-lucide="book" class="w-4 h-4"></i>The PBR Guide — Adobe</a>
+          <a href="https://aitextured.com/articles/guides/unity-urp-pbr-texture-import-settings" target="_blank" class="resource-link accent"><i data-lucide="file-text" class="w-4 h-4"></i>Unity URP PBR Import Settings</a>
+          <a href="https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@14.0/manual/shaders-in-universalrp-channel-packed-texture.html" target="_blank" class="resource-link"><i data-lucide="file-text" class="w-4 h-4"></i>Channel Packed Textures (Unity)</a>
+          <a href="https://polycount.com/discussion/211152/best-pbr-texture-compression-and-channel-layout" target="_blank" class="resource-link accent"><i data-lucide="message-circle" class="w-4 h-4"></i>Polycount: PBR Packing</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FASE 5: RIGGING -->
+    <section id="fase5" class="py-16 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="phase-badge bg-primary-500 text-white text-2xl">5</div>
+          <div>
+            <h2 class="text-3xl font-bold text-primary-700 dark:text-primary-300">Rigging, Skinning y Blend Shapes</h2>
+            <p class="text-gray-600 dark:text-gray-400">El alma de la animación</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-10">
+          <div class="space-y-4">
+            <p class="text-gray-700 dark:text-gray-300">
+              El rigging crea el esqueleto interno y el sistema de controles. En Unity existen dos tipos principales: <strong>Humanoid</strong> (para personajes humanos, permite retargeting de animaciones) y <strong>Generic</strong> (para criaturas, robots, rigs personalizados).
+            </p>
+            <p class="text-gray-700 dark:text-gray-300">
+              El <strong>skinning</strong> asigna pesos a cada vértice. La técnica avanzada <strong>Dual Quaternion Skinning (DQS)</strong> elimina artefactos de deformación en articulaciones. Las <strong>Blend Shapes</strong> permiten expresiones faciales y transformaciones éticas (cruciales para Total Darkness).
             </p>
           </div>
 
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="scan" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.sciencedirect.com/science/article/abs/pii/S0360835218300305|25">Formato CAESAR</h4>
+          <div class="card-interactive p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <h4 class="font-semibold mb-4">🎭 Rigging facial</h4>
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+              Combina dos técnicas: <strong>huesos</strong> para poses generales y <strong>blend shapes</strong> para expresiones detalladas.
+            </p>
+            <div class="text-xs text-gray-500 dark:text-gray-400">
+              <strong>Herramientas:</strong> Maya (estándar AAA), Blender (Rigify), FaceBuilder
             </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              CAESAR contiene imágenes escaneadas 3D con más de
-              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-xs">250,000 triángulos</span>
-              en formato PLY con textura de color, 73 puntos de referencia antropométricos y 40 mediciones convencionales.
+          </div>
+        </div>
+
+        <h4 class="font-semibold mb-4 text-lg">🎥 Tutoriales gratuitos recomendados</h4>
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <a href="https://www.youtube.com/watch?v=THVAFRmw384" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Complete Guide to Fast 3D Animation & Rigging</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Guía completa de rigging</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=BYI-ZRy9guE" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Maya to Unreal Full Character Pipe — Rigging</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Rigging completo Maya→UE</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=Htl7ysv10Qs" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Make Your Characters Interactive — Animation Rigging in Unity</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Animation Rigging Package</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=LEwYmFT3xDk" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Make Animations DYNAMIC with Animation Rigging</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Unity Tutorial</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=knbZ_g8Hgvk" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">ART: Animation & Rigging Toolkit Overview</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Toolkit oficial</p>
+          </a>
+          <a href="https://mocaponline.com/blogs/mocap-news/blend-shapes-morph-targets-guide" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Blend Shapes & Morph Targets Guide</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">MoCap Online — guía completa</p>
+          </a>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <a href="https://anatomy4sculptors.com/blog/" target="_blank" class="resource-link"><i data-lucide="book" class="w-4 h-4"></i>Anatomy for Sculptors Blog</a>
+          <a href="https://www.scott-eaton.com/" target="_blank" class="resource-link accent"><i data-lucide="book" class="w-4 h-4"></i>Scott Eaton — Facial Anatomy</a>
+          <a href="https://docs.unity3d.com/Packages/com.unity.animation.rigging@latest/index.html" target="_blank" class="resource-link"><i data-lucide="file-text" class="w-4 h-4"></i>Unity Animation Rigging Docs</a>
+          <a href="https://www.youtube.com/@DikkoDesign" target="_blank" class="resource-link accent"><i data-lucide="youtube" class="w-4 h-4"></i>Dikko Design (Rigging)</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FASE 6: INTEGRACIÓN UNITY -->
+    <section id="fase6" class="py-16" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="phase-badge bg-accent-500 text-white text-2xl">6</div>
+          <div>
+            <h2 class="text-3xl font-bold text-accent-700 dark:text-accent-300">Integración en Unity</h2>
+            <p class="text-gray-600 dark:text-gray-400">Animator, Blend Trees, State Machines</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-10">
+          <div class="space-y-4">
+            <p class="text-gray-700 dark:text-gray-300">
+              El <strong>Animator Controller</strong> gestiona la máquina de estados de animación. Se usan <strong>Sub-State Machines</strong> para organizar estados lógicamente (Locomoción, Ataques, Estados Éticos). Los <strong>Blend Trees</strong> mezclan animaciones suavemente basadas en parámetros como velocidad.
+            </p>
+            <p class="text-gray-700 dark:text-gray-300">
+              <strong>Animation Events</strong> sincronizan eventos (sonidos, partículas, daño) con fotogramas específicos. <strong>Root Motion</strong> permite que la animación dicte el movimiento del personaje. <strong>State Machine Behaviours</strong> ejecutan código desde estados específicos del Animator.
             </p>
           </div>
 
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="users" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
+          <div class="card-interactive p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <h4 class="font-semibold mb-4">⚙️ Configuración de importación FBX</h4>
+            <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+              <li><strong>Rig Type:</strong> Humanoid (retargeting) o Generic</li>
+              <li><strong>Optimize Game Objects:</strong> habilitar para humanoides</li>
+              <li><strong>Read/Write Enabled:</strong> solo si se manipula la malla en código</li>
+              <li><strong>Mesh Compression:</strong> reduce tamaño en memoria</li>
+              <li><strong>Anim Compression:</strong> equilibrar tamaño vs precisión</li>
+            </ul>
+          </div>
+        </div>
+
+        <h4 class="font-semibold mb-4 text-lg">🎥 Tutoriales gratuitos recomendados</h4>
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <a href="https://www.youtube.com/watch?v=9U--F5rSGGs" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
               </div>
-              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://humanshape.org/CAESAR/|24">Diversidad Demográfica</h4>
+              <div class="text-sm font-semibold">Unity 101 Animation: The Best Way to Animate</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Fundamentos de animación</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=-Vs9maot4x4" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Sub State Machines in Unity Explained</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Organización del Animator</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=INJmqquHaz4" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">How to Use Animation Events in Unity</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Sincronización precisa</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=fNgPkuMgWFg" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Animation Retargeting (Unity Tutorial)</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Reutilizar animaciones</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=6RA9D2qEu9U" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Importing Animated Characters into Unity 6</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Importación moderna</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=yuLcssPwGLc" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">UNITY 6 TUTORIAL — Textures & Materials</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Materiales en Unity 6</p>
+          </a>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <a href="https://docs.unity3d.com/6000.5/Documentation/Manual/class-Animator.html" target="_blank" class="resource-link"><i data-lucide="book" class="w-4 h-4"></i>Animator Component (Docs)</a>
+          <a href="https://docs.unity3d.com/6000.5/Documentation/Manual/class-BlendTree.html" target="_blank" class="resource-link accent"><i data-lucide="book" class="w-4 h-4"></i>Blend Trees (Docs)</a>
+          <a href="https://docs.unity3d.com/6000.5/Documentation/Manual/NestedStateMachines.html" target="_blank" class="resource-link"><i data-lucide="book" class="w-4 h-4"></i>Sub-State Machines (Docs)</a>
+          <a href="https://docs.unity3d.com/6000.5/Documentation/Manual/ConfiguringtheAvatar.html" target="_blank" class="resource-link accent"><i data-lucide="book" class="w-4 h-4"></i>Configuring the Avatar</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FASE 7: OPTIMIZACIÓN -->
+    <section id="fase7" class="py-16 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="phase-badge bg-primary-500 text-white text-2xl">7</div>
+          <div>
+            <h2 class="text-3xl font-bold text-primary-700 dark:text-primary-300">Optimización y Preparación Final</h2>
+            <p class="text-gray-600 dark:text-gray-400">LODs, GPU Instancing, Draw Calls</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6 mb-10">
+          <div class="card-interactive p-5 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="layers-2" class="w-5 h-5 text-primary-500"></i>
+              <h4 class="font-semibold">LOD (Level of Detail)</h4>
             </div>
             <p class="text-sm text-gray-700 dark:text-gray-300">
-              La base de datos incluye mediciones de hombres y mujeres de diversas razas étnicas, edades y tipos corporales, proporcionando cobertura demográfica completa.
+              Renderizar versiones de menor poligonaje según la distancia. Unity tiene sistema integrado con LODGroup. Estándar AAA: 3-4 niveles por personaje.
+            </p>
+          </div>
+
+          <div class="card-interactive p-5 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="cpu" class="w-5 h-5 text-accent-500"></i>
+              <h4 class="font-semibold">GPU Instancing</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Renderizar múltiples copias del mismo modelo con una sola draw call. Ideal para multitudes y objetos repetidos.
+            </p>
+          </div>
+
+          <div class="card-interactive p-5 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="image" class="w-5 h-5 text-primary-500"></i>
+              <h4 class="font-semibold">Texture Atlasing</h4>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Empaquetar múltiples texturas pequeñas en una grande. Reduce drásticamente las draw calls.
+            </p>
+          </div>
+        </div>
+
+        <div class="card-interactive p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm mb-8">
+          <h4 class="font-semibold mb-4">📊 Guía de polígonos recomendada</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th class="text-left p-2">Rol</th>
+                  <th class="text-left p-2">PC/Consola</th>
+                  <th class="text-left p-2">Móvil</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tr><td class="p-2 font-medium">Protagonista</td><td class="p-2 text-gray-600 dark:text-gray-400">100K-150K tris</td><td class="p-2 text-gray-600 dark:text-gray-400">8K-15K tris</td></tr>
+                <tr><td class="p-2 font-medium">Aliado/Enemigo</td><td class="p-2 text-gray-600 dark:text-gray-400">30K-60K tris</td><td class="p-2 text-gray-600 dark:text-gray-400">3K-7K tris</td></tr>
+                <tr><td class="p-2 font-medium">Multitud</td><td class="p-2 text-gray-600 dark:text-gray-400">5K-10K tris</td><td class="p-2 text-gray-600 dark:text-gray-400">1.5K-3K tris</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <h4 class="font-semibold mb-4 text-lg">🎥 Tutoriales gratuitos recomendados</h4>
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <a href="https://www.youtube.com/watch?v=A0b2MfHCCfU" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Mesh LOD is Magic (Unity 6 Tutorial)</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Sistema LOD moderno</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=vU3au56UV_E" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Unity Optimization: Reducing 3D Objects' Draw Calls</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Optimización de draw calls</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=vm95z0PwGD4" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">Boost Your Unity Game Speed — GPU Instancing</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">GPU Instancing completo</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=kJ5I9md9NG4" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">OPTIMIZE Your Unity Game — Performance Tips</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Tips generales de rendimiento</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=JOPgk3D66kA" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">How to Optimize Your Unity Game Worlds</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Optimización de mundos</p>
+          </a>
+          <a href="https://www.youtube.com/watch?v=f6KaJHUfE2M" target="_blank" rel="noopener" class="video-card p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm block">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="play-icon w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-300 flex items-center justify-center transition-all">
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </div>
+              <div class="text-sm font-semibold">FREE Performance Optimization — HLOD</div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">HLOD Draw Call Reducer</p>
+          </a>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <a href="https://docs.unity3d.com/6000.2/Documentation/Manual/lod/mesh-lod-introduction.html" target="_blank" class="resource-link"><i data-lucide="book" class="w-4 h-4"></i>Mesh LOD (Unity Docs)</a>
+          <a href="https://docs.unity3d.com/6000.5/Documentation/Manual/GPUInstancing.html" target="_blank" class="resource-link accent"><i data-lucide="book" class="w-4 h-4"></i>GPU Instancing (Docs)</a>
+          <a href="https://thegamedev.guru/unity-performance/draw-call-optimization/" target="_blank" class="resource-link"><i data-lucide="file-text" class="w-4 h-4"></i>Draw Call Batching Guide</a>
+          <a href="https://cgaxis.com/polygon-count-guide-how-many-polys-do-you-really-need-in-2026/" target="_blank" class="resource-link accent"><i data-lucide="file-text" class="w-4 h-4"></i>Polygon Count Guide 2026</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECURSOS GRATUITOS CENTRALIZADOS -->
+    <section id="recursos" class="py-16" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="phase-badge bg-gradient-to-br from-primary-500 to-accent-500 text-white">
+            <i data-lucide="library" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-3xl font-bold gradient-text">Biblioteca de Recursos Gratuitos</h2>
+            <p class="text-gray-600 dark:text-gray-400">Todo verificado · Cero paywalls</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-10">
+          <!-- Canales YouTube -->
+          <div class="card-interactive p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <h4 class="font-semibold mb-4 flex items-center gap-2">
+              <i data-lucide="youtube" class="w-5 h-5 text-red-500"></i>
+              Canales de YouTube esenciales
+            </h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="https://www.youtube.com/@ZBrushOfficial" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">ZBrush Official</a> — Tutoriales oficiales</li>
+              <li><a href="https://www.youtube.com/@MichaelPavlovich" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Michael Pavlovich</a> — ZBrush técnico profundo</li>
+              <li><a href="https://www.youtube.com/@FlippedNormals" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">FlippedNormals</a> — Personajes AAA</li>
+              <li><a href="https://www.youtube.com/@DannyMac3D" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Danny Mac 3D</a> — Retratos hiperrealistas</li>
+              <li><a href="https://www.youtube.com/@DikkoDesign" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Dikko</a> — Retopo y anatomía</li>
+              <li><a href="https://www.youtube.com/@Arrimus3D" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Arrimus 3D</a> — Retopología pro</li>
+              <li><a href="https://www.youtube.com/@Unity" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Unity Official</a> — Motor y pipelines</li>
+              <li><a href="https://www.youtube.com/@UnityCoderMonkey" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Unity Coder Monkey</a> — Tutoriales prácticos</li>
+            </ul>
+          </div>
+
+          <!-- Blogs y documentación -->
+          <div class="card-interactive p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <h4 class="font-semibold mb-4 flex items-center gap-2">
+              <i data-lucide="book-open" class="w-5 h-5 text-accent-500"></i>
+              Blogs y documentación abierta
+            </h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="https://zbrushcentral.com/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">ZBrushCentral</a> — Foro oficial</li>
+              <li><a href="https://help.maxon.net/zbrush" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Documentación ZBrush</a> — Manual completo</li>
+              <li><a href="https://anatomy4sculptors.com/blog/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Anatomy for Sculptors</a> — Anatomía visual</li>
+              <li><a href="https://www.scott-eaton.com/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Scott Eaton</a> — Anatomía facial</li>
+              <li><a href="https://docs.unity3d.com/Manual/index.html" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Unity Manual</a> — Documentación oficial</li>
+              <li><a href="https://80.lv/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">80 Level</a> — Artículos AAA</li>
+              <li><a href="https://polycount.com/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Polycount</a> — Comunidad 3D</li>
+              <li><a href="https://www.artstation.com/learn/tutorials?free=1" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">ArtStation Tutorials (gratis)</a></li>
+            </ul>
+          </div>
+
+          <!-- Software libre -->
+          <div class="card-interactive p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <h4 class="font-semibold mb-4 flex items-center gap-2">
+              <i data-lucide="download" class="w-5 h-5 text-primary-500"></i>
+              Software y herramientas libres
+            </h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="https://www.blender.org/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Blender</a> — Modelado, retopo, rigging</li>
+              <li><a href="http://www.makehumancommunity.org/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">MakeHuman</a> — Modelos antropométricos</li>
+              <li><a href="https://github.com/alessandrofrancesconi/MBLab" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">MBLab (Blender)</a> — Generador de personajes</li>
+              <li><a href="https://www.mixamo.com/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Mixamo</a> — Animaciones gratuitas</li>
+              <li><a href="https://github.com/Whinarn/UnityMeshSimplifier" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Unity Mesh Simplifier</a> — LOD automático</li>
+              <li><a href="https://texturize.app/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">Texturize</a> — Texturas PBR</li>
+            </ul>
+          </div>
+
+          <!-- Bases de datos -->
+          <div class="card-interactive p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <h4 class="font-semibold mb-4 flex items-center gap-2">
+              <i data-lucide="database" class="w-5 h-5 text-accent-500"></i>
+              Bases de datos antropométricas abiertas
+            </h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="https://www.tegakari.net/en/2021/01/caesar/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">CAESAR Summary</a> — Datos antropométricos</li>
+              <li><a href="https://www.cdc.gov/growthcharts/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">CDC Growth Charts</a> — Percentiles infantiles</li>
+              <li><a href="https://www.humaneticsgroup.com/" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">SizeUSA / SizeNorthAmerica</a></li>
+              <li><a href="https://www.gdcvault.com/free" target="_blank" class="text-primary-600 dark:text-primary-300 hover:underline">GDC Vault (free talks)</a> — Charlas AAA</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CASO DE ESTUDIO: TOTAL DARKNESS -->
+    <section id="totaldarkness" class="py-16 bg-gradient-to-br from-primary-900/10 to-accent-900/10 dark:from-primary-900/30 dark:to-accent-900/30" data-aos="fade-up">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="phase-badge bg-gradient-to-br from-primary-600 to-accent-600 text-white">
+            <i data-lucide="sparkles" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-3xl font-bold gradient-text">Caso de Estudio: Total Darkness</h2>
+            <p class="text-gray-600 dark:text-gray-400">Aplicando el pipeline a un proyecto narrativo complejo</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-10">
+          <div class="space-y-4">
+            <p class="text-gray-700 dark:text-gray-300">
+              <strong>Total Darkness</strong> es un juego narrativo que fusiona mitología mesopotámica con elementos transhumanos. Exige personajes con <strong>transformaciones visuales ligadas a decisiones éticas</strong>, estética única y sistemas de animación que reflejan estados filosóficos.
+            </p>
+            <p class="text-gray-700 dark:text-gray-300">
+              Personajes clave: <strong>El Iniciado</strong> (protagonista con transformaciones éticas), <strong>Xlerion</strong> (IA transhumana), <strong>Ninhursag</strong> (deidad mesopotámica), <strong>Adamu</strong> (primer hombre).
+            </p>
+          </div>
+
+          <div class="card-interactive p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <h4 class="font-semibold mb-4">🎯 Desafíos técnicos específicos</h4>
+            <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-accent-500 mt-0.5"></i>Blend Shapes para transformaciones éticas del Iniciado</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-accent-500 mt-0.5"></i>Rig Humanoid para El Iniciado, Generic para Xlerion</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-accent-500 mt-0.5"></i>Materiales dinámicos con Shader Graph</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-accent-500 mt-0.5"></i>Barra de salud diegética en el modelo</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-accent-500 mt-0.5"></i>Estética mesopotámica + bioluminiscencia</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-accent-500 mt-0.5"></i>Cinemáticas interactivas con Timeline</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="card-interactive p-5 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <div class="text-xs uppercase tracking-wide text-primary-600 dark:text-primary-300 font-semibold mb-2">Concept Art</div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Investigación de tablillas cuneiformes, sellos cilíndricos, relieves asirios. Fusionar con estética Giger y bioluminiscencia abisal.
+            </p>
+          </div>
+          <div class="card-interactive p-5 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <div class="text-xs uppercase tracking-wide text-accent-600 dark:text-accent-300 font-semibold mb-2">Materiales Dinámicos</div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Shader Graph con parámetros expuestos: color de piel, emisión bioluminiscente, intensidad de transformación. Controlados desde scripts.
+            </p>
+          </div>
+          <div class="card-interactive p-5 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+            <div class="text-xs uppercase tracking-wide text-primary-600 dark:text-primary-300 font-semibold mb-2">Narrativa Ramificada</div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Timeline + Cinemachine + ScriptableObjects para cinemáticas interactivas. Signals pausan la secuencia para elecciones del jugador.
             </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Sección Proporciones -->
-    <section id="proporciones" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
-      <div class="max-w-6xl mx-auto px-6">
-        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Proporciones Anatómicas Fundamentales</h2>
-        
-        <div class="grid md:grid-cols-2 gap-8 items-start mb-12">
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.researchgate.net/publication/10969517_The_anthropometric_database_for_children_and_young_adults_in_Taiwan|109">Bases de Datos Antropométricas</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Estas bases de datos antropométricas 3D se han establecido para la población general o una población objetivo específica, proporcionando datos fundamentales para apoyo en diseño y modelado.
-            </p>
-            
-            <p class="text-gray-700 dark:text-gray-300" data-ref="https://pmc.ncbi.nlm.nih.gov/articles/PMC10865212/|110">
-              Consiste en
-              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">23 mediciones</span>
-              antropométricas tales como: estatura, altura sentado, altura rodilla, altura ojo sentado, profundidad pecho y anchura hombro, entre otras.
-            </p>
-          </div>
-
-          <img
-            src="img/Modelado-Hiperrealista-ZBrush/02.png"
-            alt="Diagrama técnico de proporciones anatómicas humanas mostrando un modelo 3D masculino adulto en vista frontal y lateral sobre fondo blanco limpio. El modelo está superpuesto con líneas de medición anatómicas codificadas por colores: líneas azules (#1a73b3) horizontales indican altura total (175cm), anchura de hombros (45cm), anchura de cadera (35cm), y altura de cintura. Líneas verdes (#10b981) verticales miden altura sentado (92cm), longitud de brazo (70cm), y longitud de pierna (85cm). Líneas rojas (#dc2626) diagonales señalan ángulos anatómicos clave. En el lado derecho del diagrama, una tabla vertical muestra las proporciones estándar: cabeza a cuerpo total 1:8, anchura hombros a altura total 1:3.8, anchura cadera a anchura hombros 1:1.3, y altura sentado a altura total 1:1.9. El texto usa tipografía sans-serif clara, números en negrita, y todos los elementos están dispuestos en una cuadrícula ordenada con espaciado uniforme. La paleta de colores utiliza azul (#1a73b3) y verde (#10b981) para énfasis técnico, con bordes sutiles y sombras leves para profundidad visual."
-            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
-          />
-        </div>
-
-        <div class="mb-12">
+    <!-- CONCLUSIÓN -->
+    <section class="py-16" data-aos="fade-up">
+      <div class="max-w-4xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-6 gradient-text">Conclusiones Clave</h2>
+        <div class="space-y-4">
           <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
-            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.science.gov/topicpages/c/caesar+anthropometric+database|111">
-              <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
-              Este estudio fue diseñado para obtener dimensiones antropométricas de niños iraníes (etnia Fars) de
-              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-xs">7-11 años</span>,
-              proporcionando datos específicos para esta población.
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed">
+              <strong>1. El pipeline es un sistema integrado.</strong> Ninguna fase funciona aislada. Topología deficiente → deformaciones pobres. UV mal hecho → texturas distorsionadas. La excelencia AAA viene de la sinergia.
             </p>
           </div>
-        </div>
-
-        <div class="hs-accordion-group space-y-4">
-          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-proporcion-1">
-              <div class="flex items-center space-x-4">
-                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                  <i data-lucide="ruler" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
-                </div>
-                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://pubmed.ncbi.nlm.nih.gov/41226857/|112">Mediciones de Mano en Niños</span>
-              </div>
-              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
-            </button>
-            <div id="hs-collapse-proporcion-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-proporcion-1">
-              <div class="p-6 pt-0 space-y-4">
-                <p class="text-gray-700 dark:text-gray-300">
-                  El objetivo de este estudio observacional fue recopilar mediciones de mano y datos antropométricos en niños de
-                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">1-15 años</span>.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-proporcion-2">
-              <div class="flex items-center space-x-4">
-                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
-                  <i data-lucide="activity" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
-                </div>
-                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.researchgate.net/publication/235145489_CAESAR_Summary_Statistics_for_the_Adult_Population_Ages_18-65_of_the_United_States_of_America|107">Estudio CAESAR Adulto</span>
-              </div>
-              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
-            </button>
-            <div id="hs-collapse-proporcion-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-proporcion-2">
-              <div class="p-6 pt-0 space-y-4">
-                <p class="text-gray-700 dark:text-gray-300">
-                  CAESAR fue una importante encuesta antropométrica de las poblaciones civiles en Estados Unidos, Países Bajos e Italia. La encuesta CAESAR europea de superficie antropométrica civil americana y europea es una encuesta de mediciones corporales para personas de
-                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-sm">18-65 años</span>
-                  en tres países.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-proporcion-3">
-              <div class="flex items-center space-x-4">
-                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                  <i data-lucide="trending-up" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
-                </div>
-                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://roymech.org/Useful_Tables/Human/Human_sizes.html|141">Variaciones por Edad</span>
-              </div>
-              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
-            </button>
-            <div id="hs-collapse-proporcion-3" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-proporcion-3">
-              <div class="p-6 pt-0 space-y-4">
-                <p class="text-gray-700 dark:text-gray-300">
-                  Las estadísticas de tamaños varían con la edad. La altura promedio para una persona mayor sería hasta
-                  <span class="mx-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 font-semibold text-sm">80mm</span>
-                  menor que para una persona más joven.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Sección Rostro -->
-    <section id="rostro" class="py-20 bg-accent-50/50 dark:bg-gray-800" data-aos="fade-up">
-      <div class="max-w-6xl mx-auto px-6">
-        <h2 class="text-3xl font-bold mb-8 text-accent-700 dark:text-accent-300">Anatomía Facial Detallada</h2>
-        
-        <div class="grid md:grid-cols-2 gap-8 mb-12">
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.scribd.com/document/733330233/Shortcut-Secrets-of-Figure-Drawing-FULL-VERSION|23">Proporciones del Rostro</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Este método asegura que la figura esté correctamente centrada y proporcionada, permitiendo al artista hacer ajustes y mejorar el equilibrio en la representación.
-            </p>
-            
-            <p class="text-gray-700 dark:text-gray-300" data-ref="https://journals.sagepub.com/doi/10.1177/10519815241303337|41">
-              Este estudio tiene como objetivo presentar un conjunto de dimensiones antropométricas de la cabeza humana y la cara calculadas a partir de datos tridimensionales de trabajadores chilenos para equipos de protección personal.
-            </p>
-          </div>
-
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.researchgate.net/publication/322837858_A_3D_Anthropometric_Sizing_Analysis_System_Based_on_North_American_CAESAR_3D_Scan_Data_for_Design_of_Head_Wearable_Products|42">Dimensiones de Cabeza y Cara</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Este estudio tiene como objetivo presentar un conjunto de dimensiones antropométricas de la cabeza humana y la cara calculadas a partir de datos tridimensionales de trabajadores chilenos para equipos de protección personal.
-            </p>
-          </div>
-        </div>
-
-        <div class="mb-12">
           <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
-            <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed" data-ref="https://www.caesar-database.com/3d%20data%20information.htm|43">
-              <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
-              Las vistas de cámara de los escaneos 3D se han unido con precisión para proporcionar modelos 3D completos de cada pose. Las poses escaneadas incluyen de pie, relajado y otras posiciones anatómicas clave.
+            <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed">
+              <strong>2. PBR y Channel Packing son estándares indiscutibles.</strong> Proporcionan consistencia y realismo. El empaquetado de canales reduce la carga de GPU al mínimo.
             </p>
           </div>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="eye" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.semanticscholar.org/paper/3D-Anthropometric-Data-Set-of-the-Head-and-Face-of-Goto-Molenbroek/059b04752ab4837433a10d8bda2e1c709a7f5d99|222">Datos Antropométricos de Cabeza Infantil</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              El objetivo de este estudio es mapear la variación de cabezas y caras de niños y definir una nueva forma de presentar estos datos antropométricos 3D.
-            </p>
-          </div>
-
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="layers" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.researchgate.net/publication/259006467_3D_Anthropometric_Data_Set_of_the_Head_and_Face_of_Children_Aged_05-7_Years_for_Design_Applications|223">Datos 3D de Cabeza y Cara Infantil</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              El objetivo de este estudio es mapear la variación de cabezas y caras de niños y definir una nueva forma de presentar estos datos antropométricos 3D para que sea útil.
-            </p>
-          </div>
-
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="ruler" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.mdpi.com/2076-3417/14/16/7185|225">Canon de Longitud de Cabeza</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              Este estudio tiene como objetivo analizar las proporciones de longitud de cabeza y altura corporal de niños de
-              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-xs">2 a 16 años</span>
-              según género.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Sección Ojos -->
-    <section id="ojos" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
-      <div class="max-w-6xl mx-auto px-6">
-        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Detalles de los Ojos y Estructura Facial</h2>
-        
-        <div class="grid md:grid-cols-2 gap-8 items-start mb-12">
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.nature.com/articles/s41598-024-78101-2|64">Segmento Anterior del Ojo</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Presentamos una plataforma óptica de imagen novedosa para visualizar y caracterizar estructuras oculares anteriores, incluyendo córnea, iris, lente, esclera y otras estructuras anatómicas clave.
-            </p>
-            
-            <p class="text-gray-700 dark:text-gray-300" data-ref="https://link.springer.com/article/10.1007/s00414-026-03733-0|65">
-              La medición cuantitativa de fotografías faciales, denominada fotogrametría, es un procedimiento importante en múltiples campos incluyendo oftalmológico, dental y bioanálisis.
-            </p>
-          </div>
-
-          <img
-            src="img/Modelado-Hiperrealista-ZBrush/03.png"
-            alt="Diagrama anatómico detallado del ojo humano en vista frontal y lateral mostrando estructuras internas con etiquetas. El globo ocular es una esfera tridimensional de color gris claro (#e5e7eb) con superficie lisa. La córnea es una capa transparente semiesférica en la parte frontal, coloreada en azul claro (#bfdbfe) con reflejo brillante. El iris aparece como un disco circular con textura radial, en tono verde oliva (#10b981) con patrones concéntricos sutiles. La pupila es un círculo negro central con borde definido. La esclera es la superficie blanca externa (#ffffff) con venas sanguíneas rojas (#dc2621) visibles. Los párpados superior e inferior son estructuras anatómicas en tonos beige (#fbbf24) con textura suave. El borde palpebral es una línea curva oscura (#1f2937). Encima del párpado superior, la ceja es una franja curva en tono marrón oscuro (#7c2d12). La fórmula matemática 'Diámetro corneal = 11.7mm ± 0.5mm' aparece en texto pequeño en la esquina inferior derecha. Todas las etiquetas usan tipografía sans-serif clara en negro (#1f2937), con líneas de conexión finas apuntando a cada estructura. El fondo es blanco limpio (#ffffff) con sombras sutiles debajo del globo ocular para efecto tridimensional."
-            class="w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
-          />
-        </div>
-
-        <div class="mb-12">
           <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
-            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://arxiv.org/html/2607.23687v1|66">
-              <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
-              GNM engloba la cabeza, cara, cuello, globos oculares, dientes y lengua. GNM modela la dilatación pupilar así como la forma de esclera y córnea variando con la identidad humana.
+            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed">
+              <strong>3. La optimización es proactiva, no reactiva.</strong> LODs, atlases y GPU instancing deben planificarse desde el inicio, no añadirse al final.
             </p>
           </div>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="eye" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.mdpi.com/1424-8220/20/15/4285|67">Biometría del Segmento Anterior</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              El segmento anterior del ojo humano incluye principalmente la córnea, modelado tridimensional computacional del ojo humano.
-            </p>
-          </div>
-
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="move" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.collaborative-ai.org/publications/wood15_arxiv.pdf|68">Movimiento de Párpados</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              Modelamos el movimiento de párpados usando formas de mezcla para párpados mirando hacia arriba y hacia abajo, interpolando entre ellos basado en el tono global del globo ocular.
-            </p>
-          </div>
-
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="eye-off" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.researchgate.net/publication/346109122_Custom-made_artificial_eyes_using_3D_printing_for_dogs_A_preliminary_study|69">Modelos 3D de Ojos</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              Los modelos 3D pueden usarse para evaluar la correlación entre diferentes espesores corneales, para simulación de presión intraocular.
-            </p>
-          </div>
-        </div>
-
-        <div class="mt-8 pl-4 pr-3 py-3 border-l-4 border-amber-500 bg-amber-50/40 dark:bg-amber-900/30 rounded-r-lg">
-          <p class="text-sm font-medium text-amber-900 dark:text-amber-100 leading-relaxed" data-ref="https://www.facebook.com/MedmontInternational/posts/are-you-in-the-market-for-a-corneal-topographer-dr-daddi-fadel-builds-a-case-for/1182537677211157/|71">
-            <i data-lucide="alert-triangle" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
-            El tonómetro Diaton introdujo una solución audaz: medir la PIO a través del párpado y sobre la esclera, evitando completamente la córnea.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Sección Manos -->
-    <section id="manos" class="py-20 bg-primary-50/50 dark:bg-gray-800" data-aos="fade-up">
-      <div class="max-w-6xl mx-auto px-6">
-        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Anatomía de las Manos</h2>
-        
-        <div class="grid md:grid-cols-2 gap-8 mb-12">
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://anatomy4sculptors.com/blog/hand-anatomy-for-artists/?_gl=1*1mj460h*_up*MQ..*_gs*Mg..&gclid=Cj0KCQiArOvIBhDLARIsAPwJXOZydeY4oTUWtxxZe6CZ4stn3BhYNJ8vTBy_CeLz77eDpk2EtptjW2saAvcwEALw_wcB|19">Anatomía de Manos para Artistas</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Este blog sobre anatomía de manos para artistas ayuda con las dificultades de dibujar y esculturar manos. En este blog, examinaremos los huesos y músculos de la mano.
-            </p>
-            
-            <p class="text-gray-700 dark:text-gray-300" data-ref="https://dogtownsculptors.org/books/|20">
-              Libros sobre escultura y dibujo de figuras: Bridgman's Life Drawing (George Bridgman), Constructive Anatomy (George Bridgman), The Human Machine (George Bridgman), The Book of a Hundred Hands (George Bridgman).
-            </p>
-          </div>
-
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://www.reddit.com/r/learnart/comments/15ao49n/who_is_better_for_learning_human_anatomy_george/|21">Enfoque de Bridgman</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Loomis es increíble en dibujo de figuras pero no aprenderás anatomía de sus libros de dibujo de figuras. Eso no es lo que ese libro trata.
-            </p>
-          </div>
-        </div>
-
-        <div class="mb-12">
-          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
-            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.facebook.com/groups/conceptartorg/posts/10156244558282516/|22">
-              <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
-              Este curso intensivo te enseña cómo dibujar el cuerpo humano en cualquier ángulo (rotación en el espacio). También te enseña cómo inventar tus propias poses.
-            </p>
-          </div>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="hand" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.youtube.com/watch?v=xZj02G4v4qw|14">Estilo de Bridgman</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              El estilo de Bridgman es muy orgánico, suelto y formas muy precisas del cuerpo, toneladas de manos.
-            </p>
-          </div>
-
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="book-open" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.amazon.com/Bridgmans-Constructive-Anatomy-Artists-Illustrations/dp/B0G2BJHTF5|16">Anatomía Constructiva</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              La guía de anatomía de Bridgman presenta casi
-              <span class="mx-1 px-1.5 py-0.5 rounded-md bg-accent-100 dark:bg-accent-900/30 text-accent-800 dark:text-accent-300 font-semibold text-xs">500 ilustraciones</span>
-              enseñando a los artistas a dibujar el cuerpo humano usando su método de masas cuñas para capturar movimiento.
-            </p>
-          </div>
-
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="camera" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.facebook.com/groups/anatomy4artists/posts/1064928080273703/|17">Fotos de Esculturas Clásicas</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              Presentando fotos de alta resolución de esculturas clásicas para validar las teorías de Bridgman, este libro está diseñado para ser práctico y manos a la obra.
+          <div class="pl-4 pr-3 py-3 border-l-4 border-accent-500 bg-accent-50/40 dark:bg-accent-900/30 rounded-r-lg">
+            <p class="text-sm font-medium text-accent-900 dark:text-accent-100 leading-relaxed">
+              <strong>4. Unity es una plataforma seria para AAA.</strong> Con URP/HDRP, Animation Rigging, HLOD y la aplicación disciplinada de mejores prácticas, puede competir directamente en el ámbito AAA.
             </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Sección Flujo de Trabajo -->
-    <section id="flujotrabajo" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
-      <div class="max-w-6xl mx-auto px-6">
-        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Flujo de Trabajo en ZBrush</h2>
-        
-        <div class="grid md:grid-cols-2 gap-8 mb-12">
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://help.maxon.net/zbp/en-us/Content/html/4_palettes_tool-3-geometry-dynamesh.html|11">DynaMesh</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              DynaMesh es una operación de remallado que crea topología ideal para escultura. Aprende el flujo de trabajo básico de DynaMesh en la sección de Esenciales de Escultura DynaMesh proporcionada.
-            </p>
-            
-            <p class="text-gray-700 dark:text-gray-300" data-ref="https://www.zbrushcentral.com/t/workflow-for-dynamesh-zremesher/414755|12">
-              Me gustaría obtener información sobre un flujo de trabajo. Estoy usando el sistema para preparar modelos. Hasta ahora las funciones con las que estoy obteniendo resultados son DynaMesh y ZRemesher.
-            </p>
-          </div>
-
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-primary-700 dark:text-primary-300" data-ref="https://80.lv/articles/zbrush-dynamesh-workflow-tutorial|13">Tutorial de DynaMesh</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              El propósito de este tutorial es ayudar a otros artistas a mejorar su flujo de trabajo de modelado de alto polígono. Velocidad y capacidad para modelar complejidades.
-            </p>
-          </div>
-        </div>
-
-        <div class="mb-12">
-          <div class="pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
-            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://www.youtube.com/watch?v=7T6XpKxwniA|75">
-              <i data-lucide="info" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
-              ZRemesher es una gran herramienta para obtener rápidamente buena topología de ZBrush. En este tutorial rápido te mostraré lo básico de ZRemesher.
-            </p>
-          </div>
-        </div>
-
-        <div class="hs-accordion-group space-y-4">
-          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-flujo-1">
-              <div class="flex items-center space-x-4">
-                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                  <i data-lucide="layers" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
-                </div>
-                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.reddit.com/r/ZBrush/comments/l79xu6/workflow_questionhow_do_you_avoid_warbling_when/|76">Evitar Distorsiones en DynaMesh</span>
-              </div>
-              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
-            </button>
-            <div id="hs-collapse-flujo-1" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-flujo-1">
-              <div class="p-6 pt-0 space-y-4">
-                <p class="text-gray-700 dark:text-gray-300">
-                  Es inevitable con DynaMesh. Para ayudar a recuperarlo con ZRemesh, agrupa las caras originales y activa la opción mantener grupos.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-flujo-2">
-              <div class="flex items-center space-x-4">
-                <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
-                  <i data-lucide="refresh-cw" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
-                </div>
-                <span class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.tiktok.com/@lefties_3d/video/7562571097669979414|78">De DynaMesh a ZRemesher</span>
-              </div>
-              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-accent-600 dark:text-accent-400"></i>
-            </button>
-            <div id="hs-collapse-flujo-2" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-flujo-2">
-              <div class="p-6 pt-0 space-y-4">
-                <p class="text-gray-700 dark:text-gray-300">
-                  Cuando tu escultura está lista pero la topología parece desordenada, este truco te ayuda a pasar del bloqueo a formas limpias rápidamente, manteniendo todos tus detalles.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="hs-accordion card-interactive bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <button class="hs-accordion-toggle w-full flex justify-between items-center p-4 text-left hover:bg-primary-50 dark:hover:bg-gray-700/50 transition-colors rounded-xl" id="hs-flujo-3">
-              <div class="flex items-center space-x-4">
-                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                  <i data-lucide="git-branch" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
-                </div>
-                <span class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://www.youtube.com/watch?v=mTNzWZF6IMk|79">Topología Dinámica</span>
-              </div>
-              <i data-lucide="chevron-down" class="hs-accordion-active:rotate-180 transition-transform duration-300 w-5 h-5 text-primary-600 dark:text-primary-400"></i>
-            </button>
-            <div id="hs-collapse-flujo-3" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-flujo-3">
-              <div class="p-6 pt-0 space-y-4">
-                <p class="text-gray-700 dark:text-gray-300">
-                  Proponemos un marco 3D+tiempo para modelar secuencias dinámicas de formas faciales 3D que representa movimiento no rígido realista durante una actuación, usando un modelo paramétrico.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Sección Referencias Artísticas -->
-    <section class="py-20 bg-accent-50/50 dark:bg-gray-800" data-aos="fade-up">
-      <div class="max-w-6xl mx-auto px-6">
-        <h2 class="text-3xl font-bold mb-8 text-accent-700 dark:text-accent-300">Referencias Artísticas y Canónicas</h2>
-        
-        <div class="grid md:grid-cols-2 gap-8 mb-12">
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.sciencedirect.com/science/article/pii/S0379073824000744|84">Estándares de Identificación Craneofacial</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Hay numerosos estándares anatómicos y antropométricos que pueden utilizarse para análisis e identificación craneofacial. Estos estándares provienen de métodos tradicionales y tecnologías modernas.
-            </p>
-            
-            <p class="text-gray-700 dark:text-gray-300" data-ref="https://anatomypubs.onlinelibrary.wiley.com/doi/10.1002/ar.23146|85">
-              La posición del pliegue epicántico se describe como medial, central o lateral, y puede predecirse usando la forma del margen supraorbitario.
-            </p>
-          </div>
-
-          <div class="space-y-6">
-            <h3 class="text-2xl font-semibold text-accent-700 dark:text-accent-300" data-ref="https://www.scott-eaton.com/category/anatomy|98">Curso de Scott Eaton</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              El curso compañero de Anatomía para Artistas explora la anatomía de la cara en profundidad. Cubre la construcción del cráneo, rasgos, grasa facial, musculatura, expresiones y el sistema de Codificación de Acción Facial (FACS).
-            </p>
-          </div>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="book" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.scott-eaton.com/|99">Curso Facial de Scott Eaton</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              El curso compañero de Anatomía para Artistas explora la anatomía de la cara en profundidad. Cubre la construcción del cráneo, rasgos, grasa facial, musculatura, expresiones y FACS.
-            </p>
-          </div>
-
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="palette" class="w-6 h-6 text-primary-600 dark:text-primary-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-primary-700 dark:text-primary-300" data-ref="https://learning.scott-eaton.com/|100">Portraiture &amp; Facial Anatomy</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              Curso intensivo en escultura figurativa digital usando ZBrush. Cubre construcción del cráneo, rasgos faciales, grasa, musculatura y expresiones.
-            </p>
-          </div>
-
-          <div class="card-interactive p-6 bg-white/90 backdrop-blur-sm dark:bg-gray-900 rounded-xl shadow-md">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
-                <i data-lucide="video" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
-              </div>
-              <h4 class="font-semibold text-lg text-accent-700 dark:text-accent-300" data-ref="https://www.youtube.com/watch?v=fLByCGMCV3Y|102">Curso Online de Scott Eaton</h4>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              El curso está disponible en línea para compartir las lecciones de anatomía de los viejos maestros con artistas decididos a dominar la figura humana.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Sección Conclusión -->
-    <section id="conclusion" class="py-20 bg-white/80 dark:bg-gray-900" data-aos="fade-up">
-      <div class="max-w-5xl mx-auto px-6">
-        <h2 class="text-3xl font-bold mb-8 text-primary-700 dark:text-primary-300">Conclusión</h2>
-        
-        <div class="space-y-6">
-          <p class="text-lg text-gray-700 dark:text-gray-300" data-ref="https://www.sciencedirect.com/science/article/abs/pii/S0169814118301185|1">
-            Los escáneres 3D ofrecen la oportunidad de reunir datos antropométricos de manera menos invasiva y por lo tanto son más adecuados para personas mayores o físicamente impedidas, facilitando la recolección de mediciones precisas.
-          </p>
-          
-          <p class="text-lg text-gray-700 dark:text-gray-300" data-ref="https://www.kaggle.com/datasets/thedevastator/3-d-anthropometry-measurements-of-human-body-sur|45">
-            Esta encuesta utiliza tecnología avanzada de antropometría superficial tridimensional que mide la superficie externa del cuerpo humano, proporcionando datos precisos para aplicaciones médicas y de diseño.
-          </p>
-          
-          <p class="text-lg text-gray-700 dark:text-gray-300" data-ref="https://arxiv.org/abs/2101.02515|46">
-            Con la ayuda de los dos nuevos conjuntos de datos, proponemos un modelo de forma basado en partes y una red neuronal profunda para estimar mediciones antropométricas a partir de imágenes 2D, mejorando la precisión de análisis.
-          </p>
-
-          <div class="mt-8 pl-4 pr-3 py-3 border-l-4 border-primary-500 bg-primary-50/40 dark:bg-primary-900/30 rounded-r-lg">
-            <p class="text-sm font-medium text-primary-900 dark:text-primary-100 leading-relaxed" data-ref="https://pmc.ncbi.nlm.nih.gov/articles/PMC10875237/|47">
-              <i data-lucide="circle-check" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>
-              Presentamos un conjunto de datos que toma puntos clave de pose humana 2D y 3D estimados de imágenes y los relaciona con la ubicación de puntos anatómicos 3D, proporcionando una base sólida para modelado digital.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
 
   <!-- Footer -->
-  <footer class="bg-primary-900 dark:bg-gray-950 text-gray-300 py-12">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center">
-        <p class="text-lg font-semibold text-primary-300 dark:text-primary-400 mb-4">Guía Completa para Modelado Hiperrealista en ZBrush</p>
-        <p class="text-sm text-gray-400 dark:text-gray-500">
-          © 2024 Guía de Investigación. Todos los derechos reservados.
-        </p>
-      </div>
+  <footer class="bg-gray-900 dark:bg-black text-gray-400 py-10 border-t border-gray-800">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <p class="text-lg font-semibold gradient-text mb-2">Pipeline AAA de Personajes en Unity 3D</p>
+      <p class="text-sm">Guía profesional completa · Todos los recursos verificados y gratuitos</p>
+      <p class="text-xs mt-4 text-gray-500">Basado en documentación técnica de Total Darkness y mejores prácticas AAA de la industria</p>
     </div>
   </footer>
 
-  <!-- Initialize Libraries -->
   <script>
+    function setTheme(dark) {
+      document.documentElement.classList.toggle('dark', dark);
+      document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      try { localStorage.setItem('td-hiperrealista-theme', dark ? 'dark' : 'light'); } catch (e) {}
+      document.getElementById('sunIcon').style.display = dark ? 'block' : 'none';
+      document.getElementById('moonIcon').style.display = dark ? 'none' : 'block';
+    }
+
+    function toggleDarkMode() {
+      setTheme(!document.documentElement.classList.contains('dark'));
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-      // Initialize AOS
-      AOS.init({
-        duration: 800,
-        once: true,
-        offset: 100
-      });
-
-      // Initialize Lucide icons
+      AOS.init({ duration: 800, once: true, offset: 100 });
       lucide.createIcons();
+      setTheme(document.documentElement.classList.contains('dark'));
 
-      // Initialize Preline components
-      setTimeout(() => {
-        HSStaticMethods.autoInit();
-      }, 100);
-
-      // Initialize citation system
-      setTimeout(() => {
-        initCitationSystem();
-      }, 200);
-
-      // Progress bar functionality
       const progressBar = document.getElementById('progressBar');
-      
       window.addEventListener('scroll', () => {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
         const scrollPercent = (scrollTop / docHeight) * 100;
-        
         progressBar.style.width = scrollPercent + '%';
       });
 
-      // Smooth scrolling for anchor links
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
           e.preventDefault();
           const target = document.querySelector(this.getAttribute('href'));
-          if (target) {
-            target.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
-            });
-          }
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
       });
     });
