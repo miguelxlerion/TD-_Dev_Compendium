@@ -16,7 +16,7 @@ Cómo funciona la auto-integración:
 Respeta ediciones manuales: si el manifest ya tiene una entrada para el mismo
 archivo, conserva title/short/description/category/tags/badge/featured.
 """
-import json, re, sys, html as ihtml
+import json, re, sys, hashlib, html as ihtml
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -97,8 +97,27 @@ def load_previous():
 def main():
     prev, version = load_previous()
     pages = []
-    for f in sorted(CONTENT.glob("*.html")):
+    seen_hash = set()
+
+    def fresh(path: Path) -> bool:
+        """Detecta contenido duplicado: si otro archivo ya tiene estos mismos
+        bytes, se omite (evita que una copia con distinto nombre aparezca dos
+        veces en la plataforma). Se priorizan los ya integrados en el índice."""
+        digest = hashlib.md5(path.read_bytes()).hexdigest()
+        if digest in seen_hash:
+            print(f"[dup] {path.name} duplicado: se omite (mismo contenido ya integrado)")
+            return False
+        seen_hash.add(digest)
+        return True
+
+    html_files = sorted(CONTENT.glob("*.html"))
+    # Primero los ya conocidos (conservan su curaduría y ganan el desempate),
+    # después los nuevos.
+    html_files.sort(key=lambda f: f"content/{f.name}" not in prev)
+    for f in html_files:
         if f.name.lower() == "manifest.json":
+            continue
+        if not fresh(f):
             continue
         rel = f"content/{f.name}"
         title, h1t, desc, blob = extract_meta(f)
@@ -123,6 +142,8 @@ def main():
         pages.append(entry)
 
     for f in sorted(DOCS.glob("*.pdf")):
+        if not fresh(f):
+            continue
         rel = f"docs/{f.name}"
         stem = f.stem.replace("-", " ").replace("_", " ")
         title = " ".join(w.capitalize() for w in stem.split())

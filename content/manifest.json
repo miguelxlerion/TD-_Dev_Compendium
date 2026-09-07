@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated": "2026-09-07T00:16:01+00:00",
+  "generated": "2026-09-07T00:55:56+00:00",
   "generator": "tools/build-manifest.py",
   "categories": [
     {
@@ -242,6 +242,20 @@
         "narrativa",
         "pdf",
         "xlerion"
+      ]
+    },
+    {
+      "id": "pdf-del-dibujo-al-dato-3d",
+      "title": "Del Dibujo al Dato 3D",
+      "short": "Del Dibujo al Dato 3D",
+      "file": "docs/Del Dibujo al Dato 3D.pdf",
+      "type": "pdf",
+      "category": "biblioteca",
+      "topic": "personajes",
+      "description": "Documento de diseño: del dibujo al dato 3D.",
+      "tags": [
+        "pdf",
+        "personajes"
       ]
     },
     {
